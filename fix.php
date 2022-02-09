@@ -1,0 +1,1217 @@
+<?php
+
+use lsolesen\ pel\ Pel;
+use lsolesen\ pel\ PelConvert;
+use lsolesen\ pel\ PelDataWindow;
+use lsolesen\ pel\ PelEntryAscii;
+use lsolesen\ pel\ PelEntryByte;
+use lsolesen\ pel\ PelEntryRational;
+use lsolesen\ pel\ PelEntryUserComment;
+use lsolesen\ pel\ PelEntryUserCopyright;
+use lsolesen\ pel\ PelEntryWindowsString;
+use lsolesen\ pel\ PelExif;
+use lsolesen\ pel\ PelIfd;
+use lsolesen\ pel\ PelIllegalFormatException;
+use lsolesen\ pel\ PelJpeg;
+use lsolesen\ pel\ PelTag;
+use lsolesen\ pel\ PelTiff;
+
+require_once "rrw_util_inc.php";
+class freewheeling_fixit {
+    public static function fit_it( $attr ) {
+        global $eol, $errorBeg, $errorEnd;
+        error_reporting( E_ALL | E_STRICT );
+        ini_set( "display_errors", true );
+        $msg = "";
+
+        try {
+            $msg .= SetConstants( "updateDiretoryOnFileMatch" );
+            $task = rrwUtil::fetchparameterString( "task" );
+            if ( 0 == strcmp( "jsondate", $task ) ) { // no check for login
+                $msg .= freewheeling_fixit::jsonDate();
+                return $msg;
+            }
+
+            if ( !current_user_can( 'edit_posts' ) )
+                return "$msg $errorBeg E#487 you need to be logged in $errorEnd ";
+            switch ( $task ) {
+                case "add":
+                    $msg .= freewheeling_fixit::addphotos();
+                    break;
+                case "addlist":
+                    $msg .= freewheeling_fixit::addList();
+                    break;
+                case "bydate": //get collection of photos between two dates
+                    $msg .= freewheeling_fixit::byDate();
+                    break;
+                case "badcopyright":
+                    $msg .= freewheeling_fixit::badCopyright();
+                    break;
+                case "close":
+                    $msg .= freewheeling_fixit::direonpOnFileMatch();
+                    $msg .= freewheeling_fixit::updateDiretoryCloseFileMatch();
+                    break;
+                case "deletephoto":
+                    $msg .= freewheeling_fixit::deletePhoto();
+                    break;
+                case "direonp":
+                    $msg .= freewheeling_fixit::direonpOnFileMatch();
+                    break;
+                case "duplicatephoto":
+                    $msg .= freewheeling_fixit::setUseStatus( "duplicate" );
+                    break;
+                case "exif":
+                    $msg .= freewheeling_fixit::exifCleanup();
+                    break;
+                case "extrakeyword":
+                    $msg .= freewheeling_fixit::extraKeyword();
+                    break;
+                case "filelike":
+                    $msg .= freewheeling_fixit::filelike();
+                    break;
+                case "getdate":
+                    $msg .= freewheeling_fixit::getDate();
+                    break;
+                case "jsondate":
+                    $msg .= freewheeling_fixit::jsonDate();
+                    break;
+                case "jsonreject":
+                    $msg .= freewheeling_fixit::jsonReject();
+                    break;
+                case "keyworddups":
+                    $msg .= freewheeling_fixit::keywordDups();
+                    break;
+                case "keywordform":
+                    $msg .= freewheeling_fixit::keywordForm();
+                    break;
+                case "nocopyright":
+                    $msg .= freewheeling_fixit::noCopyright();
+                    break;
+                case "nodate":
+                    $msg .= freewheeling_fixit::noDate();
+                    break;
+                case "nokey":
+                    $msg .= freewheeling_fixit::noKeyWords();
+                    break;
+                case "nophotog":
+                    $msg .= freewheeling_fixit::missingPhotographer();
+                    break;
+                case "nosource":
+                    $msg .= freewheeling_fixit::noSource( "direonp",
+                        " source directory" );
+                    break;
+                case "notbike":
+                    $msg .= freewheeling_fixit::setUseStatus( "notbike" );
+                    break;
+                case "notrailname":
+                    $msg .= freewheeling_fixit::nosource( "trail_name",
+                        " trail name" );
+                    break;
+                case "photog":
+                    $msg .= freewheeling_fixit::listPhotog();
+                    break;
+                case "rename":
+                    $msg .= freewheeling_fixit::updateRename( "", "", "" );
+                    break;
+                case "rejectphoto":
+                    $msg .= freewheeling_fixit::setUseStatus( "reject" );
+                    break;
+                case "tag":
+                    $msg .= freewheeling_fixit::tag();
+                    break;
+                case "tagphoto":
+                    $msg .= freewheeling_fixit::tagphoto();
+                    break;
+                case "test":
+                    $msg .= freewheeling_fixit::test();
+                    break;
+                case "upload":
+                    $msg .= "$errorBeg E#465 Upload s a seperate routine, not part of fix $errorEnd";
+                    break;
+                case "wipedireonp":
+                    $msg .= freewheeling_fixit::WipeDireOnP();
+                    break;
+
+                default:
+                    $msg .= "#498 unkown task of'$task' $eol Try bydate,cleanup,
+copyright,filelike, jsondate, mosource, reame --
+future direonp, close, keyword, meta
+copyright, keywords, meta, rename $eol";
+                    break;
+            }
+        } catch ( Exception $ex ) {
+            $msg .= "$errorBeg E#495 fix routtine " . $ex->getMessage() . $errorEnd;
+        }
+        return $msg;
+    }
+    private static function tagphoto() {
+        global $eol, $errorBeg, $errorEnd;
+        global $photoPath, $photoUrl;
+        $taglinePath = "$photoPath/tagline";
+        $taglineUrl = "$photoUrl/tagline";
+        $msg = "working on $photoPath $eol";
+        if ( !is_dir( $photoPath ) )
+            throw new Exception( "'$photoPath' is not a directory" );
+        $dh = opendir( $photoPath );
+        if ( !is_resource($dh) )
+            throw new Exception( "'$photoPath' did not open" );
+
+        $files = array();
+        while ($files[] = readdir( $dh ) ) ;
+        sort($files);
+        $msg .= "there are " . count($files) . " files to process $eol ";
+        $cntDire = 0;
+        $msg .= "<table>\n";
+        foreach ( $files as $file ) {
+            try {
+            $cntDire++;
+            if ("." == $file || ".." == $file || empty($file) )
+                continue;
+            if ( $cntDire > 5000 )
+                break;
+            $fullFile = "$photoPath/$file";
+            $outfile =  "$taglinePath/$file";
+            $imgdis = new Imagick( );
+            $handle = fopen( $fullFile, "r" );
+            $imgdis->readImageFile( $handle );
+      
+            $w_src = $imgdis->getImageWidth();
+            $h_src = $imgdis->getImageHeight();
+            $h_chop = $h_src- 20;
+             $imgdis->chopImage (0,$h_chop, 0,0);
+            $imgdis->writeImage( $outfile);
+            $imgdis->destroy();
+  
+            $imgUrl = "<img src='$taglineUrl/$file' />";
+            $msg .= rrwFormat::cellRow($file," $w_src X $h_src, $imgUrl");
+            }catch(Exception $ex) {
+                print "Working on $file $eol $eol";
+                continue;
+            }
+        }
+        
+        closedir( $dh );
+        $msg .="</table\n";
+        $msg .= "processed $cntDire files $eol";
+        return( $msg);
+
+    }
+
+
+    public static function adminNavBar() {
+        // common routinue to putput the pictures administrators admin bar
+        if ( current_user_can( 'edit_posts' ) ) {
+            $msg = "
+                <p>[ <a href='/admin' target='admin' >admin </a>]
+                [ <a href='/fix?task=add' target='admin' >add </a> ]
+                [ c:\_e &nbsp; php sub.php ]
+                [ <a href='/fix/upload' target='admin' >upload </a> ]
+                [ <a href='/fix?task=exif' target='admin' >exif </a> ]
+                [ <a href='/fix?task=tag' target='one' >tag </a> ]
+                 </p>\n ";
+        } else
+            $msg = "";
+        return $msg;
+    }
+    private static function extraKeyword() {
+        list( $msg, $cntExtra, $cntMissing ) = freewheeling_fixit::extraKeywordCnts( true );
+        return $msg;
+    }
+
+    public static function extraKeywordCnts( $list = false ) {
+        global $eol;
+        global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords, $rrw_trails;
+        $msg = "";
+
+        $sqlKey = "select keyword from $rrw_keywords";
+        $recKeys = $wpdbExtra->get_resultsA( $sqlKey );
+        $keys = array();
+        foreach ( $recKeys as $recKey ) {
+            $keys[ $recKey[ "keyword" ] ] = 0;
+        }
+        $sqlPhotoKeys = "select filename, photoKeyword from $rrw_photos ";
+        $recphotos = $wpdbExtra->get_resultsA( $sqlPhotoKeys );
+        $cntMissing = 0;
+        foreach ( $recphotos as $recphoto ) {
+            $words = explode( ",", $recphoto[ "photoKeyword" ] );
+            foreach ( $words as $word ) {
+                $word = trim( $word );
+                if ( empty( $word ) )
+                    continue;
+                if ( array_key_exists( $word, $keys ) ) {
+                    $keys[ $word ]++;
+                } else {
+                    $cntMissing++;
+                    $keys[ $word ] = 1;
+                    if ( $list ) {
+                        $filename = $recphoto[ "filename" ];
+                        $sqlins = "insert into $rrw_keywords (keywordFilename, keyword, is_location )  values ('$filename', '$word','0')";
+                        $msg .= "$sqlins $eol";
+                    }
+                }
+            }
+        }
+        $cntExtra = 0;
+        ksort( $keys );
+        foreach ( $keys as $key => $value ) {
+            if ( 0 == $value ) {
+                // key word in keyword list, but not in any file
+                $cntExtra++;
+                if ( $list ) {
+                    $sqldel = "delete from $rrw_keywords where keyword = '$key'";
+                    $msg .= "$sqldel $eol";
+                }
+            }
+        }
+        $msg .= "Found $cntExtra Extra keywords, $cntMissing missing keywords $eol";
+        return array( $msg, $cntExtra, $cntMissing );
+    }
+
+    private static function setUseStatus( $newStatus ) {
+        global $eol, $errorBeg, $errorEnd;
+        global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords, $rrw_trails;
+        global $photoPath, $thumbPath, $highresPath;
+        $msg = "";
+        $debug = false;
+        $photoname = rrwUtil::fetchparameterString( "photoname" );
+        if ( empty( $photoname ) )
+            return "$msg $eol $errorBeg No photoname specifed $errorEnd";
+        $sqlsetUseStatus = "update $rrw_source set sourcestatus = '$newStatus' 
+                        where searchname = '$photoname'";
+        $answer = $wpdbExtra->query( $sqlsetUseStatus );
+        $msg .= "$answer &nbsp; $sqlsetUseStatus $eol ";
+        $sqlsetUseStatus = "update $rrw_photos set photostatus = '$newStatus' 
+                        where filename = '$photoname'";
+        $answer = $wpdbExtra->query( $sqlsetUseStatus );
+        $msg .= "$answer &nbsp; $sqlsetUseStatus $eol ";
+
+        $url = "https://here/pict/fix127.php?task=$newStatus" .
+        "photo&photoname=$photoname";
+        $msg .= "[ <a href='$url' target='admin'> $url </a> ]";
+        return "$msg  $newStatus $photoname";
+
+
+    }
+
+    private static function addphotos() {
+        global $eol;
+        global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords, $rrw_trails;
+        global $photoPath, $thumbPath, $highresPath;
+        $msg = "";
+        $debug = false;
+        $sqlCoor = "select * from $rrw_trails
+                        where not corridor = ''
+                            order by corridor, trail_short_name  ";
+        $recCoors = $wpdbExtra->get_resultsA( $sqlCoor );
+        $cntTrail = 0;
+        foreach ( $recCoors as $recCoor ) {
+            $cntTrail++;
+            if ( $cntTrail > 100 )
+                break;
+            $trailname = $recCoor[ "trailName" ];
+            $shortname = $recCoor[ "trail_short_name" ];
+            $msg .= "----- Extracting $trailname with $shortname $eol";
+            $sql = "SELECT sourceFullName, searchname from $rrw_source 
+                    where not searchname in 
+                        (select filename from $rrw_photos) 
+                        and sourcestatus = 'use' and sourceFullName like '%$shortname%'
+                        order by searchname";
+            if ( $debug )$msg .= "$sql $eol";
+            $recPhotos = $wpdbExtra->get_resultsA( $sql );
+            $msg .= "found " . $wpdbExtra->num_rows . " of photos to add $eol";
+            $cnt = 0;
+            $msg .= "<table>";
+            $sqllist = array();
+            foreach ( $recPhotos as $recPhoto ) {
+                $cnt++;
+                if ( $cnt > 10 )
+                    break 2;
+                $filename = $recPhoto[ "searchname" ];
+                $direonp = $recPhoto[ "sourceFullName" ];
+                $msg .= rrwFormat::CellRow( $filename, $trailname, $direonp );
+                $sqlInsert = "insert into $rrw_photos (filename, trail_name, photographer, 
+            direonp) values (
+            '$filename', '$trailname', 'Mary Shaw',
+            '$direonp')";
+                array_push( $sqllist, $sqlInsert );
+            }
+        }
+        $msg .= "</table>
+        $eol [ You now need to run 
+        c:\_e\php sub.php &nbsp; in a command window ] 
+                follwowed by  [ <a href='/upload' target='admin'' >upload /</a> ]
+                [ <a href='fix?task=exif'> copyright</a> $eol";
+
+        foreach ( $sqllist as $sql ) {
+            $cnt = $wpdbExtra->query( $sql );
+            $msg .= "$cnt &nbsp; $sql $eol";
+        }
+        return $msg;
+    }
+    public static function addsearch( $fields ) {
+        global $eol;
+        global $rrw_photos, $rrw_source;
+        $msg = "";
+
+        $sql = "select $fields from $rrw_source where sourcestatus = 'use' and
+                    (sourcefullname like '%w-pa-trails%' or
+                     sourcefullname like '%ytrek%' ) and 
+                    not searchname in (select filename from $rrw_photos)";
+        return $sql;
+    }
+    private static function addList() {
+        // display a list of field that might added
+        global $eol;
+        $msg = "";
+        $sql = freewheeling_fixit::addsearch( " searchname, sourcefullname" ) .
+        " order by sourcefullname, searchname"; // a sql to find addtional files to add
+        $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
+            "photos that might be uploaded", 20 );
+        return $msg;
+    }
+
+    private static function deletePhoto() {
+
+        global $eol, $errorBeg, $errorEnd;
+        global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords;
+        global $photoPath, $thumbPath, $highresPath;
+        $msg = "";
+
+        $debug = false;
+        print "inoto del pgoto";
+
+        $filename = rrwUtil::fetchParameterString( "del2" );
+        $msg .= "task = deleteing the Photo <strong>$filename</strong> $eol ";
+        $del3 = rrwUtil::fetchParameterString( "del3" );
+        if ( strcmp( $filename, $del3 ) != 0 ) {
+            $msg .= "input parameters do not match. photo not deleted";
+            return $msg;;
+        }
+        if ( $filename == "" ) {
+            $msg .= "Missing or invalid photo name";
+            return $msg;;
+        }
+        $sql = "select photo_id, filename from $rrw_photos 
+                    where filename = '$filename'";
+        if ( $debug )$msg .= "\n<!-- sql is $sql -->\n";
+        $recs = $wpdbExtra->get_resultsA( $sql );
+        if ( 1 != $wpdbExtra->num_rows )
+            $msg .= "Sql did not find file name in the database $eol $sql $eol";
+
+        $sql = "delete from $rrw_photos where Filename ='$filename'";
+        $answer = $wpdbExtra->query( $sql );
+        $msg .= "$answer &nbsp; $sql  $eol";
+
+        $sql = "delete from $rrw_keywords where keywordFilename = '$filename'";
+        $answer = $wpdbExtra->query( $sql );
+        $msg .= "$answer &nbsp; $sql  $eol";
+
+        $sqlreject = "update $rrw_source set sourcestatus = 'reject' 
+                        where searchname = '$filename'";
+        $answer = $wpdbExtra->query( $sqlreject );
+        $msg .= "$answer &nbsp; $sqlreject $eol ";
+        if ( 0 == $answer )
+            $msg .= "$errorBeg E#464 need to insert reject over n 127.0.0.1 $errorEnd";
+
+        $filename1 = "$thumbPath/$filename" . "_tmb.jpg";
+        $filename2 = "$photoPath/$filename" . "_cr.jpg";
+        $filename3 = "$highresPath/$filename.jpg";
+        if ( false ) {
+            $msg .= "photo '$filename' deleted from database. $eol 
+            Can be recovered by doing Add Photos, if not deleted from server$eol 
+            $filename1 $eol $filename2 $eol ";
+        } else {
+            $notexist = "<strong>does not exist</strong>";
+            if ( file_exists( $filename1 ) ) {
+                $msg .= "$eol Deleting file $filename1 $eol";
+                unlink( "$filename1" );
+
+            } else {
+                $msg .= "file $filename1 $notexist $eol ";
+            }
+            if ( file_exists( $filename2 ) ) {
+                $msg .= "$eol Deleting file $filename2 $eol";
+                unlink( "$filename2" );
+
+            } else {
+                $msg .= "file $filename2 $notexist $eol";
+            }
+            if ( file_exists( $filename3 ) ) {
+                $msg .= "Did <strong>not</strong> delete the 
+                        high resolution $filename3 $eol";
+            } else {
+                $msg .= "file $filename3 $notexist $eol";
+            }
+        }
+        $url = "http://here/pict/fix127.php?task=rejectphoto&photoname=$filename";
+        /* does not work, on wrongserver, need to javascript
+        $msg.= "try curl $eol";
+        $ch = curl_init($url);
+        if (! curl_setopt($ch, CURLOPT_RETURNTRANSFER, true) )
+            $msg .= "$errorBeg curl_setopt($ch, CURLOPT_RETURNTRANSFER, true)
+                    failed $ErrorEnd";
+        $curlAnswer = curl_exec($ch);        
+        $msg .= $curlAnswer;
+        curl_close($ch);
+        */
+        $msg .= "$eol <a href='$url' target='here' >$url</a> $eol";
+        return $msg;
+    } // end functin deletephoto 
+
+    private static function keywordDups() {
+        global $eol;
+        global $wpdbExtra, $rrw_keywords;
+        $msg = "";
+        $sqlKeywordDups = "select count(*), keyword, keywordfilename
+                from $rrw_keywords 
+                group by keyword, keywordFilename having count(*) > 1";
+        $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sqlKeywordDups,
+            "duplicate key word entries" );
+        return $msg;
+    }
+
+
+    private static function keywordForm() {
+        global $eol;
+        global $wpdbExtra, $rrw_keywords, $rrw_photos;
+        $msg = "";
+        $submit = rrwUtil::fetchparameterString( "submit" );
+        if ( empty( $submit ) ) {
+            $msg .= "<form> 
+            Old Keyword:<input type='text' name='old' id = 'old' />,
+            New Keyword:<input type='text' name='new' id = 'new' />
+            <input type='hidden' name='task' id='task' value='keywordform' />
+            <input type='submit' name='submit' id='submit' 
+                        value='change the keyword $old' />
+            </form >";
+        } else {
+            $old = rrwUtil::fetchparameterString( "old" );
+            $new = rrwUtil::fetchparameterString( "new" );
+            $sqlChange = "update $rrw_keywords set keyword = '$new' 
+                        where keyword = '$old' ";
+            $cnt = $wpdbExtra->query( $sqlChange );
+            $msg .= "Update $cnt keywords in keyword table from $old to $new $eol ";
+            $sqlChange2 = " update $rrw_photos 
+                set photoKeyword = replace (photoKeyword, '$old', '$new') 
+                where photoKeyword like '%$old%' ";
+            $msg .= "$sqlChange2 $eol ";
+            $cnt2 = $wpdbExtra->query( $sqlChange2 );
+            $msg .= "Update $cnt2 keywords in photo table from $old to $new $eol ";
+        }
+        return $msg;
+    }
+
+    private static function listPhotog() {
+        global $rrw_photos;
+        $msg = "";
+        $photog = rrwUtil::fetchparameterString( "photog" );
+        if ( empty( $photog ) ) { //nophotographer specified
+            $sql = "select count(*) cnt, photographer, copyright, photostatus
+                    from $rrw_photos 
+                    group by photographer, copyright ";
+            $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
+                "count of photographer in the database " );
+            return $msg;
+        }
+        $sql = "select filename, photographer, photostatus from $rrw_photos 
+                where photographer = '$photog'
+                order by photographer, filename";
+        $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
+            "photos created to the photographer $photog ", 5000 );
+        return $msg;
+
+    }
+
+    private static function GetPhotogList( & $photographers ) {
+        global $eol;
+        $msg = "";
+        global $wpdbExtra, $rrw_photos, $rrw_photographers;
+        $sqlPhotog = "select Photographer, copyrightdefault from $rrw_photographers";
+        $recphotogs = $wpdbExtra->get_resultsA( $sqlPhotog );
+        foreach ( $recphotogs as $recphotog ) {
+            $Photographer = $recphotog[ "Photographer" ];
+            $copyrightdefault = $recphotog[ "copyrightdefault" ];
+            $photographers[ "$Photographer" ] = $copyrightdefault;
+        }
+        //     $msg .= rrwUtil::print_r($photographers, true, "$eol photographers inside get$eol ");
+        return $msg;
+    }
+
+    private static function jsonDate() {
+        global $eol;
+        global $wpdbExtra, $rrw_photos, $rrw_photographers;
+        $msg = "";
+        $sql = "select filename, uploaddate from $rrw_photos ";
+        $msg .= "$sql $eol";
+
+        $rows = $wpdbExtra->get_resultsA( $sql );
+        $cnt = count( $rows );
+        $msg .= "There are $cnt photos with date. See this json file for information. ";
+        $msg .= json_encode( $rows );
+        return $msg;
+    }
+
+    private static function jsonReject() {
+        global $eol;
+        global $wpdbExtra, $rrw_source;
+        $msg = "";
+        $sql = "select searchname, sourcestatus from $rrw_source ";
+        $msg .= "$sql $eol";
+
+        $rows = $wpdbExtra->get_resultsA( $sql );
+        $cnt = count( $rows );
+        $msg .= "There are $cnt photos with date. ";
+        $msg .= json_encode( $rows );
+        return $msg;
+    }
+
+    private static function missingPhotographer() {
+        global $eol;
+        global $photoDB, $rrw_photos, $rrw_photographers;
+        $msg = "";
+
+        $sql = "select '' direonp, filename filename, photostatus from $rrw_photos
+                where photographer not in 
+                (select photographer from $rrw_photographers)
+                order by filename "; // photographer
+        $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
+            "photos without a photographer" );
+        return $msg;
+    }
+
+
+    private static function byDate() { //get collection of photos between two dates
+        global $eol;
+        global $photoDB, $rrw_photos;
+        $msg = "";
+
+        $startdate = rrwUtil::fetchparameterString( "startdate" );
+        $enddate = rrwUtil::fetchparameterString( "enddate" );
+        $sql = "select direonp, filename, photostatus from $rrw_photos where 
+    '$startdate' <= uploaddate and uploaddate < '$enddate'"; // missng source
+        print( "<!-- sql is $sql -->\n" );
+        $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
+            "photos uploaded between $startdate and $enddate" );
+        return $msg;
+    }
+    private static function badCopyright() {
+        global $eol;
+        global $rrw_photos;
+        $msg = "";
+
+        $sql = "SELECT filename, copyright, photostatus FROM $rrw_photos
+                        where not copyright like 'copyright%' ";
+        $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
+            "photos copyright does not start with 'copyright'" );
+        $msg .= "Run <a href='/fix/?task=exif' target='admin'>Update copyright</a> $eol";
+        return $msg;
+
+    }
+    private static function noCopyright() {
+        global $eol;
+        global $rrw_photos;
+        $msg = "";
+
+        $sql = "select filename, trail_name, photoDate, photostatus
+            from $rrw_photos where copyright = '' ";
+        $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
+            "photos wih no copyright" );
+        $msg .= "Run <a href='/fix/?task=exif' target='admin'>Update copyright</a> $eol";
+        return $msg;
+
+    }
+    private static function fileLike() {
+        global $eol;
+        global $photoDB, $rrw_source;
+        $msg = "";
+
+        $partfile = rrwUtil::fetchparameterString( "partfile" );
+        $sql = "select sourcefullName direonp, searchname filename, photostatus
+                from $rrw_source
+                where searchname like '%$partfile%'
+                 order by searchname, sourcefullname "; // missng source
+        print( "<!-- sql is $sql -->\n" );
+        $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
+            "source with file name like '$partfile'" );
+        return $msg;
+    }
+    private static function getDate() {
+        global $eol;
+        global $photoPath;
+        $photoname = rrwUtil::fetchparameterString( "photoname" );
+        $fullFilename = "$photoPath/$photoname" . "_cr.jpg";
+        $value = readexifItem( $fullFilename, "datetimeoriginal", $msg );
+        return $msg;
+    }
+
+    private static function noDate() {
+        global $eol;
+        global $wpdbExtra, $rrw_photos;
+        global $photoPath;
+        $msg = "";
+
+        $sql = "select filename, trail_name, photoDate
+            from $rrw_photos where photoDate = '' or photoDate = 'Unknown' ";
+        $recDates = $wpdbExtra->get_resultsA( $sql );
+        $cnt = 0;
+        $msg .= "<table>";
+        $msg .= rrwFormat::HeaderRow( "Photo", "Trail", "Database Date", "exif date" );
+        foreach ( $recDates as $recDate ) {
+            $cnt++;
+            if ( $cnt > 5000 )
+                break;
+            $photoName = $recDate[ "filename" ];
+            $photoDate = $recDate[ "photoDate" ];
+            $trailname = $recDate[ "trail_name" ];
+            $fullFilename = "$photoPath/$photoName" . "_cr.jpg";
+            $value = readexifItem( $fullFilename, "datetimeoriginal", $msg );
+            $photoDisplay = freewheeling_fixit::formatPhotoLink( $photoName );
+            $msg .= rrwFormat::CellRow( $photoDisplay, $trailname, $photoDate, $value );
+        }
+
+
+        $msg .= "</table>\n";
+        return $msg;
+    }
+    private static function noKeyWords() {
+        global $eol;
+        global $rrw_photos;
+        $msg = "";
+        $sql = "select filename, trail_name, photographer, photostatus
+            from $rrw_photos where photoKeyword = '' ";
+        $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
+            "photos wih no keywords" );
+        return $msg;
+    }
+
+    private static function noSource( $item, $description ) {
+        global $eol;
+        global $rrw_photos;
+        $msg = "";
+        //  item is  trail_name, direonp
+        $sql = "select filename, trail_name, photographer, $item, photostatus 
+                from $rrw_photos 
+                where $item = ''  order by trail_name "; // missng source
+        $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
+            "photos wih no $description" );
+        return $msg;
+    }
+
+    private static function rrwFormatDisplayPhotos( $sql, $desvripton, $limit = 100 ) {
+        global $eol, $errorBeg, $errorEnd;
+        global $wpdbExtra;
+        $msg = "";
+        error_reporting( E_ALL | E_STRICT );
+
+        try {
+            print( "<!-- sql request is \n\n$sql\n\n -->\n" );
+            $missngsource = $wpdbExtra->get_resultsA( $sql );
+            $missngsourceCnt = $wpdbExtra->num_rows;
+            $msg .= "There are $missngsourceCnt $desvripton $eol";
+            $cnt = 0;
+            if ( 0 == $missngsourceCnt )
+                return $msg;
+            $color = rrwUtil::colorSwap();
+            $msg .= "$eol <table></tr> \n";
+            foreach ( $missngsource[ 0 ] as $name => $valu ) {
+                $msg .= rrwFormat::CellHeader( $name );
+            }
+            $msg .= "</tr>";
+            $cnt = 0;
+            $totalCnt = count( $missngsource );
+            foreach ( $missngsource as $recset ) {
+                $cnt++;
+                if ( $cnt > $limit ) {
+                    $remain = $totalCnt - $limit;
+                    throw new Exception( "$msg $errorBeg E#498 limit of $limit reached,
+                            there are $remain more $eol" );
+                }
+                $color = rrwUtil::colorSwap( $color );
+                $msg .= "<tr style='background-color:$color;' >\n";
+                foreach ( $recset as $name => $valu ) {
+                    switch ( $name ) {
+                        case 'filename':
+                        case "keywordfilename":
+                        case "searchname":
+                            $valu = freewheeling_fixit::formatPhotoLink( $valu );
+                            break;
+                        case 'photographer':
+                            $valu = "<a href='/fix?task=photog&photog=$valu' 
+                                        target='list'  > $valu </a>";
+                            break;
+                        default:
+                            // just plane $valu
+                            break;
+                    }
+                    $msg .= rrwFormat::Cell( $valu );
+                }
+                $msg .= "</tr>";
+            }
+            $msg .= "</table>\n";
+            //           $msg .= rrwUtil::print_r( $missngsource[ 0 ], true, "one recod" );
+            //           $msg .= rrwUtil::print_r( $missngsource[ 0 ], true, "one recod" );
+        } catch ( Exception $ex ) {
+            $msg .= "E#401 " . $ex->getMessage() . "<p> $sql </p> ";
+        }
+        return $msg;
+    }
+
+    private static function tag() {
+        global $eol, $errorBeg, $errorEnd;
+        global $wpdbExtra, $rrw_photos;
+        $msg = "";
+        /*
+                $sql = "select filename, trail_name, photographer
+                    from $rrw_photos where photoKeyword = '' ";
+                $recs = $wpdbExtra->get_resultsA( $sql );
+                if ( 0 == $wpdbExtra->num_rows )
+                    return "No photos with out keywords";
+                $photoname = $recs[ 0 ][ "filename" ];
+                $_GET[ "photoname" ] = $photoname;
+            */
+        $_POST[ "photoname" ] = "nokey";
+        $msg = freeWheeling_DisplayOne::DisplayOne( null );
+        return $msg;
+    }
+
+    private static function updateRename( $filename, $newname, $sourceFullName ) {
+        global $eol, $errorBeg, $errorEnd;
+        global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords;
+        global $photoPath, $thumbPath, $highresPath;
+        $msg = "";
+
+        $debug = true;
+        if ( $debug )$msg .= "updateRename( $filename, $newname, $sourceFullName ) ";
+
+        if ( empty( $filename ) ) {
+            $filename = trim( rrwUtil::fetchparameterString( "filename" ) );
+            $newname = trim( rrwUtil::fetchparameterString( "new" ) );
+            $sourceFullName = trim( rrwUtil::fetchparameterString( "source" ) );
+        }
+        if ( empty( $sourceFullName && "dale" == substr( $newname, 0, 4 ) ) ) {
+            $sourceFullName = "P:/film-scan/" . substr( $newname, 0, 6 ) . "/IMAGES/$newname.jpg";
+        }
+        if ( empty( $newname ) ) {
+            $msg .= "<form >
+        <input type='text' name='filename' diabled value='$filename' />
+        <input type='text' name='new' value='$filename' />
+        <input type='submit' value='rename dataase/files' />
+        <input type='hidden' name='task' value='rename' />
+        </form>";
+            return $msg;
+        } //  ---------------------------------------------- move three files
+        $msg .= freewheeling_fixit::checkAndRename( "$photoPath/${filename}_cr.jpg",
+            "$photoPath/{$newname}_cr.jpg" );
+        $msg .= freewheeling_fixit::checkAndRename( "$thumbPath/{$filename}_tmb.jpg",
+            "$thumbPath/{$newname}_tmb.jpg" );
+        $msg .= freewheeling_fixit::checkAndRename( "$highresPath/{$filename}.jpg",
+            "$<strong>thumbPath</strong>/{$newname}.jpg" );
+        //  ------------------------------------------------- things in rrw_photos
+        $sqlExist = "select filename from $rrw_photos where filename = '$newname'";
+        $recExists = $wpdbExtra->get_resultsA( $sqlExist );
+        if ( 0 != $wpdbExtra->num_rows )
+            $msg .= "$errorBeg E#420 file $newname is already in the photo table,
+                    not replaced $errorEnd";
+        else {
+            $sqlupdate = "update $rrw_photos set filename = '$newname',
+                direOnP = '$sourceFullName' where filename ='$filename' ";
+            $rec = $wpdbExtra->query( $sqlupdate );
+            $msg .= "$sqlupdate $eol";
+        } // ------------------------------------------------  direonp
+        $sqldireonp = "update $rrw_photos set direonp =
+                replace(direonp, '$filename', '$newname') where filename = '$newname'";
+        $rec = $wpdbExtra->query( $sqldireonp );
+        /// --------------------------------------------------- cause to be fetched
+        $sqlDate = "update $rrw_photos set uploaddate = '1990-01-01' 
+                    where filename = '$newname'";
+        $msg .= "$sqlDate $eol";
+        $rec = $wpdbExtra->query( $sqlDate );
+        // --------------------------------------------------------- keywords
+        $sqlupdate = "update $rrw_keywords set keywordfilename = '$newname'
+                        where keywordfilename ='$filename' ";
+        $rec = $wpdbExtra->query( $sqlupdate );
+        $msg .= "$sqlupdate $eol";
+        $msg .= " [ <a href='/display-one-photo?photoname=$newname' 
+                    target='one'>$newname</a> ]
+        [ <a href='http://127.0.0.1/pict/sub.php?direname=' target='submit' >
+                upload picture file </a> ] ";
+        return $msg;
+
+    } // end  updateRename( $filename, $newname, $sourceFullName ) {
+
+    private static function checkAndRename( $fileFrom, $fileTo ) {
+        global $eol;
+        $msg = "";
+        if ( !file_exists( $fileFrom ) ) {
+            $msg .= "From file $fileFrom does not exists $eol";
+            return $msg;
+        }
+        if ( file_exists( $fileTo ) ) {
+            $msg .= "To file $fileTo exists and will be over ridden $eol";
+            unlink( $fileTo );
+        }
+        rename( $fileFrom, $fileTo );
+        return "$msg rename ($fileFrom, $fileTo) $eol";
+    }
+
+    private static function direonpOnFileMatch() {
+        // used to relate the entries in photo datta database to the file location on spoke
+        // if file name matchs then update the diterctory field
+        global $eol;
+        global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_photographers;
+        $msg = "";
+        $debug = false;
+        try {
+            $msg .= SetConstants( "updateDiretoryOnFileMatch" );
+            $msg .= direReport( "direonp", "with blank DireOnP" );
+            //      return $msg;
+            $sql = "select direonp, sourcefullname, searchname from $rrw_photos 
+            left join $rrw_source on filename=searchname 
+                where searchname is not null and not direonp = sourcefullname 
+                    and sourcestatus ='use' order by searchname";
+            if ( $debug );
+            $msg .= "$sql $eol";
+            $recs = $wpdbExtra->get_resultsA( $sql );
+            $cntrecs = $wpdbExtra->num_rows;
+            $msg .= "Found $cntrecs rows of data - 
+                    probably duplicate sourcefilename entries $eol";
+            $cntInsert = 0;
+            $sqlList = array(); // list of the flippers
+            foreach ( $recs as $rec ) {
+                $cntInsert++;
+                if ( $cntInsert > 500 )
+                    break;
+                $direonp = $rec[ "direonp" ];
+                $sourcefullname = $rec[ "sourcefullname" ];
+                $searchname = $rec[ "searchname" ];
+                $sqlins = "update $rrw_photos set direonp = '$sourcefullname'
+                    where filename = '$searchname' ";
+                $updateCnt = $wpdbExtra->query( $sqlins );
+                if ( $debug )$msg .= "$updateCnt -- $sqlins $eol ";
+                $sqlList[ $searchname ] = $sourcefullname;
+
+            }
+            $msg .= direReport( "direonp", "with blank DireOnP" ) . "$eol <table> $eol";
+            foreach ( $sqlList as $key => $value ) {
+                $keyDisplay = "<a href='http://pictures.shaw-weil.com/display-one-photo" .
+                "?photoname=$key' target='one' >$key</a>";
+                $msg .= rrwFormat::CellRow( $keyDisplay, $value );
+            }
+            $msg .= "</table> <hr weight=3>";
+            $sqlblank = "select filename from $rrw_photos 
+                where direonp = '' or direonp is null ";
+            $msg .= "$sqlblank $eol ";
+            $recs = $wpdbExtra->get_resultsA( $sqlblank );
+            $cntrecs = $wpdbExtra->num_rows;
+            $msg .= "Found $cntrecs rows of blank direonp $eol";
+
+            $msg .= "<table> ";
+            foreach ( $recs as $rec ) {
+                $key = $rec[ "filename" ];
+                $keyDisplay = "<a href='http://pictures.shaw-weil.com/display-one-photo" .
+                "?photoname=$key' target='one' >$key</a>";
+                $msg .= rrwFormat::CellRow( $keyDisplay );
+            }
+            $msg .= "</table> ";
+
+
+        } catch ( Exception $ex ) {
+            $msg .= "E3494 in direonpOnFileMatch $sourcefullname" . $ex->getMessage();
+        }
+        return $msg;
+    } // wns updateDiretoryOnFileMatch
+
+    private static function updateDiretoryCloseFileMatch() {
+        global $eol;
+        global $wpdbExtra, $rrw_photos, $rrw_source;
+        $msg = "";
+        // used to relate the entries in photo datta database to the file location on spoke
+        // if file name is close (contains) then update the diterctory field
+
+        $msg .= SetConstants( "updateDiretoryOnFileMatch" );
+        $msg .= direReport( "direonp", "with blank DireOnP" );
+        $sql = "select Filename from $rrw_photos where direonp = '' ";
+        $msg .= "$sql $eol ";
+        $recs = $wpdbExtra->get_resultsA( $sql );
+        $cntrecs = $wpdbExtra->num_rows;
+        $msg .= "Found $cntrecs photos not marched to directories of data $eol";
+        $photos = array();
+        foreach ( $recs as $rec )
+            array_push( $photos, $rec[ "Filename" ] );
+        $sqlSource = "select sourceFullName, searchName from $rrw_source 
+                    where sourcestatus = 'use'";
+        $recPcs = $wpdbExtra->get_resultsA( $sqlSource );
+        $cntrecs = $wpdbExtra->num_rows;
+        $msg .= "Found $cntrecs posible  marchs to portion of file name $eol";
+        $cntInsert = 0;
+        $msg .= "<table>" . rrwFormat::HeaderRow( "PC dire", "web File",
+            "PC File", "New File" );
+        $color = rrwUtil::colorSwap();
+        //  create a new file name by some rules
+        $testPass = 1; // new filename based on pattern '/\d*_*(.+)_\d*/';
+        $testPass = 2; // new file naame is forced to match
+        $TestPass = 3; //
+        foreach ( $recPcs as $recPC ) {
+            $searchName = $recPC[ "searchName" ];
+            $sourceFullName = $recPC[ "sourceFullName" ];
+
+            for ( $ii = 0; $ii < count( $photos ); $ii++ ) {
+                if ( strpos( $photos[ $ii ], $searchName ) !== false ) {
+                    // got a match update databse rename files
+                    switch ( $testPass ) {
+                        case 1:
+                            $filename = $photos[ "$ii" ];
+                            $pattern = '/\d*_*(.+)_\d*/';
+                            $newname = preg_replace( $pattern, '${1}', $filename );
+                            break;
+                        case 2:
+                            $filename = $photos[ "$ii" ];
+                            $newname = $searchName;
+                            break;
+                        case 3:
+                            $filename = $photos[ "$ii" ];
+                            $pattern = '/\d*_*(.+)_\d*/';
+                            $newname = preg_replace( $pattern, '${1}', $filename );
+                            $newname = $searchName;
+                            break;
+                        default:
+                            throw new Exception( "E#485 iinvalid testpas = $testPass" );
+                    }
+                    if ( $newname != $searchName ) {
+                        $match = "** adjust ***";
+                    } else
+                        $match = "";
+                    $color = rrwUtil::colorSwap( $color );
+                    $msg .= rrwFormat::CellRow( $color, $sourceFullName, $filename,
+                        $searchName, $newname, $match );
+                    if ( $newname != $searchName )
+                        continue;
+
+                    $msg .= updateRename( $filename, $newname, $sourceFullName );
+                    $cntInsert++;
+                    if ( $cntInsert > 5 )
+                        return "$msg </table> - finished one entry";
+                } // end search matches a piece of filename 
+            } // end looking for match in the photolist
+        } // end looping thru the source list
+        $msg .= "</table> $eol";
+        $msg .= direReport( "direonp", "with blank DireOnP" ) . $eol . $eol;
+        $sqlEmpty = "select filename, photo_id from $rrw_photos where direonp = '' 
+            and filename like '%_ms%'
+            order by substring(filename,7,5) ";
+        $recEmptys = $wpdbExtra->get_resultsA( $sqlEmpty );
+        $msg .= "</table>\n";
+        foreach ( $recEmptys as $recEmpty ) {
+            $filename = $recEmpty[ "filename" ];
+            $photo_id = $recEmpty[ "photo_id" ];
+            if ( strpos( $filename, "_ms" ) === false ) {
+                $newname = "";
+            } else {
+                $newname = "dale0" . substr( $filename, 9, 1 ) . "-img00" .
+                substr( $filename, 11, 2 );
+            }
+            $c1 = "<form action='/fix?task=rename' method='post' >
+                <input type='text' value='$filename' name='filename'/>";
+            $c2 = "<input type='text' value='$newname' name='new'/>";
+            $c3 = "<input type='submit' value='rename' /> </form>";
+            $c4 = "<a href='https://pictures.shaw-weil.com/display-one-photo?photoid=$photo_id' target='one' > $photo_id </a>";
+            $msg .= rrwFormat::CellRow( $c1, $c2, $c3, $c4 );
+        }
+        $msg .= "</table>\n";
+        return $msg;
+    } // end function updateDiretoryCloseFileMatch() 
+
+    private static function exifCleanup() {
+        global $eol, $errorBeg, $errorEnd;
+        global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords;
+        global $photoPath, $thumbPath, $highresPath;
+        $msg = "";
+        error_reporting( E_ALL | E_STRICT );
+        try {
+            $debug = true;
+            $potag = array();
+            $msg .= freewheeling_fixit::GetPhotogList( $potag );
+            //      $msg .= rrwUtil::print_r( $potag, true, "$eol $eol Photogaphers from $rrw_photographers$eol" );
+
+            $sqlUnkownDate = "update $rrw_photos set photodate= 'Unknown' 
+                            where photodate = '' ";
+            $cnt = $wpdbExtra->query( $sqlUnkownDate );
+            $msg .= "Updated $cnt blank Photo Dates to Unkown $eol ";
+
+
+            $sql = "SELECT * FROM $rrw_photos
+                    left join $rrw_source on filename = searchname
+                     order by filename";
+            $recs = $wpdbExtra->get_resultsA( $sql );
+            $msg .= "<table>";
+            $cnt = 0;
+            $cntPUShed = 0;
+            foreach ( $recs as $rec ) {
+                $cnt++;
+                if ( $cnt > 3000 )
+                    break;
+                $photoname = $rec[ "filename" ];
+                $databaseCopyright = $rec[ "copyright" ];
+                $datebasePhotoDate = $rec[ "PhotoDate" ];
+                $databasePhotographer = $rec[ "photographer" ];
+                $databaseKeyword = $rec[ "photoKeyword" ];
+                $databaseHeight = $rec[ "height" ];
+                $databaseWidth = $rec[ "width" ];
+                $fullFile = "$photoPath/$photoname" . "_cr.jpg";
+                $rec[ "fullfile" ] = $fullFile;
+                $sqlUpdate = "";
+                if ( !file_exists( $fullFile ) ) {
+                    $msg .= "$errorBeg E#448  file $fullFile not found $errorEnd";
+                    continue;
+                }
+                $fileExif = exif_read_data( $fullFile );
+                if ( empty( $rec[ "originalExif" ] ) )
+                    $rec[ "originalExif" ] = array();
+                else {
+                    $msg .= rrwUtil::print_r( $rec[ "originalExif" ], true, " $eol rec['originalExif']$eol " );
+                    $x = json_decode( $rec[ "originalExif" ] );
+                    if ( is_null( $x ) ) {
+                        $msg .= json_last_error_msg();
+                        $msg .= rrwUtil::print_r( $x, true, "$eoljson decode error $eol" );
+                        $rec[ "originalExif" ] = array();
+                    }
+                }
+                $msg .= " $cnt
+            <a href='display-one-photo?photoname=$photoname' target='one' >$photoname </a> ";
+                //  -----------------------------------------------------  photographer
+                if ( empty( $databasePhotographer ) ) {
+                    $databasePhotographer = "Mary Shaw";
+                }
+                $msg .= "databasePhotographer = $databasePhotographer $eol ";
+                // ---------------------------- ------------------------- copytight
+                if ( empty( $databaseCopyright ) ) {
+                    $datebasecopyRight = $potag[ $databasePhotographer ];
+                    $sqlUpdate .= ",copyright = '$datebasecopyRight'";
+                }
+                // assert datebasecopyRight is set, and the correct one
+                if ( array_key_exists( "Copyright", $fileExif ) )
+                    $fileCopyRight = $fileExif[ "Copyright" ];
+                else
+                    $fileCopyRight = "";
+                if ( $fileCopyRight != $databaseCopyright ) {
+                    $msg .= "Push To Image " . substr( $databaseCopyright, 0, 49 ) . $eol;
+                    $msg .= pushToImage( $fullFile, "copyright", $databaseCopyright );
+                }
+                //  --------------------------------------------- datetime
+                $msg .= freewheeling_fixit::SetDateTime(
+                    $rec, $datebasePhotoDate, $fileExif );
+
+                // ---------------------------------------------------------- keywords/tags
+                // more code to come
+                // pushToImage(fullFile, "?????", databaseKeyword$);
+                // ---------------------------------------------------------- image height
+                // ---------------------------------------------------------- image width
+                $imageheight = $fileExif[ "COMPUTED" ][ "Height" ];
+                $imagewidth = $fileExif[ "COMPUTED" ][ "Width" ];
+                if ( $databaseHeight != $imageheight )
+                    $sqlUpdate .= ", height = '$imageheight'";
+                if ( $databaseWidth != $imagewidth )
+                    $sqlUpdate .= ", width = '$imagewidth'";
+
+                if ( strlen( $sqlUpdate ) > 0 ) { // now update the database
+                    $sqlUpdate = substr( $sqlUpdate, 1 );
+                    $sqlFinal = "Update $rrw_photos set $sqlUpdate 
+                        where filename = '$photoname'";
+                    $answer = $wpdbExtra->query( $sqlFinal );
+                    $msg .= "$answer &nbsp; $sqlFinal $eol";
+                }
+            } // end of foreach record  
+            $msg .= "processed $cnt records $eol";
+        } catch ( Exception $ex ) {
+            $msg .= "$msg E#440 in exif " . $ex->getMessage();
+        }
+        return $msg;
+    } // end function exif
+
+    private static function SetDateTime( $rec, $datebasePhotoDate, $fileExif ) {
+        global $eol;
+        global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords;
+        global $photoPath, $thumbPath, $highresPath;
+        $msg = "";
+        error_reporting( E_ALL | E_STRICT );
+        // -----------------------------------------------------------  datetime
+        // assume date time in original (source[exif] is correct)
+        // if no original, assume database is correct
+        // if no original or database use file photo[exif]
+        // if no priginal,satebase, or file - set to Unknown
+        if ( strpos( $rec[ "filename" ], "justus-pump" ) !== false )
+            $debug = true;
+        else
+            $debug = false;
+        if ( $debug )$msg .= "got justus pump $eol";
+        $dateKey = "datetimeoriginal";
+        if ( !empty( $rec[ "originalExif" ] ) ) {
+            $exif = json_decode( $rec[ "originalExif" ], true );
+            if ( is_array( $exif ) ) {
+                if ( array_key_exists( $dateKey, $exif ) )
+                    $newDate = $exif[ $dateKey ];
+                else
+                    $newDate = $rec[ "sourcedate" ];
+            } else
+                $newDate = $rec[ "sourcedate" ];
+        } else
+            $newDate = $rec[ "sourcedate" ];
+        if ( empty( $newDate ) )
+            $newDate = $datebasePhotoDate;
+        $msg .= "if ( $newDate != $datebasePhotoDate $eol ";
+        if ( $newDate != $datebasePhotoDate &&
+            strpos( $newDate, "0000" ) === false ) {
+            $sql = "update $rrw_photos set Photodate ='$newDate'
+                                        where filename = '" . $rec[ "filename" ] . "'";
+            $cnt = $wpdbExtra->query( $sql );
+            $msg .= "$cnt &nbsp; $sql $eol";
+            $datebasePhotoDate = $newDate;
+        }
+        return $msg;
+    } // end  setDateTieme function
+
+    private static function WipeDireOnP() {
+        global $eol, $errorBeg, $errorEnd;
+        global $wpdbExtra, $rrw_photos;
+        $msg = "";
+        $photoname = rrwUtil::fetchparameterString( "photoname" );
+        if ( Empty( $photoname ) )
+            return "$msg $errorBeg E#468 no spphotonamee specified ";
+        $sql = "update $rrw_photos set direonp = '' 
+                    where filename ='$photoname'";
+        $cnt = $wpdbExtra->query( $sql );
+        $msg .= "$cnt &nbsp; $sql $eol";
+        return $msg;
+    }
+
+    private static function test() {
+        $msg = "trail is " . freewheeling_fixit::findTrailname( "P:/digipix//w-pa-trails/1-ahtm/river-trail/4th-av-launch-constr-s.jpg" );
+        return $msg;
+    }
+
+    private static function findTrailname( $direonp ) {
+        global $eol;
+        global $wpdbExtra, $rrw_trails;
+
+        $sqltrails = "select trailname, trail_short_name from $rrw_trails 
+                    where not trail_short_name = ''";
+        $rectrails = $wpdbExtra->get_resultsA( $sqltrails );
+        $trails = array();
+        $trails = array();
+        foreach ( $rectrails as $rectrail ) {
+            $trailname = $rectrail[ "trailname" ];
+            $short = $rectrail[ "trail_short_name" ];
+            $trails[ $short ] = $trailname;
+        }
+        foreach ( $trails as $key => $name ) {
+            if ( strpos( $direonp, $key ) !== false )
+                return $name;
+        }
+        return "";
+    }
+    public static function formatPhotoLink( $photoname ) {
+        return "<a href='/display-one-photo?photoname=$photoname'
+                                target='one' > $photoname </a>";
+    }
+} // end class
+?>
