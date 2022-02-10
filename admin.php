@@ -88,8 +88,9 @@ class freewhilln_Administration_Pictures {
             $sqlPhotog = "select count(*) from 
                     (select distinct photographer from $rrw_photos ) ph1 ";
             $msg .= "<!-- $sqlPhotog \n-->";
-            $photogCnt = $wpdbExtra->get_var( $sqlPhotog );
-
+            $photogUsedCnt = $wpdbExtra->get_var( $sqlPhotog );
+            $sqlAllPhotog = "select count(*) from $rrw_photographers";
+            $PhotogTotalCnt = $wpdbExtra->get_var($sqlAllPhotog);
             $sqlKeywordDups = "select count(*), keyword from $rrw_keywords 
                 group by keyword, keywordFilename having count(*) > 1";
             $recKeywordDup = $wpdbExtra->get_resultsA( $sqlKeywordDups );
@@ -125,8 +126,10 @@ class freewhilln_Administration_Pictures {
             " with <a href='/fix?task=nosource' target='list' > no source file</a> $eol
                 $before3_17 with load dates before 3/17 $eol
                 $after3_17 with load dates after 3/17 $eol";
-            $msg .= "$photogCnt <a  href='fix?task=photog' target='list' >
-                    distinct photographers</a> in the photo table $eol";
+            $msg .= "$photogUsedCnt <a  href='/display-photographers/'
+                    target='list' >
+                    distinct photographers</a> used of $PhotogTotalCnt 
+                    in the photo tables $eol";
             $msg .= "$cntMore approximately <a href='/fix?task=addlist' target='list'>
                         photos to be added</a> $eol";
             $msg .= "$cntmissingExif with <a href='/fix/?task=badcopyright'

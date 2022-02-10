@@ -98,6 +98,7 @@ require_once "display_tables_class.php";
 // picture routines
 require_once "admin.php";
 require_once "displayone.php";
+require_once "DisplayPhotogaphers.php";
 require_once "displayphotos.php";
 require_once "fix.php";
 require_once "update.php";
@@ -1138,16 +1139,14 @@ function reada3a4( $attr ) {
     $msg .= dumpMeta( $input_file, $output_file );
     return $msg;
 }
-// picture taks
-
+// picture tasks
 SetConstants( "by the short codes" );
 add_shortcode( "adminpictures", array( "freewhilln_Administration_Pictures",
     "administrationPicures" ) );
 add_shortcode( "displayphotos", array( "freewheeling_displayPhotos", "displayPhotos" ) );
 add_shortcode( "displayone", array( "freeWheeling_DisplayOne", "DisplayOne" ) );
 add_shortcode( "displayupdate", array( "freeWheeling_DisplayUpdate", "DisplayUpdate" ) );
-add_shortcode( "fix", arraY( "freewheeling_fixit", "fit_it" ) );
-//add_shortcode( "quality", arraY( "freewheeling_quality", "quality" ) );
+add_shortcode( "fix", array( "freewheeling_fixit", "fit_it" ) );
 add_shortcode( "upload", "doUpload" );
 
 add_shortcode( "insertdire", "insertdire" );
@@ -1156,6 +1155,7 @@ add_shortcode( "addtag", "addtag" );
 add_shortcode( "reada3a4", "reada3a4" );
 add_shortcode( "writea5", "writea5" );
 add_shortcode( "testPel", "testPel3" );
+add_shortcode( "displaypho", array( "DisplayPhotographers", "Display" ) );
 
 require 'plugin_update_check.php';
 $MyUpdateChecker = new PluginUpdateChecker_2_0(

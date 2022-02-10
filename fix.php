@@ -17,6 +17,8 @@ use lsolesen\ pel\ PelTag;
 use lsolesen\ pel\ PelTiff;
 
 require_once "rrw_util_inc.php";
+require_once "display_tables_inc.php";
+
 class freewheeling_fixit {
     public static function fit_it( $attr ) {
         global $eol, $errorBeg, $errorEnd;
@@ -60,8 +62,8 @@ class freewheeling_fixit {
                 case "duplicatephoto":
                     $msg .= freewheeling_fixit::setUseStatus( "duplicate" );
                     break;
-                case "exif":
-                    $msg .= freewheeling_fixit::exifCleanup();
+                case "forcedatabase":
+                    $msg .= freewheeling_fixit::forceDatabse2matchexif();
                     break;
                 case "extrakeyword":
                     $msg .= freewheeling_fixit::extraKeyword();
@@ -108,7 +110,7 @@ class freewheeling_fixit {
                         " trail name" );
                     break;
                 case "photog":
-                    $msg .= freewheeling_fixit::listPhotog();
+                    $msg .= freewheeling_fixit::DisplayPhotogaphers( $attr );
                     break;
                 case "rename":
                     $msg .= freewheeling_fixit::updateRename( "", "", "" );
@@ -153,47 +155,47 @@ copyright, keywords, meta, rename $eol";
         if ( !is_dir( $photoPath ) )
             throw new Exception( "'$photoPath' is not a directory" );
         $dh = opendir( $photoPath );
-        if ( !is_resource($dh) )
+        if ( !is_resource( $dh ) )
             throw new Exception( "'$photoPath' did not open" );
 
         $files = array();
-        while ($files[] = readdir( $dh ) ) ;
-        sort($files);
-        $msg .= "there are " . count($files) . " files to process $eol ";
+        while ( $files[] = readdir( $dh ) );
+        sort( $files );
+        $msg .= "there are " . count( $files ) . " files to process $eol ";
         $cntDire = 0;
         $msg .= "<table>\n";
         foreach ( $files as $file ) {
             try {
-            $cntDire++;
-            if ("." == $file || ".." == $file || empty($file) )
-                continue;
-            if ( $cntDire > 5000 )
-                break;
-            $fullFile = "$photoPath/$file";
-            $outfile =  "$taglinePath/$file";
-            $imgdis = new Imagick( );
-            $handle = fopen( $fullFile, "r" );
-            $imgdis->readImageFile( $handle );
-      
-            $w_src = $imgdis->getImageWidth();
-            $h_src = $imgdis->getImageHeight();
-            $h_chop = $h_src- 20;
-             $imgdis->chopImage (0,$h_chop, 0,0);
-            $imgdis->writeImage( $outfile);
-            $imgdis->destroy();
-  
-            $imgUrl = "<img src='$taglineUrl/$file' />";
-            $msg .= rrwFormat::cellRow($file," $w_src X $h_src, $imgUrl");
-            }catch(Exception $ex) {
+                $cntDire++;
+                if ( "." == $file || ".." == $file || empty( $file ) )
+                    continue;
+                if ( $cntDire > 5000 )
+                    break;
+                $fullFile = "$photoPath/$file";
+                $outfile = "$taglinePath/$file";
+                $imgdis = new Imagick();
+                $handle = fopen( $fullFile, "r" );
+                $imgdis->readImageFile( $handle );
+
+                $w_src = $imgdis->getImageWidth();
+                $h_src = $imgdis->getImageHeight();
+                $h_chop = $h_src - 20;
+                $imgdis->chopImage( 0, $h_chop, 0, 0 );
+                $imgdis->writeImage( $outfile );
+                $imgdis->destroy();
+
+                $imgUrl = "<img src='$taglineUrl/$file' />";
+                $msg .= rrwFormat::cellRow( $file, " $w_src X $h_src, $imgUrl" );
+            } catch ( Exception $ex ) {
                 print "Working on $file $eol $eol";
                 continue;
             }
         }
-        
+
         closedir( $dh );
-        $msg .="</table\n";
+        $msg .= "</table\n";
         $msg .= "processed $cntDire files $eol";
-        return( $msg);
+        return ( $msg );
 
     }
 
@@ -603,7 +605,7 @@ copyright, keywords, meta, rename $eol";
                         where not copyright like 'copyright%' ";
         $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
             "photos copyright does not start with 'copyright'" );
-        $msg .= "Run <a href='/fix/?task=exif' target='admin'>Update copyright</a> $eol";
+        $msg .= "Run <a href='/fix/?task=exif' target='admin'>update something</a> $eol";
         return $msg;
 
     }
@@ -1021,7 +1023,7 @@ copyright, keywords, meta, rename $eol";
         return $msg;
     } // end function updateDiretoryCloseFileMatch() 
 
-    private static function exifCleanup() {
+    private static function forceDatabse2matchexif() {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords;
         global $photoPath, $thumbPath, $highresPath;
@@ -1033,22 +1035,25 @@ copyright, keywords, meta, rename $eol";
             $msg .= freewheeling_fixit::GetPhotogList( $potag );
             //      $msg .= rrwUtil::print_r( $potag, true, "$eol $eol Photogaphers from $rrw_photographers$eol" );
 
-            $sqlUnkownDate = "update $rrw_photos set photodate= 'Unknown' 
+            // sanitize empty data
+            $sqlUnkownDate = "update $rrw_photos set photodate = 'Unknown' 
                             where photodate = '' ";
             $cnt = $wpdbExtra->query( $sqlUnkownDate );
             $msg .= "Updated $cnt blank Photo Dates to Unkown $eol ";
+            if ( empty( $rec[ "originalExif" ] ) )
+                $rec[ "originalExif" ] = array();
 
 
             $sql = "SELECT * FROM $rrw_photos
                     left join $rrw_source on filename = searchname
-                     order by filename";
+                     order by filename limit 1 ";
             $recs = $wpdbExtra->get_resultsA( $sql );
-            $msg .= "<table>";
-            $cnt = 0;
+            $cntRecs = 0;
             $cntPUShed = 0;
             foreach ( $recs as $rec ) {
-                $cnt++;
-                if ( $cnt > 3000 )
+                // search through all photos
+                $cntRecs++;
+                if ( $cntRecs > 3000 )
                     break;
                 $photoname = $rec[ "filename" ];
                 $databaseCopyright = $rec[ "copyright" ];
@@ -1067,39 +1072,29 @@ copyright, keywords, meta, rename $eol";
                 $fileExif = exif_read_data( $fullFile );
                 if ( empty( $rec[ "originalExif" ] ) )
                     $rec[ "originalExif" ] = array();
-                else {
-                    $msg .= rrwUtil::print_r( $rec[ "originalExif" ], true, " $eol rec['originalExif']$eol " );
-                    $x = json_decode( $rec[ "originalExif" ] );
-                    if ( is_null( $x ) ) {
-                        $msg .= json_last_error_msg();
-                        $msg .= rrwUtil::print_r( $x, true, "$eoljson decode error $eol" );
-                        $rec[ "originalExif" ] = array();
-                    }
+                //      $msg .= rrwUtil::print_r( $rec[ "originalExif" ], true, " rec['originalExif'] " );
+                $x = json_decode( $rec[ "originalExif" ] );
+                if ( is_null( $x ) ) {
+                    $msg .= json_last_error_msg();
+                    $msg .= rrwUtil::print_r( $x, true, "$eoljson decode error $eol" );
+                    $rec[ "originalExif" ] = array();
+                } else {
+                    $msg .= rrwUtil::print_r( $x, true, "existing exif" );
                 }
-                $msg .= " $cnt
-            <a href='display-one-photo?photoname=$photoname' target='one' >$photoname </a> ";
-                //  -----------------------------------------------------  photographer
-                if ( empty( $databasePhotographer ) ) {
-                    $databasePhotographer = "Mary Shaw";
-                }
-                $msg .= "databasePhotographer = $databasePhotographer $eol ";
-                // ---------------------------- ------------------------- copytight
-                if ( empty( $databaseCopyright ) ) {
-                    $datebasecopyRight = $potag[ $databasePhotographer ];
-                    $sqlUpdate .= ",copyright = '$datebasecopyRight'";
-                }
-                // assert datebasecopyRight is set, and the correct one
-                if ( array_key_exists( "Copyright", $fileExif ) )
-                    $fileCopyRight = $fileExif[ "Copyright" ];
-                else
-                    $fileCopyRight = "";
-                if ( $fileCopyRight != $databaseCopyright ) {
-                    $msg .= "Push To Image " . substr( $databaseCopyright, 0, 49 ) . $eol;
-                    $msg .= pushToImage( $fullFile, "copyright", $databaseCopyright );
-                }
+                $msg .= "<a href='display-one-photo?photoname=$photoname' target='one' >$photoname </a>, ";
                 //  --------------------------------------------- datetime
-                $msg .= freewheeling_fixit::SetDateTime(
-                    $rec, $datebasePhotoDate, $fileExif );
+                if ( strlen( $fileExif ) < 10 ) {
+                    continue;
+                }
+                $msg .= freewheeling_fixit::getPhotoDateTime( $fileExif );
+                continue;
+
+                // ---------------------------- ------------------------- copytight
+                if ( array_key_exists( "Copyright", $fileExif ) ) {
+                    $fileCopyRight = $fileExif[ "Copyright" ];
+                    if ( $fileCopyRight != $databaseCopyright )
+                        $sqlUpdate .= ", Copyright = '$fileCopyRight'";
+                }
 
                 // ---------------------------------------------------------- keywords/tags
                 // more code to come
@@ -1121,54 +1116,37 @@ copyright, keywords, meta, rename $eol";
                     $msg .= "$answer &nbsp; $sqlFinal $eol";
                 }
             } // end of foreach record  
-            $msg .= "processed $cnt records $eol";
+            $msg .= "processed $cntRecs photos $eol";
         } catch ( Exception $ex ) {
             $msg .= "$msg E#440 in exif " . $ex->getMessage();
         }
         return $msg;
     } // end function exif
 
-    private static function SetDateTime( $rec, $datebasePhotoDate, $fileExif ) {
+    private static function getPhotoDateTime( $fileExif ) {
         global $eol;
-        global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords;
-        global $photoPath, $thumbPath, $highresPath;
-        $msg = "";
         error_reporting( E_ALL | E_STRICT );
         // -----------------------------------------------------------  datetime
-        // assume date time in original (source[exif] is correct)
-        // if no original, assume database is correct
-        // if no original or database use file photo[exif]
-        // if no priginal,satebase, or file - set to Unknown
-        if ( strpos( $rec[ "filename" ], "justus-pump" ) !== false )
-            $debug = true;
-        else
-            $debug = false;
-        if ( $debug )$msg .= "got justus pump $eol";
-        $dateKey = "datetimeoriginal";
-        if ( !empty( $rec[ "originalExif" ] ) ) {
-            $exif = json_decode( $rec[ "originalExif" ], true );
-            if ( is_array( $exif ) ) {
-                if ( array_key_exists( $dateKey, $exif ) )
-                    $newDate = $exif[ $dateKey ];
-                else
-                    $newDate = $rec[ "sourcedate" ];
-            } else
-                $newDate = $rec[ "sourcedate" ];
-        } else
-            $newDate = $rec[ "sourcedate" ];
-        if ( empty( $newDate ) )
-            $newDate = $datebasePhotoDate;
-        $msg .= "if ( $newDate != $datebasePhotoDate $eol ";
-        if ( $newDate != $datebasePhotoDate &&
-            strpos( $newDate, "0000" ) === false ) {
-            $sql = "update $rrw_photos set Photodate ='$newDate'
-                                        where filename = '" . $rec[ "filename" ] . "'";
-            $cnt = $wpdbExtra->query( $sql );
-            $msg .= "$cnt &nbsp; $sql $eol";
-            $datebasePhotoDate = $newDate;
+        // return the photo data in the formst YYYY-MM-DD
+        // or return blank
+        $pictureDate = ""; // date not present in photo
+        $exif = json_decode( $fileExif, true );
+        if ( !is_array( $exif ) )
+            return $pictureDate;
+        foreach ( array( "datetimeoriginal", "datetimedigitized", "previewdatetime", "gpsdatestamp", "datetime" ) as $dateKey ) {
+            if ( array_key_exists( $dateKey, $exif ) ) {
+                $pictureDate = $exif[ $dateKey ];
+                break;
+            }
         }
-        return $msg;
-    } // end  setDateTieme function
+        if ( empty( $pictureDate ) )
+            return $pictureDate;
+        // now get the correct format
+        $picdate = new DateTime( $pictureDate );
+        $picFormated = $picdate->format( "Y-m-d" );
+        print "$pictureDate goes to $picFormated $eol";
+        return $picdate->format( "Y-m-d" );
+    } // end  getPhotoDateTime function
 
     private static function WipeDireOnP() {
         global $eol, $errorBeg, $errorEnd;
