@@ -4,7 +4,7 @@ require_once "rrw_util_inc.php";
 require_once "display_tables_inc.php";
 
 if ( class_exists( "freewheeling_fixit" ) )
-    return 9;
+    return;
 
 class freewheeling_fixit {
     public static function fit_it( $attr ) {
@@ -14,15 +14,17 @@ class freewheeling_fixit {
         $msg = "";
 
         try {
+            $msg .= "fix routine $eol";
             $msg .= SetConstants( "updateDiretoryOnFileMatch" );
             $task = rrwUtil::fetchparameterString( "task" );
-            if ( 0 == strcmp( "jsondate", $task ) ) { // no check for login
-                $msg .= freewheeling_fixit::jsonDate();
-                return $msg;
+            switch ( $task ) { // those tasks which do not reqire a line in
+                case "jsondate":
+                    $msg .= freewheeling_fixit::jsonDate();
+                    return $msg;
             }
 
-            if ( !current_user_can( 'edit_posts' ) )
-                return "$msg $errorBeg E#487 you need to be logged in $errorEnd ";
+            $msg .= self::checkForLogIn();
+
             switch ( $task ) {
                 case "add":
                     $msg .= freewheeling_fixit::addphotos();
@@ -133,6 +135,22 @@ copyright, keywords, meta, rename $eol";
         return $msg;
     }
 
+    public static function checkForLogIn( $errMessage = "" ) {
+        // throw error is user isnot allowed to edit
+        global $eol, $errorBeg, $errorEnd;
+        $msg = "";
+
+        if ( current_user_can( 'edit_posts' ) )
+            return $msg;
+        $bt = debug_backtrace();
+        $caller = array_shift( $bt );
+        $file = $caller[ 'file' ];
+        $line = $caller[ 'line' ];
+        throw new Exception( "$msg $errorBeg $errMessage 
+                    permission has not been granted,
+                    you need to be logged in to do this.  $errorEnd" );
+    }
+
     private static function exifMissing() {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_photographers, $rrw_photos;
@@ -149,8 +167,8 @@ copyright, keywords, meta, rename $eol";
             there are $cntphotos photos in use that have no exif data $eol ";
         return $msg;
     }
-    
-     private static function filesmissing() {
+
+    private static function filesmissing() {
         global $eol;
         global $photoUrl, $photoPath, $thumbUrl, $thumbPath, $highresUrl, $highresPath;
         global $displaykey;
@@ -160,17 +178,17 @@ copyright, keywords, meta, rename $eol";
         $dirlistRes = self::getFileList( $highresPath );
         $dirlist_cr = self::getFileList( $photoPath );
         $dirlist_cr = self::getFileList( $photoPath );
-        foreach ($dirlistRes as $file=>$fileFull) {
-            if (!array_key_exists($file, $dirlist_cr))
+        foreach ( $dirlistRes as $file => $fileFull ) {
+            if ( !array_key_exists( $file, $dirlist_cr ) )
                 $msg .= "$fileFull is not in $photoPath $eol ";
         }
-           foreach ($dirlist_cr as $file=>$fileFull) {
-            if (!array_key_exists($file, $dirlistRes))
+        foreach ( $dirlist_cr as $file => $fileFull ) {
+            if ( !array_key_exists( $file, $dirlistRes ) )
                 $msg .= "$fileFull is not in $highresPath $eol ";
         }
         return $msg;
     }
-    
+
     public static function Author2Copyright( $attr ) {
         // copy the database coppyright to the photo
         global $eol, $errorBeg, $errorEnd;
@@ -402,13 +420,13 @@ copyright, keywords, meta, rename $eol";
 
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords;
-        global $photoPath, $thumbPath, $highresPath;
+        global $photoPath, $thumbPath, $highresPath, $rejectPath;
         $msg = "";
 
         $debug = false;
-        print "inoto del pgoto";
 
         $filename = rrwUtil::fetchParameterString( "del2" );
+        if ( $debug )$msg .= "into delete photo $filename $eol";
         $msg .= "task = deleteing the Photo <strong>$filename</strong> $eol ";
         $del3 = rrwUtil::fetchParameterString( "del3" );
         if ( strcmp( $filename, $del3 ) != 0 ) {
@@ -424,26 +442,26 @@ copyright, keywords, meta, rename $eol";
         if ( $debug )$msg .= "\n<!-- sql is $sql -->\n";
         $recs = $wpdbExtra->get_resultsA( $sql );
         if ( 1 != $wpdbExtra->num_rows )
-            $msg .= "Sql did not find file name in the database $eol $sql $eol";
+            $msg .= "Sql did not find file name in the database $eol";
 
         $sql = "delete from $rrw_photos where Filename ='$filename'";
         $answer = $wpdbExtra->query( $sql );
-        $msg .= "$answer &nbsp; $sql  $eol";
+        $msg .= "Deleted $answer photo record, &nbsp";
 
         $sql = "delete from $rrw_keywords where keywordFilename = '$filename'";
         $answer = $wpdbExtra->query( $sql );
-        $msg .= "$answer &nbsp; $sql  $eol";
+        $msg .= "$answer keyword record, &nbsp; ";
 
         $sqlreject = "update $rrw_source set sourcestatus = 'reject' 
                         where searchname = '$filename'";
         $answer = $wpdbExtra->query( $sqlreject );
-        $msg .= "$answer &nbsp; $sqlreject $eol ";
-        if ( 0 == $answer )
-            $msg .= "$errorBeg E#464 need to insert reject over n 127.0.0.1 $errorEnd";
-
+        $msg .= "$answer source record, &nbsp; ";
+      
         $filename1 = "$thumbPath/$filename" . "_tmb.jpg";
         $filename2 = "$photoPath/$filename" . "_cr.jpg";
         $filename3 = "$highresPath/$filename.jpg";
+        $ToFilename3 = "$rejectPath/$filename.jpg";
+        
         if ( false ) {
             $msg .= "photo '$filename' deleted from database. $eol 
             Can be recovered by doing Add Photos, if not deleted from server$eol 
@@ -465,24 +483,13 @@ copyright, keywords, meta, rename $eol";
                 $msg .= "file $filename2 $notexist $eol";
             }
             if ( file_exists( $filename3 ) ) {
-                $msg .= "Did <strong>not</strong> delete the 
-                        high resolution $filename3 $eol";
+               $msg .= "renameing $filename3 -- to -- , $ToFilename3 ";
+                $msg .= rename ($filename3, $ToFilename3 );
             } else {
                 $msg .= "file $filename3 $notexist $eol";
             }
+            $msg .= $eol;
         }
-        $url = "http://here/pict/fix127.php?task=rejectphoto&photoname=$filename";
-        /* does not work, on wrongserver, need to javascript
-        $msg.= "try curl $eol";
-        $ch = curl_init($url);
-        if (! curl_setopt($ch, CURLOPT_RETURNTRANSFER, true) )
-            $msg .= "$errorBeg curl_setopt($ch, CURLOPT_RETURNTRANSFER, true)
-                    failed $ErrorEnd";
-        $curlAnswer = curl_exec($ch);        
-        $msg .= $curlAnswer;
-        curl_close($ch);
-        */
-        $msg .= "$eol <a href='$url' target='here' >$url</a> $eol";
         return $msg;
     } // end functin deletephoto 
 
@@ -1207,7 +1214,7 @@ copyright, keywords, meta, rename $eol";
         return "<a href='/display-one-photo?photoname=$photoname'
                                 target='one' > $photoname </a>";
     }
- 
+
     public static function getFileList( $dire ) {
         // returns an array, key = filename, value= full path to file
         $files = array();
@@ -1222,7 +1229,7 @@ copyright, keywords, meta, rename $eol";
             $files[ $entry ] = "$dire/$entry";
         }
         sort( $files );
-          return $files;
+        return $files;
     }
 
 } // end class

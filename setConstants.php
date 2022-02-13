@@ -4,6 +4,7 @@ global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords, $rrw_trails;
 global $rrw_photographer, $rrw_photographers, $rrw_access;
 global $eol, $errorBeg, $errorEnd;
 global $photoUrl, $photoPath, $thumbUrl, $thumbPath, $highresUrl, $highresPath;
+global $rejectUrl, $rejectPath;
 global $uploadPath;
 global $gallery;
 global $freewheel_table_prefix;
@@ -34,12 +35,14 @@ try {
     $photoUrl = "$siteUrl/photos";
     $thumbUrl = "$photoUrl/thumbs";
     $highresUrl = "$photoUrl/high_resolutiom";
+    $rejectUrl  = "$photoUrl/reject";
 
     $photoPath = ABSPATH . "photos";
     //       $photoPath = "/home/pillowan/www-shaw-weil-pictures/photos";
     $thumbPath = "$photoPath/thumbs";
     $highresPath = "$photoPath/high_resolution";
     $uploadPath = "$photoPath/upload";
+    $rejectPath = "$photoPath/reject";
  
 } catch ( Exception $ex ) {
     throw new Exception( "$errorBeg E#499 xxx SetConstants " . $ex->get_message() . $errorEnd );
