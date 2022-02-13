@@ -687,7 +687,7 @@ class phpExifReader {
         for ($a=2;$a<$length;$a++){
             $ch = $data[$a];
             if ($ch == '\r' && $data[$a+1] == '\n') continue; // Remove cr followed by lf.
-
+
             $Comment .= $ch;
         }
         //$this->ImageInfo[M_COM] = $Comment;
@@ -988,7 +988,7 @@ class phpExifReader {
                         break;
                 case TAG_FILE_MODDATE;
                         $this->ImageInfo['h']["fileModifiedDate"] = $this->string_format(substr($ValuePtr,0,$ByteCount));
-                        break;
+                        break;
                 case TAG_YCBCR_POSITIONING:
                         $this->ImageInfo['h']["YCbCrPositioning"] = $this->ConvertAnyFormat($ValuePtr, $Format);
                         break;

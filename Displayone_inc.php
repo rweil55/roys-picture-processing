@@ -72,7 +72,7 @@ class freeWheeling_DisplayOne {
             }
             $msg .= "<hr><br />";
             // --------------------------------------------------- update section
-            $msg .= "<br /><form action='update.php' method='post' >";
+            $msg .= "<br /><form action='/update.php' method='post' >";
             if ( $debugPath )$msg .= "***** 4 *****displayOne:photoUrlPath $photoUrlPath <br/>";
 
             $sql = "Select ph.*, trailName from ${tableprefix}photos ph, 
@@ -214,7 +214,8 @@ class freeWheeling_DisplayOne {
         }
         $msg .= "$eol<strong>Identifiable People:</strong>" . $recset[ "People" ] . "
     <div id='missedClassifi'  onclick='openMissedClassifi(this,$photoname);'>
-    if any of thie infomation is incorrect or missing. Please let us know$eol";
+    if any of thie infomation is incorrect or missing. Please let us know E#863,
+    so we can fix it $eol";
         return $msg;
     } // end display table
 

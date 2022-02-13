@@ -5,11 +5,11 @@ class DisplayPhotographers {
         global $eol, $errorBeg, $errorEnd;
         global $rrw_photographers;
         $msg = "";
-        print "$rrw_photographers $eol";
+        
         $action = rrwUtil::fetchparameterString( "action" );
         tablename( "$rrw_photographers" );
         sortdefault( "photographer" );
-        seqname( "photographer_id" );
+        seqname( "photographer" );
         columns( "photographer Name", "photographer", 69 );
         columns( "E-Mail", "Address", 69 );
         columns( "Comment", "Comment", 69 );

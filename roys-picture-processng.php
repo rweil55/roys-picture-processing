@@ -11,44 +11,45 @@
  * Text Domain: Roys-picture-processng
  * Domain Path: /translation
  
-  * Version: 1.0.5
+  * Version: 1.0.13
 
  */
 // disable direct access
 
-use lsolesen\ pel\ Pel;
-use lsolesen\ pel\ PelConvert;
-use lsolesen\ pel\ PelDataWindow;
-use lsolesen\ pel\ PelEntryAscii;
-use lsolesen\ pel\ PelEntryByte;
-use lsolesen\ pel\ PelEntryCopyright;
-use lsolesen\ pel\ PelEntryLong;
-use lsolesen\ pel\ PelEntryNumber;
-use lsolesen\ pel\ PelEntryRational;
-use lsolesen\ pel\ PelEntryShort;
-use lsolesen\ pel\ PelEntrySRational;
-use lsolesen\ pel\ PelEntrySLong;
-use lsolesen\ pel\ PelEntryTime;
-//use lsolesen\ pel\ PelEntryUndefined;
-use lsolesen\ pel\ PelEntryUserComment;
-use lsolesen\ pel\ PelEntryUserCopyright;
-use lsolesen\ pel\ PelEntryVersion;
-use lsolesen\ pel\ PelEntryWindowsString;
-use lsolesen\ pel\ PelEntryUndefined;
-use lsolesen\ pel\ PelExif;
-use lsolesen\ pel\ PelFormat;
-use lsolesen\ pel\ PelIfd;
-use lsolesen\ pel\ PelIfdException;
-use lsolesen\ pel\ PelIllegalFormatException;
-use lsolesen\ pel\ PelInvalidDataException;
-use lsolesen\ pel\ PelJpeg;
-use lsolesen\ pel\ PelJpegComment;
-use lsolesen\ pel\ PelJpegContent;
-use lsolesen\ pel\ PelJpegInvalidMarkerException;
-use lsolesen\ pel\ PelJpegMarker;
-use lsolesen\ pel\ PelMakerNotes;
-use lsolesen\ pel\ PelTag;
-use lsolesen\ pel\ PelTiff;
+use lsolesen\pel\Pel;
+use lsolesen\pel\PelConvert;
+use lsolesen\pel\PelCanonMakerNotes;
+use lsolesen\pel\PelDataWindow;
+use lsolesen\pel\PelEntryAscii;
+use lsolesen\pel\PelEntryByte;
+use lsolesen\pel\PelEntryCopyright;
+use lsolesen\pel\PelEntryLong;
+use lsolesen\pel\PelEntryNumber;
+use lsolesen\pel\PelEntryRational;
+use lsolesen\pel\PelEntryShort;
+use lsolesen\pel\PelEntrySRational;
+use lsolesen\pel\PelEntrySLong;
+use lsolesen\pel\PelEntryTime;
+//use lsolesen\pel\PelEntryUndefined;
+use lsolesen\pel\PelEntryUserComment;
+use lsolesen\pel\PelEntryUserCopyright;
+use lsolesen\pel\PelEntryVersion;
+use lsolesen\pel\PelEntryWindowsString;
+use lsolesen\pel\PelEntryUndefined;
+use lsolesen\pel\PelExif;
+use lsolesen\pel\PelFormat;
+use lsolesen\pel\PelIfd;
+use lsolesen\pel\PelIfdException;
+use lsolesen\pel\PelIllegalFormatException;
+use lsolesen\pel\PelInvalidDataException;
+use lsolesen\pel\PelJpeg;
+use lsolesen\pel\PelJpegComment;
+use lsolesen\pel\PelJpegContent;
+use lsolesen\pel\PelJpegInvalidMarkerException;
+use lsolesen\pel\PelJpegMarker;
+use lsolesen\pel\PelMakerNotes;
+use lsolesen\pel\PelTag;
+use lsolesen\pel\PelTiff;
 
 ini_set( "display_errors", true );
 $pel = "/home/pillowan//www-shaw-weil-pictures/wp-content/plugins" .
@@ -57,7 +58,8 @@ require_once "$pel/Pel.php";
 require_once "$pel/PelException.php";
 require_once "$pel/PelJpegInvalidMarkerException.php";
 require_once "$pel/PelJpegContent.php";
-
+require_once "$pel/PelMakerNotes.php";
+require_once "$pel/PelCanonMakerNotes.php";
 require_once "$pel/PelConvert.php";
 require_once "$pel/PelDataWindow.php";
 require_once "$pel/PelEntry.php";
@@ -86,7 +88,6 @@ require_once "$pel/PelInvalidDataException.php";
 require_once "$pel/PelJpeg.php";
 require_once "$pel/PelJpegComment.php";
 require_once "$pel/PelJpegMarker.php";
-require_once "$pel/PelMakerNotes.php";
 require_once "$pel/PelTag.php";
 require_once "$pel/PelTiff.php";
 
@@ -100,7 +101,9 @@ require_once "admin.php";
 require_once "displayone.php";
 require_once "DisplayPhotogaphers.php";
 require_once "displayphotos.php";
+require_once "DisplayTrails.php";
 require_once "fix.php";
+require_once "submission.php";
 require_once "update.php";
 require_once "uploadphoto.php";
 
@@ -1014,7 +1017,7 @@ function testpel2( $attr ) {
     $msg .= SetConstants( "testPel" );
     // lnowntags for the 5th parameter 
     $input_file = "/home/pillowan/www-shaw-weil-pictures/photos/028682_ms5-73_011798_cr.jpg";
-    //  $output_file = "/home/pillowan/www-shaw-weil-pictures/photos/028682_ms5-73_011798_crxxxxxxxx.jpg";
+    //  $output_file = "/home/pillowan/www-shaw-weil-pictures/photos/028682_ms5-73_011798_cr.jpg";
 
     //  $input_file = "$gallery/a3.jpg";
     $output_file = "$gallery/a5.jpg";
@@ -1141,13 +1144,18 @@ function reada3a4( $attr ) {
 }
 // picture tasks
 SetConstants( "by the short codes" );
+add_shortcode( "author2copyright", array( "freewheeling_fixit", "Author2Copyright") );
 add_shortcode( "adminpictures", array( "freewhilln_Administration_Pictures",
     "administrationPicures" ) );
 add_shortcode( "displayphotos", array( "freewheeling_displayPhotos", "displayPhotos" ) );
-add_shortcode( "displayone", array( "freeWheeling_DisplayOne", "DisplayOne" ) );
+add_shortcode( "display-one-photo",
+              array( "freeWheeling_DisplayOne", "DisplayOne" ) );
+add_shortcode( "display-photographer", array( "DisplayPhotographers", "Display" ) );
+add_shortcode( "displaytrail", array( "DisplayTrails", "Display" ) );
 add_shortcode( "displayupdate", array( "freeWheeling_DisplayUpdate", "DisplayUpdate" ) );
 add_shortcode( "fix", array( "freewheeling_fixit", "fit_it" ) );
-add_shortcode( "upload", "doUpload" );
+add_shortcode( "rrwPicSubmission", array( "rrwPicSubmission", "showForm" ) );
+add_shortcode( "upload", "processuploadDire" );
 
 add_shortcode( "insertdire", "insertdire" );
 add_shortcode( "perl", "testperl" );
@@ -1155,7 +1163,6 @@ add_shortcode( "addtag", "addtag" );
 add_shortcode( "reada3a4", "reada3a4" );
 add_shortcode( "writea5", "writea5" );
 add_shortcode( "testPel", "testPel3" );
-add_shortcode( "displaypho", array( "DisplayPhotographers", "Display" ) );
 
 require 'plugin_update_check.php';
 $MyUpdateChecker = new PluginUpdateChecker_2_0(

@@ -1,23 +1,10 @@
 <?php
 
-use lsolesen\ pel\ Pel;
-use lsolesen\ pel\ PelConvert;
-use lsolesen\ pel\ PelDataWindow;
-use lsolesen\ pel\ PelEntryAscii;
-use lsolesen\ pel\ PelEntryByte;
-use lsolesen\ pel\ PelEntryRational;
-use lsolesen\ pel\ PelEntryUserComment;
-use lsolesen\ pel\ PelEntryUserCopyright;
-use lsolesen\ pel\ PelEntryWindowsString;
-use lsolesen\ pel\ PelExif;
-use lsolesen\ pel\ PelIfd;
-use lsolesen\ pel\ PelIllegalFormatException;
-use lsolesen\ pel\ PelJpeg;
-use lsolesen\ pel\ PelTag;
-use lsolesen\ pel\ PelTiff;
-
 require_once "rrw_util_inc.php";
 require_once "display_tables_inc.php";
+
+if ( class_exists( "freewheeling_fixit" ) )
+    return 9;
 
 class freewheeling_fixit {
     public static function fit_it( $attr ) {
@@ -62,6 +49,9 @@ class freewheeling_fixit {
                 case "duplicatephoto":
                     $msg .= freewheeling_fixit::setUseStatus( "duplicate" );
                     break;
+                case "exifmissing":
+                    $msg .= self::exifMissing();
+                    break;
                 case "forcedatabase":
                     $msg .= freewheeling_fixit::forceDatabse2matchexif();
                     break;
@@ -71,8 +61,8 @@ class freewheeling_fixit {
                 case "filelike":
                     $msg .= freewheeling_fixit::filelike();
                     break;
-                case "getdate":
-                    $msg .= freewheeling_fixit::getDate();
+                case "filesmissing":
+                    $msg .= self::filesmissing();
                     break;
                 case "jsondate":
                     $msg .= freewheeling_fixit::jsonDate();
@@ -121,22 +111,18 @@ class freewheeling_fixit {
                 case "tag":
                     $msg .= freewheeling_fixit::tag();
                     break;
-                case "tagphoto":
-                    $msg .= freewheeling_fixit::tagphoto();
+                case "removecreditline":
+                    $msg .= freewheeling_fixit::removeCreditline();
                     break;
                 case "test":
                     $msg .= freewheeling_fixit::test();
                     break;
-                case "upload":
-                    $msg .= "$errorBeg E#465 Upload s a seperate routine, not part of fix $errorEnd";
-                    break;
                 case "wipedireonp":
                     $msg .= freewheeling_fixit::WipeDireOnP();
                     break;
-
                 default:
                     $msg .= "#498 unkown task of'$task' $eol Try bydate,cleanup,
-copyright,filelike, jsondate, mosource, reame --
+copyright,filelike, jsondate, mosource, rename, removecreditline --
 future direonp, close, keyword, meta
 copyright, keywords, meta, rename $eol";
                     break;
@@ -146,32 +132,92 @@ copyright, keywords, meta, rename $eol";
         }
         return $msg;
     }
-    private static function tagphoto() {
+
+    private static function exifMissing() {
+        global $eol, $errorBeg, $errorEnd;
+        global $wpdbExtra, $rrw_photographers, $rrw_photos;
+        global $photoPath;
+        $msg = " ";
+
+        $sqlMissingExif = "
+            select filename FROM $rrw_photos where originalexif = ''
+            and status = 'use'
+            ";
+        $recs = $wpdbExtra->get_resultsA( $sqlMissingExif );
+        $cntphotos = $wpdbExtra->num_rows;
+        $msg .= "
+            there are $cntphotos photos in use that have no exif data $eol ";
+        return $msg;
+    }
+    
+     private static function filesmissing() {
+        global $eol;
+        global $photoUrl, $photoPath, $thumbUrl, $thumbPath, $highresUrl, $highresPath;
+        global $displaykey;
+        ini_set( "display_errors", true );
+        $msg = "";
+
+        $dirlistRes = self::getFileList( $highresPath );
+        $dirlist_cr = self::getFileList( $photoPath );
+        $dirlist_cr = self::getFileList( $photoPath );
+        foreach ($dirlistRes as $file=>$fileFull) {
+            if (!array_key_exists($file, $dirlist_cr))
+                $msg .= "$fileFull is not in $photoPath $eol ";
+        }
+           foreach ($dirlist_cr as $file=>$fileFull) {
+            if (!array_key_exists($file, $dirlistRes))
+                $msg .= "$fileFull is not in $highresPath $eol ";
+        }
+        return $msg;
+    }
+    
+    public static function Author2Copyright( $attr ) {
+        // copy the database coppyright to the photo
+        global $eol, $errorBeg, $errorEnd;
+        global $wpdbExtra, $rrw_photographers, $rrw_photos;
+        global $photoPath;
+        $msg = "
+            ";
+
+        try {
+            $filename = rrwUtil::fetchparameterString( "
+            filename " );
+            if ( empty( $filename ) )
+                throw new Exception( "
+            $errorBeg E #867 missing filename parameter $errorEnd" );
+            $sqlPhoto = "select copyrightDefault from $rrw_photos ph
+        join $rrw_photographers ger on ph.photographer = ger.photographer 
+                    where filename ='$filename' ";
+            $copyRight = $wpdbExtra->get_var( $sqlPhoto );
+            if ( false === $copyRight || empty( $copyRight ) )
+                throw new Exception( "$errorBeg E#865 missing Author or author copyright $errorEnd $sqlPhoto $eol " );
+            $fileFull = "$photoPath/$filename" . "_cr.jpg";
+            $msg .= pushToImage( $fileFull, "copyright", $copyRight );
+            $sqlUpdate = "update $rrw_photos set copyright = '$copyRight' 
+                        where filename = '$filename'";
+            $cnt = $wpdbExtra->query( $sqlUpdate );
+            $msg .= "update $cnt record in the photo database";
+        } catch ( Exception $ex ) {
+            $msg .= "E#868 top level - " . $ex->getMessage();
+        }
+
+        return $msg;
+    }
+    private static function removeCreditline( $attr ) {
         global $eol, $errorBeg, $errorEnd;
         global $photoPath, $photoUrl;
+        // remove 20 pixels from the bottom of the image.
         $taglinePath = "$photoPath/tagline";
         $taglineUrl = "$photoUrl/tagline";
         $msg = "working on $photoPath $eol";
-        if ( !is_dir( $photoPath ) )
-            throw new Exception( "'$photoPath' is not a directory" );
-        $dh = opendir( $photoPath );
-        if ( !is_resource( $dh ) )
-            throw new Exception( "'$photoPath' did not open" );
-
-        $files = array();
-        while ( $files[] = readdir( $dh ) );
-        sort( $files );
-        $msg .= "there are " . count( $files ) . " files to process $eol ";
-        $cntDire = 0;
+        $files = GetDireList( $photoPath, true );
         $msg .= "<table>\n";
-        foreach ( $files as $file ) {
+        $cntDire = 0;
+        foreach ( $files as $file => $fullFile ) {
             try {
                 $cntDire++;
-                if ( "." == $file || ".." == $file || empty( $file ) )
-                    continue;
                 if ( $cntDire > 5000 )
                     break;
-                $fullFile = "$photoPath/$file";
                 $outfile = "$taglinePath/$file";
                 $imgdis = new Imagick();
                 $handle = fopen( $fullFile, "r" );
@@ -188,33 +234,13 @@ copyright, keywords, meta, rename $eol";
                 $msg .= rrwFormat::cellRow( $file, " $w_src X $h_src, $imgUrl" );
             } catch ( Exception $ex ) {
                 print "Working on $file $eol $eol";
-                continue;
             }
         }
-
-        closedir( $dh );
         $msg .= "</table\n";
         $msg .= "processed $cntDire files $eol";
         return ( $msg );
-
     }
 
-
-    public static function adminNavBar() {
-        // common routinue to putput the pictures administrators admin bar
-        if ( current_user_can( 'edit_posts' ) ) {
-            $msg = "
-                <p>[ <a href='/admin' target='admin' >admin </a>]
-                [ <a href='/fix?task=add' target='admin' >add </a> ]
-                [ c:\_e &nbsp; php sub.php ]
-                [ <a href='/fix/upload' target='admin' >upload </a> ]
-                [ <a href='/fix?task=exif' target='admin' >exif </a> ]
-                [ <a href='/fix?task=tag' target='one' >tag </a> ]
-                 </p>\n ";
-        } else
-            $msg = "";
-        return $msg;
-    }
     private static function extraKeyword() {
         list( $msg, $cntExtra, $cntMissing ) = freewheeling_fixit::extraKeywordCnts( true );
         return $msg;
@@ -632,17 +658,9 @@ copyright, keywords, meta, rename $eol";
                 from $rrw_source
                 where searchname like '%$partfile%'
                  order by searchname, sourcefullname "; // missng source
-        print( "<!-- sql is $sql -->\n" );
+        $msg .= ( "<!-- sql is $sql -->\n" );
         $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
             "source with file name like '$partfile'" );
-        return $msg;
-    }
-    private static function getDate() {
-        global $eol;
-        global $photoPath;
-        $photoname = rrwUtil::fetchparameterString( "photoname" );
-        $fullFilename = "$photoPath/$photoname" . "_cr.jpg";
-        $value = readexifItem( $fullFilename, "datetimeoriginal", $msg );
         return $msg;
     }
 
@@ -1025,28 +1043,26 @@ copyright, keywords, meta, rename $eol";
 
     private static function forceDatabse2matchexif() {
         global $eol, $errorBeg, $errorEnd;
+        $msg = "";
+
+        try {
+            $sql = "SELECT * FROM $rrw_photos
+                     order by filename limit 1 ";
+            $msg .= Do_forceDatabse2matchexif( $sql );
+            return $msg;
+        } // end try
+        catch ( Exception $ex ) {
+            $msg .= $ex->getMessage();
+        }
+        return $msg;
+    } // end function
+
+    public static function Do_forceDatabse2matchexif( $sql ) {
+        global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords;
         global $photoPath, $thumbPath, $highresPath;
         $msg = "";
-        error_reporting( E_ALL | E_STRICT );
         try {
-            $debug = true;
-            $potag = array();
-            $msg .= freewheeling_fixit::GetPhotogList( $potag );
-            //      $msg .= rrwUtil::print_r( $potag, true, "$eol $eol Photogaphers from $rrw_photographers$eol" );
-
-            // sanitize empty data
-            $sqlUnkownDate = "update $rrw_photos set photodate = 'Unknown' 
-                            where photodate = '' ";
-            $cnt = $wpdbExtra->query( $sqlUnkownDate );
-            $msg .= "Updated $cnt blank Photo Dates to Unkown $eol ";
-            if ( empty( $rec[ "originalExif" ] ) )
-                $rec[ "originalExif" ] = array();
-
-
-            $sql = "SELECT * FROM $rrw_photos
-                    left join $rrw_source on filename = searchname
-                     order by filename limit 1 ";
             $recs = $wpdbExtra->get_resultsA( $sql );
             $cntRecs = 0;
             $cntPUShed = 0;
@@ -1063,57 +1079,58 @@ copyright, keywords, meta, rename $eol";
                 $databaseHeight = $rec[ "height" ];
                 $databaseWidth = $rec[ "width" ];
                 $fullFile = "$photoPath/$photoname" . "_cr.jpg";
-                $rec[ "fullfile" ] = $fullFile;
-                $sqlUpdate = "";
+                $sqlUpdate = array();
                 if ( !file_exists( $fullFile ) ) {
                     $msg .= "$errorBeg E#448  file $fullFile not found $errorEnd";
                     continue;
                 }
+                $msg .= "<a href='display-one-photo?photoname=$photoname' target='one'          >$photoname </a>, ";
+                // --------------------------------------------- exif
                 $fileExif = exif_read_data( $fullFile );
-                if ( empty( $rec[ "originalExif" ] ) )
-                    $rec[ "originalExif" ] = array();
-                //      $msg .= rrwUtil::print_r( $rec[ "originalExif" ], true, " rec['originalExif'] " );
-                $x = json_decode( $rec[ "originalExif" ] );
-                if ( is_null( $x ) ) {
-                    $msg .= json_last_error_msg();
-                    $msg .= rrwUtil::print_r( $x, true, "$eoljson decode error $eol" );
-                    $rec[ "originalExif" ] = array();
-                } else {
-                    $msg .= rrwUtil::print_r( $x, true, "existing exif" );
-                }
-                $msg .= "<a href='display-one-photo?photoname=$photoname' target='one' >$photoname </a>, ";
-                //  --------------------------------------------- datetime
-                if ( strlen( $fileExif ) < 10 ) {
+                if ( empty( $fileExif ) || !is_array( $fileExif ) ) {
+                    $msg .= "$errorBeg #854 Fetch of exif 
+                                from $fullFile failed $errorEnd";
                     continue;
                 }
-                $msg .= freewheeling_fixit::getPhotoDateTime( $fileExif );
-                continue;
-
-                // ---------------------------- ------------------------- copytight
-                if ( array_key_exists( "Copyright", $fileExif ) ) {
+                //  --------------------------------------------- datetime
+                $FileDateTime = self::getPhotoDateTime( $fileExif );
+                if ( $datebasePhotoDate != $FileDateTime )
+                    $sqlUpdate[ "PhotoDate" ] = $FileDateTime;
+                // ---------------------------- ------------------ copyright
+                if ( array_key_exists( "Copyright", $fileExif ) )
                     $fileCopyRight = $fileExif[ "Copyright" ];
-                    if ( $fileCopyRight != $databaseCopyright )
-                        $sqlUpdate .= ", Copyright = '$fileCopyRight'";
-                }
+                else
+                    $fileCopyRight = "";
+                if ( $fileCopyRight != $databaseCopyright )
+                    $sqlUpdate .= ", Copyright = '$fileCopyRight'";
 
-                // ---------------------------------------------------------- keywords/tags
-                // more code to come
-                // pushToImage(fullFile, "?????", databaseKeyword$);
-                // ---------------------------------------------------------- image height
-                // ---------------------------------------------------------- image width
+                // --------------------------------- image height, image width
                 $imageheight = $fileExif[ "COMPUTED" ][ "Height" ];
                 $imagewidth = $fileExif[ "COMPUTED" ][ "Width" ];
                 if ( $databaseHeight != $imageheight )
-                    $sqlUpdate .= ", height = '$imageheight'";
+                    $sqlUpdate[ "height" ] = $imageheight;
                 if ( $databaseWidth != $imagewidth )
-                    $sqlUpdate .= ", width = '$imagewidth'";
+                    $sqlUpdate[ "width" ] = $imagewidth;
+                // -------------------------------------------- tags
+                if ( array_key_exists( "tags", $fileExif ) )
+                    $filetags = $fileExif[ "tags" ];
+                else
+                    $filetags = "";
+                if ( $filetags != $databaseKeyword )
+                    $sqlUpdate[ "photoKeyword" ] = $filetags;
+                /* -------------------------------------------- photographer
+                if ( array_key_exists( "photographer", $fileExif ) )
+                    $filephotographer = $fileExif[ "photographer" ];
+                else
+                    $filephotographer = "";
+                if ( $filephotographer != $databasephotographer )
+                    $sqlUpdate["photoKeyword"] = $filephotographer;
+                */
 
-                if ( strlen( $sqlUpdate ) > 0 ) { // now update the database
-                    $sqlUpdate = substr( $sqlUpdate, 1 );
-                    $sqlFinal = "Update $rrw_photos set $sqlUpdate 
-                        where filename = '$photoname'";
-                    $answer = $wpdbExtra->query( $sqlFinal );
-                    $msg .= "$answer &nbsp; $sqlFinal $eol";
+                if ( count( $sqlUpdate ) > 0 ) { // now update the database
+                    $answer = $wpdbExtra->update( $rrw_photos, $sqlUpdate,
+                        array( "filename" => $photoname ) );
+                    $msg .= "undated $answer record $eol";
                 }
             } // end of foreach record  
             $msg .= "processed $cntRecs photos $eol";
@@ -1130,12 +1147,11 @@ copyright, keywords, meta, rename $eol";
         // return the photo data in the formst YYYY-MM-DD
         // or return blank
         $pictureDate = ""; // date not present in photo
-        $exif = json_decode( $fileExif, true );
-        if ( !is_array( $exif ) )
+        if ( !is_array( $fileExif ) )
             return $pictureDate;
         foreach ( array( "datetimeoriginal", "datetimedigitized", "previewdatetime", "gpsdatestamp", "datetime" ) as $dateKey ) {
-            if ( array_key_exists( $dateKey, $exif ) ) {
-                $pictureDate = $exif[ $dateKey ];
+            if ( array_key_exists( $dateKey, $fileExif ) ) {
+                $pictureDate = $fileExif[ $dateKey ];
                 break;
             }
         }
@@ -1191,5 +1207,23 @@ copyright, keywords, meta, rename $eol";
         return "<a href='/display-one-photo?photoname=$photoname'
                                 target='one' > $photoname </a>";
     }
+ 
+    public static function getFileList( $dire ) {
+        // returns an array, key = filename, value= full path to file
+        $files = array();
+        $dh = opendir( $dire );
+        if ( !is_resource( $dh ) )
+            throw new Exception( "the directory '$dire' did not open" );
+        while ( $entry = readdir( $dh ) ) {
+            if ( false === $entry )
+                break;
+            if ( !is_file( "$dire/$entry" ) )
+                continue;
+            $files[ $entry ] = "$dire/$entry";
+        }
+        sort( $files );
+          return $files;
+    }
+
 } // end class
 ?>

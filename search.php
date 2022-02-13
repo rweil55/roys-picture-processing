@@ -83,7 +83,7 @@
     $msg = "";
 
     $table = new rrwDisplayTable;
-    $msg .= "<form action='search.php' method='post' id='form1' name='form1' >";
+    $msg .= "<form action='/search.php' method='post' id='form1' name='form1' >";
     // ------------------------------------------ trail selection
     $currentvalue = "Any Trail";
     $sql = "select '$currentvalue' trailName, '$currentvalue' union 

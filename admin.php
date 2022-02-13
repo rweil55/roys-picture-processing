@@ -11,8 +11,8 @@ class freewhilln_Administration_Pictures {
             return true;
         else
             return false;
-    } 
-  
+    }
+
     static public function administrationPicures( $attr ) {
         global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords, $rrw_trails;
         global $rrw_photographers;
@@ -27,13 +27,13 @@ class freewhilln_Administration_Pictures {
                 $displaykey = true;
             if ( "off" == $setdisplaykey )
                 $displaykey = false;
-            //  ------------------------------------------------------ various counts
+            //  ----------------------------------------------- various counts
             $sql = "select count(*) from $rrw_photos"; // total photos
             $msg .= ( "<!-- sql is $sql -->\n" );
             $photoRowCnt = $wpdbExtra->get_var( $sql );;
 
             $sql = "select count(*) from $rrw_photos 
-                    where not photostatus = 'use' "; // roral photos
+                    where not photostatus = 'use' "; // total rejected photos
             $msg .= ( "<!-- sql is $sql -->\n" );
             $photorejectCnt = $wpdbExtra->get_var( $sql );;
 
@@ -90,7 +90,7 @@ class freewhilln_Administration_Pictures {
             $msg .= "<!-- $sqlPhotog \n-->";
             $photogUsedCnt = $wpdbExtra->get_var( $sqlPhotog );
             $sqlAllPhotog = "select count(*) from $rrw_photographers";
-            $PhotogTotalCnt = $wpdbExtra->get_var($sqlAllPhotog);
+            $PhotogTotalCnt = $wpdbExtra->get_var( $sqlAllPhotog );
             $sqlKeywordDups = "select count(*), keyword from $rrw_keywords 
                 group by keyword, keywordFilename having count(*) > 1";
             $recKeywordDup = $wpdbExtra->get_resultsA( $sqlKeywordDups );
@@ -118,7 +118,9 @@ class freewhilln_Administration_Pictures {
 
 
             // --------------------------------------------------------- column 1
-            $msg .= "<table><tr><td style='vertical-align:top'>\n";
+            $msg .= "<table><tr>
+                    <td style='vertical-align:top'>\n
+                    <strong> Information Counts </strong>$eol";
             $msg .= "$photoRowCnt photos in the photo database$eol";
             $msg .= "$photorejectCnt photos rejected/duplicates $eol";
             $msg .= "$keyWithCnt distinct photos in the keyword database$eol";
@@ -132,10 +134,9 @@ class freewhilln_Administration_Pictures {
                     in the photo tables $eol";
             $msg .= "$cntMore approximately <a href='/fix?task=addlist' target='list'>
                         photos to be added</a> $eol";
-            $msg .= "$cntmissingExif with <a href='/fix/?task=badcopyright'
-                        target='list'> missing exif data</a> $eol";
             //  -----------------------------------------------   column 2
-            $msg .= "\n</td><td style='vertical-align:top'>\n";
+            $msg .= "\n</td><td style='vertical-align:top'>\n
+            <strong>Missing data counts</strong>$eol";
             $msg .= freewhilln_Administration_Pictures::EmptyCount( "trail_name" ) .
             " photos with <a href='/fix?task=notrailname'  target='list'>
                     no trail name</a> $eol";
@@ -158,6 +159,7 @@ class freewhilln_Administration_Pictures {
             ";
             //  -------------------------------------------  column 3
             $msg .= "</td><td style='vertical-align:top'>
+            <strong>Specilized search </strong>$eol 
 <form action='/displayphotos' method=POST>
 <input type='text' name='photo' id='searchphoto' value='' />photo<br />
 <input type='text' name='directory' id='searchdire' value='' />directory<br />
@@ -166,25 +168,26 @@ class freewhilln_Administration_Pictures {
 <input type='submit' name='submit' id='submit' value='Search any' />
 </form>";
             $msg .= "</td></tr></table>";
+            //  -------------------------------------------  next section
 
             $msg .= "
-To Modify/Add <a href='display_table_trail/' target='modify'>Trail Names</a><br />
-To Modify/Add <a href='display_table_photographer' target='modify'>
+To Modify/Add <a href='/display_table_trail/' target='modify'>Trail Names</a><br />
+To Modify/Add <a href='/display-photographer' target='modify'>
         Phographer Names</a><br />
 To Modify/Merge <a href='/fix?task=keywordform' target='modify'>Keywords</a>
 ";
             $today = date( "Y-m-d" );
             $msg .= "
-<form action='fix?task=bydate' method='post' >
+<form action='/fix?task=bydate' method='post' >
     Display all photos uploaded between
     <input type=text name=startdate value='1/1/2021' >
     and
     <input type=text name=enddate value='$today' >
     <input type=submit value='Go Display'>
 </form>
-<!-- Display keywords with the photos <a href='admin?setting=on' >On</a> &nbsp; 
-<a href='admin?setting=off' >Off</a> &nbsp;<br />-->
-<a href='notindatabase.php?doupdate=please'> 
+<!-- Display keywords with the photos <a href='/admin?setting=on' >On</a> &nbsp; 
+<a href='/admin?setting=off' >Off</a> &nbsp;<br />-->
+<a href='/notindatabase.php?doupdate=please'> 
         Add photos</a> that are not in the database
 (There are $photoRowCnt in database.)<br />
 <a href='notindatabase.php' target='list' >Show photos</a> list<br />
@@ -210,7 +213,7 @@ Too upload new photos.
     <!--    
  	<li>  A) Place big file in the c:\temp\pictures folder. </li>
     <li>  B) Run the local <a href='//127.0.0.1/shawweil/pictures/appendcopyright.pl' >append copyright routine</a>   </li> -->
-    <li> A) Upload the large format photo via the <a href='/submission.php' >submission form </a></li>
+    <li> A) Upload the large format photo via the <a href='/submission' >submission form </a></li>
     <li> B) Update the list of <a href='/notindatabase.php' target='list' >photos not in the database</a> </li>
     <li> C) Click the link to <a href='/search.php?submit=Photos+Without+any+keyword'
              target='list'> enter keywords, etc</a> </li>
@@ -233,6 +236,8 @@ Too upload new photos.
         $cnt = $wpdbExtra->get_var( $sql );;
         return $cnt;
     }
+   
+
 } //end Class 
 
 ?>

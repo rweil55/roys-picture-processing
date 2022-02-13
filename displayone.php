@@ -15,14 +15,14 @@ class freeWheeling_DisplayOne {
         $debugPath = false;
          
         try {
+            include "setConstants.php";
             $photoname = rrwUtil::fetchparameterString( "photoname", $attr );
             $photoname = str_replace("_tmb", "", $photoname);
              $photoname = str_replace(".jpg", "", $photoname);
             if ( $debugPath )$msg .= "**** 1 ******displayOne:photoPath $photoPath <br/>";
             //	if thumbs is true them display thumbnail, else display fill size
            if ( $debugPath )$msg .= " DisplayOne ($photoname )   ... ";
-            error_reporting( E_ALL | E_STRICT );
-            $current_user = wp_get_current_user();
+           $current_user = wp_get_current_user();
            if ( ! ( $current_user instanceof WP_User ) ) 
                $ser = "Guest";
             else
@@ -48,12 +48,13 @@ class freeWheeling_DisplayOne {
             $msg .= ( "\n<!-- sql is $sql -->\n" );
             $recset_query = $wpdbExtra->get_resultsA( $sql );
             if ( 1 != $wpdbExtra->num_rows ) {
-                $msg .= FreewheelingCommon::missingImageMessage( "in display a photo, looking for image $photoname.
-                    URL = " . home_url() );
+                $msg .= FreewheelingCommon::missingImageMessage( "E#856 
+                        in display a photo, looking for image $photoname.
+                        URL = " . home_url() );
                 return $msg;
             }
             $recset = $recset_query[ 0 ];
-            $photoname = $recset[ "filename" ];
+            $photoname = $recset[ "filename" ]; 
             $photographer = $recset[ "photographer" ];
             $direonp = $recset[ "DireOnP" ];
             $trail_Name = $recset[ "trail_Name" ];
@@ -61,8 +62,9 @@ class freeWheeling_DisplayOne {
             $htmlfileref1 = "$photoUrl/{$photoname}_cr.jpg";
             $fullfilename1 = "$photoPath/{$photoname}_cr.jpg";
             if ( !file_exists( $fullfilename1 ) ) {
-                $msg .= FreewheelingCommon::missingImageMessage( "in display a photo, looking for image file $fullfilename1.
-                    URL = " . home_url(), $photoname );
+                $msg .= FreewheelingCommon::missingImageMessage( "E#957 
+                        in display a photo, looking for image file $fullfilename1.
+                        URL = " . home_url(), $photoname );
                 return $msg;
 
             }
@@ -257,7 +259,11 @@ class freeWheeling_DisplayOne {
             "Photo Date: ", $recset[ "PhotoDate" ] );
         $msg .= rrwFormat::CellRow( "Photo Size ", $sizeDisplay );
         $msg .= "</table>";
-        $msg .= $recset[ "copyright" ] . $eol;
+        $copyRight = $recset[ "copyright" ];
+        if (empty($copyRight))
+            $copyRight = "Copyright missing from file - Assume all rights reserved
+                <a href='/author2copyright/?filename=$photoname' >.</a>";
+        $msg .=  "$copyRight $eol";
     
         # -------------------- keywords
         $msg .= "<strong>Existing keywords:</strong>\n";
@@ -275,7 +281,7 @@ class freeWheeling_DisplayOne {
         $msg .= "$eol<strong>Identifiable People:</strong>" . $recset[ "People" ] . "
 <div id='missedClassifi' onclick='openMissedClassifi(this,$photoname);'>
     if any of this infomation is incorrect or missing. Please
-    <a href='/webmaster-feedback'>let us know</a>$eol";
+    <a href='/webmaster-feedback'>let us knowE#862</a>$eol";
         return $msg;
 
     } // end display table
