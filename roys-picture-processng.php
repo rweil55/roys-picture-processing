@@ -11,7 +11,7 @@
  * Text Domain: Roys-picture-processng
  * Domain Path: /translation
  
-  * Version: 1.0.13
+  * Version: 1.0.14
 
  */
 // disable direct access
@@ -152,7 +152,7 @@ class FreewheelingCommon {
 
 function SetConstants( $whocalled ) {
     include "setConstants.php";
-}
+ }
 
 function rrw_getAccessID() {
     $current_user = wp_get_current_user();

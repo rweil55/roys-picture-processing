@@ -5,7 +5,7 @@ class_alias( "freewhilln_Administration_Pictures", "admin" );
 
 class freewhilln_Administration_Pictures {
 
-    static public function user_can_update_pics( $photoname ) {
+    static public function user_can_update_picsxx( $photoname ) {
         // more code to come to selectively allow edits
         if ( current_user_can( "edit_posts" ) )
             return true;
