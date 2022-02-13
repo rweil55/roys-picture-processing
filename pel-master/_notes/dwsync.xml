@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <dwsync>
-<file name="AUTHORS" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892327121144743" remote="132890555400000000" Dst="1" />
-<file name="CHANGELOG.md" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892327123862728" remote="132890555400000000" Dst="1" />
-<file name="COPYING" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892327124052611" remote="132890555400000000" Dst="1" />
-<file name="INSTALL.md" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892327124684986" remote="132890555400000000" Dst="1" />
-<file name="README.markdown" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892327126082258" remote="132890555400000000" Dst="1" />
-<file name="TODO" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892327128130865" remote="132890555400000000" Dst="1" />
-<file name="autoload.php" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892327130380371" remote="132890555400000000" Dst="1" />
-<file name="composer.json" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892327132163315" remote="132890555400000000" Dst="1" />
-<file name="make-image-test.php" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892327149848747" remote="132890555400000000" Dst="1" />
-<file name="make-release.sh" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892327151923061" remote="132890555400000000" Dst="1" />
-<file name="phpcs.xml" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892327153398495" remote="132890555400000000" Dst="1" />
-<file name="phpunit.xml" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892327155288893" remote="132890555400000000" Dst="1" />
-<file name="run-phpdoc.sh" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892327174264381" remote="132890555400000000" Dst="1" />
-<file name="update-locales.sh" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892327270855204" remote="132890555400000000" Dst="1" />
-<file name="update-pot.sh" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892327271944548" remote="132890555400000000" Dst="1" />
+<file name="AUTHORS" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892386031513964" remote="132890555400000000" Dst="1" />
+<file name="CHANGELOG.md" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892386031912896" remote="132890555400000000" Dst="1" />
+<file name="COPYING" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892386032192167" remote="132890555400000000" Dst="1" />
+<file name="INSTALL.md" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892386033229376" remote="132890555400000000" Dst="1" />
+<file name="README.markdown" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892386033009968" remote="132890555400000000" Dst="1" />
+<file name="TODO" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892386033748009" remote="132890555400000000" Dst="1" />
+<file name="autoload.php" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892386034296526" remote="132890555400000000" Dst="1" />
+<file name="composer.json" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892386034625650" remote="132890555400000000" Dst="1" />
+<file name="make-image-test.php" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892386038654862" remote="132890555400000000" Dst="1" />
+<file name="make-release.sh" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892386038914511" remote="132890555400000000" Dst="1" />
+<file name="phpcs.xml" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892386039811767" remote="132890555400000000" Dst="1" />
+<file name="phpunit.xml" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892386040500335" remote="132890555400000000" Dst="1" />
+<file name="run-phpdoc.sh" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892386044755817" remote="132890555400000000" Dst="1" />
+<file name="update-locales.sh" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892386120494483" remote="132890555400000000" Dst="1" />
+<file name="update-pot.sh" server="ftp.pillowandpedal.org//www-shaw-weil-pictures-dev/wp-content/plugins/roys-picture-processng/" local="132892386120375094" remote="132890555400000000" Dst="1" />
 </dwsync>
