@@ -61,11 +61,11 @@ class display_a_picture {
             $msg .= SetConstants( "Display a picture" );
             $debug = false;
             $photographer = $recset[ "photographer" ];
-            $traiil = $recset[ "trail_Name" ];
-            $Location = $recset[ "Location" ];
+            $traiil = $recset[ "trail_name" ];
+            $Location = $recset[ "location" ];
             $PhotoDate = $recset[ "PhotoDate" ];
             $photo_id = $recset[ "photo_id" ];
-            $People = $recset[ "People" ];
+            $People = $recset[ "people" ];
             $photoKeyword = $recset[ "photoKeyword" ];
             
             $keyword = explode(",", $photoKeyword);

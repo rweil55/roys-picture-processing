@@ -456,12 +456,12 @@ copyright, keywords, meta, rename $eol";
                         where searchname = '$filename'";
         $answer = $wpdbExtra->query( $sqlreject );
         $msg .= "$answer source record, &nbsp; ";
-      
+
         $filename1 = "$thumbPath/$filename" . "_tmb.jpg";
         $filename2 = "$photoPath/$filename" . "_cr.jpg";
         $filename3 = "$highresPath/$filename.jpg";
         $ToFilename3 = "$rejectPath/$filename.jpg";
-        
+
         if ( false ) {
             $msg .= "photo '$filename' deleted from database. $eol 
             Can be recovered by doing Add Photos, if not deleted from server$eol 
@@ -483,8 +483,8 @@ copyright, keywords, meta, rename $eol";
                 $msg .= "file $filename2 $notexist $eol";
             }
             if ( file_exists( $filename3 ) ) {
-               $msg .= "renameing $filename3 -- to -- , $ToFilename3 ";
-                $msg .= rename ($filename3, $ToFilename3 );
+                $msg .= "renameing $filename3 -- to -- , $ToFilename3 ";
+                $msg .= rename( $filename3, $ToFilename3 );
             } else {
                 $msg .= "file $filename3 $notexist $eol";
             }
@@ -1055,7 +1055,16 @@ copyright, keywords, meta, rename $eol";
         try {
             $sql = "SELECT * FROM $rrw_photos
                      order by filename limit 1 ";
-            $msg .= Do_forceDatabse2matchexif( $sql );
+            $recs = $wpdbExtra->get_resultsA( $sql );
+            $cntRecs = 0;
+            $cntPUShed = 0;
+            foreach ( $recs as $rec ) {
+                $msg .= Do_forceDatabse2matchexif( $rec );
+                // search through all photos
+                $cntRecs++;
+                if ( $cntRecs > 3 )
+                    break;
+            }
             return $msg;
         } // end try
         catch ( Exception $ex ) {
@@ -1064,83 +1073,94 @@ copyright, keywords, meta, rename $eol";
         return $msg;
     } // end function
 
-    public static function Do_forceDatabse2matchexif( $sql ) {
+    public static function Do_forceDatabse2matchexif( $rec ) {
         global $eol, $errorBeg, $errorEnd;
-        global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords;
+        global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords,
+        $rrw_photographers;
         global $photoPath, $thumbPath, $highresPath;
         $msg = "";
         try {
-            $recs = $wpdbExtra->get_resultsA( $sql );
-            $cntRecs = 0;
-            $cntPUShed = 0;
-            foreach ( $recs as $rec ) {
-                // search through all photos
-                $cntRecs++;
-                if ( $cntRecs > 3000 )
-                    break;
-                $photoname = $rec[ "filename" ];
-                $databaseCopyright = $rec[ "copyright" ];
-                $datebasePhotoDate = $rec[ "PhotoDate" ];
-                $databasePhotographer = $rec[ "photographer" ];
-                $databaseKeyword = $rec[ "photoKeyword" ];
-                $databaseHeight = $rec[ "height" ];
-                $databaseWidth = $rec[ "width" ];
-                $fullFile = "$photoPath/$photoname" . "_cr.jpg";
-                $sqlUpdate = array();
-                if ( !file_exists( $fullFile ) ) {
-                    $msg .= "$errorBeg E#448  file $fullFile not found $errorEnd";
-                    continue;
-                }
-                $msg .= "<a href='display-one-photo?photoname=$photoname' target='one'          >$photoname </a>, ";
-                // --------------------------------------------- exif
-                $fileExif = exif_read_data( $fullFile );
-                if ( empty( $fileExif ) || !is_array( $fileExif ) ) {
-                    $msg .= "$errorBeg #854 Fetch of exif 
-                                from $fullFile failed $errorEnd";
-                    continue;
-                }
-                //  --------------------------------------------- datetime
-                $FileDateTime = self::getPhotoDateTime( $fileExif );
-                if ( $datebasePhotoDate != $FileDateTime )
+            $photoname = $rec[ "filename" ];
+            $databaseCopyright = $rec[ "copyright" ];
+            $datebasePhotoDate = $rec[ "PhotoDate" ];
+            $databasePhotographer = $rec[ "photographer" ];
+            $databaseKeyword = $rec[ "photoKeyword" ];
+            $databaseHeight = $rec[ "height" ];
+            $databaseWidth = $rec[ "width" ];
+            $fullFile = "$photoPath/$photoname" . "_cr.jpg";
+            $sqlUpdate = array();
+            if ( !file_exists( $fullFile ) )
+                throw new Exception( "$errorBeg E#448  file $fullFile not found $errorEnd" );
+            $msg .= "<a href='display-one-photo?photoname=$photoname' target='one'          >$photoname </a>, ";
+            // --------------------------------------------- exif
+            // https://exiftool.org/TagNames/EXIF.html list most tags
+            $fileExif = exif_read_data( $fullFile );
+            if ( empty( $fileExif ) || !is_array( $fileExif ) )
+                throw new Exception( "$errorBeg #854 Fetch of exif 
+                                from $fullFile failed $errorEnd" );
+            $msg .= rrwUtil::print_r($fileExif, true, "$fullFile exif ");
+            //  --------------------------------------------- datetime
+            $FileDateTime = self::getPhotoDateTime( $fileExif );
+            if ( empty( $FileDateTime ) && empty( $datebasePhotoDate ) )
+            ; // do nothing
+            elseif ( empty( $FileDateTime ) && !empty( $datebasePhotoDate ) )
+                pushToImage( $photoname, "datetimedigitized", $datebasePhotoDate );
+            elseif ( empty( $FileDateTime ) && !empty( $datebasePhotoDate ) )
+                $sqlUpdate[ "PhotoDate" ] = $FileDateTime;
+            else { // both have data 
+                if ( $databasephotodate != $FileDateTime )
                     $sqlUpdate[ "PhotoDate" ] = $FileDateTime;
-                // ---------------------------- ------------------ copyright
-                if ( array_key_exists( "Copyright", $fileExif ) )
-                    $fileCopyRight = $fileExif[ "Copyright" ];
-                else
-                    $fileCopyRight = "";
-                if ( $fileCopyRight != $databaseCopyright )
-                    $sqlUpdate .= ", Copyright = '$fileCopyRight'";
+            }
+            // ---------------------------- ------------------ copyright
+            if ( array_key_exists( "Copyright", $fileExif ) )
+                $fileCopyRight = $fileExif[ "Copyright" ];
+            else
+                $fileCopyRight = "";
+            if ( empty( $databaseCopyright ) && !empty( $databasePhotographer ) ) {
+                $sqlDefault = "select copyrightDefault from $rrw_photographers
+                            where photograher = 'databasePhotographer' ";
+                $databaseCopyright = $wpdbExtra ->get_var( $sqlDefault );
+                $sqlUpdate[ "Copyright" ] = $databaseCopyright;
+            }
+            if ( $fileCopyRight != $databaseCopyright )
+                $sqlUpdate[ "Copyright" ] = $fileCopyRight;
 
-                // --------------------------------- image height, image width
-                $imageheight = $fileExif[ "COMPUTED" ][ "Height" ];
-                $imagewidth = $fileExif[ "COMPUTED" ][ "Width" ];
-                if ( $databaseHeight != $imageheight )
-                    $sqlUpdate[ "height" ] = $imageheight;
-                if ( $databaseWidth != $imagewidth )
-                    $sqlUpdate[ "width" ] = $imagewidth;
-                // -------------------------------------------- tags
-                if ( array_key_exists( "tags", $fileExif ) )
-                    $filetags = $fileExif[ "tags" ];
-                else
-                    $filetags = "";
-                if ( $filetags != $databaseKeyword )
-                    $sqlUpdate[ "photoKeyword" ] = $filetags;
-                /* -------------------------------------------- photographer
-                if ( array_key_exists( "photographer", $fileExif ) )
-                    $filephotographer = $fileExif[ "photographer" ];
-                else
-                    $filephotographer = "";
-                if ( $filephotographer != $databasephotographer )
-                    $sqlUpdate["photoKeyword"] = $filephotographer;
-                */
-
-                if ( count( $sqlUpdate ) > 0 ) { // now update the database
-                    $answer = $wpdbExtra->update( $rrw_photos, $sqlUpdate,
-                        array( "filename" => $photoname ) );
-                    $msg .= "undated $answer record $eol";
+            // --------------------------------- image height, image width
+            $imageheight = $fileExif[ "COMPUTED" ][ "Height" ];
+            $imagewidth = $fileExif[ "COMPUTED" ][ "Width" ];
+            if ( $databaseHeight != $imageheight )
+                $sqlUpdate[ "height" ] = $imageheight;
+            if ( $databaseWidth != $imagewidth )
+                $sqlUpdate[ "width" ] = $imagewidth;
+            // -------------------------------------------- keywodes
+            // more code needed here to get the file tags
+            if ( array_key_exists( "XPKeywords", $fileExif ) )
+                $fileKeywords = $fileExif[ "XPKeywords" ];
+            else
+                $fileKeywords = "";
+            if ( empty( $fileKeywords ) && empty( $databaseKeyword ) )
+            ; // do nothing
+            elseif ( empty( $fileKeywords ) && !empty( $databaseKeyword ) )
+                pushToImage( $photoname, "XPKeywords", $databaseKeyword );
+            elseif ( !empty( $fileKeywords ) && empty( $databaseKeyword ) ) {
+                $sqlUpdate[ "photoKeyword" ] = $fileKeywords;
+                // update keyword table
+            } else { // both have data 
+                if ( $databaseKeyword != $fileKeywords ) {
+                    $sqlUpdate[ "photoKeyword" ] = $fileKeywords;
+                    // update keyword table
                 }
-            } // end of foreach record  
-            $msg .= "processed $cntRecs photos $eol";
+            }
+
+            //  -------------------------------------------- photographer
+            //  exif has no place for photographer
+
+            if ( count( $sqlUpdate ) > 0 ) { // now update the database
+                $answer = $wpdbExtra->update( $rrw_photos, $sqlUpdate,
+                    array( "filename" => $photoname ) );
+                $msg .= "had " . count( $sqlUpdate ) .
+                " to be updated in $answer record $eol";
+            }
         } catch ( Exception $ex ) {
             $msg .= "$msg E#440 in exif " . $ex->getMessage();
         }
@@ -1156,7 +1176,14 @@ copyright, keywords, meta, rename $eol";
         $pictureDate = ""; // date not present in photo
         if ( !is_array( $fileExif ) )
             return $pictureDate;
-        foreach ( array( "datetimeoriginal", "datetimedigitized", "previewdatetime", "gpsdatestamp", "datetime" ) as $dateKey ) {
+        foreach ( array(    /* all times are strings  */
+            "datetimeoriginal", "DateTimeOriginal",
+            "datetimedigitized", 
+            "previewdatetime", "PreviewDateTime", 
+            "ModifyDate", "modifydate",
+     //       "gpstimestamp", "GPSTimeStamp", // rational64 number
+            "gpsdatestamp", "GPSDateStamp", 
+            "FileDateTime" ) as $dateKey ) {
             if ( array_key_exists( $dateKey, $fileExif ) ) {
                 $pictureDate = $fileExif[ $dateKey ];
                 break;
@@ -1165,10 +1192,12 @@ copyright, keywords, meta, rename $eol";
         if ( empty( $pictureDate ) )
             return $pictureDate;
         // now get the correct format
+        print "$pictureDate  --$dateKey $eol";
         $picdate = new DateTime( $pictureDate );
         $picFormated = $picdate->format( "Y-m-d" );
         print "$pictureDate goes to $picFormated $eol";
         return $picdate->format( "Y-m-d" );
+                // TimeZoneOffset
     } // end  getPhotoDateTime function
 
     private static function WipeDireOnP() {

@@ -35,7 +35,7 @@ class freeWheeling_DisplayOne {
             $photoname = $recset[ "filename" ];
             $photographer = $recset[ "photographer" ];
             $direonp = $recset[ "DireOnP" ];
-            $trail_Name = $recset[ "trail_Name" ];
+            $trail_name = $recset[ "trail_name" ];
             if ( $debugPath )$msg .= "**** 5 ******displayOne:photoUrl $photoUrlPath <br/>";
 
             if ( $debugPath )$msg .= "**** 3 ******displayOne:photoUrl $photoUrlPath <br/>";
@@ -86,13 +86,13 @@ class freeWheeling_DisplayOne {
                 exit( 0 );
             }
             #listbox2( $db, $table, $field, $oldvalue, $sortField )
-            listbox2( $photoDB, "${tableprefix}trails", "trailName", $trail_Name, "trailName" );
+            listbox2( $photoDB, "${tableprefix}trails", "trailName", $trail_name, "trailName" );
             listbox2( $photoDB, "${tableprefix}photographers", "photographer", $photographer, "photographer" );
             $msg .= "\n" . "Date:<input type='text' name='photodate' size='50' value=\"" . $rec_photo[ "PhotoDate" ] . "\">" . "\n" .
             "<br>Location: <input type='text' name='location' size='50' 
-        value=\"" . $rec_photo[ "Location" ] . "\">" . "\n" .
-            "<br>People: <input type='text' name='People' size='50' value=\"" . $rec_photo[ "People" ] . "\">" . "\n" .
-            "<br>Comments:<textarea name='comment' rows='5' cols='50' >" . $rec_photo[ "Comment" ] . "</textarea>\n" .
+        value=\"" . $rec_photo[ "location" ] . "\">" . "\n" .
+            "<br>People: <input type='text' name='People' size='50' value=\"" . $rec_photo[ "people" ] . "\">" . "\n" .
+            "<br>Comments:<textarea name='comment' rows='5' cols='50' >" . $rec_photo[ "comment" ] . "</textarea>\n" .
             "<br>Source Directory: $direonp  
         <a href='http://127.0.0.1/pict/sub.php?direname=$direonp' target='submit' >
         new picture file</a>
@@ -181,10 +181,10 @@ class freeWheeling_DisplayOne {
             File is <a href='$photoUrl/{$photoname}_cr.jpg' >\n" .
         $photoname . "</a></td></tr>\n";
 
-        if ( is_null( $recset[ "trail_Name" ] ) ) {
+        if ( is_null( $recset[ "trail_name" ] ) ) {
             $trailDisplay = "&lt;&lt;Missing&gt;&gt;";
         } else {
-            $trailDisplay = htmlspecialchars( $recset[ "trail_Name" ] );
+            $trailDisplay = htmlspecialchars( $recset[ "trail_name" ] );
             if ( is_null( $recset[ "photographer" ] ) ) {
                 $photographerDisplay = "&lt;&lt;Missing&gt;&gt;";
             } else {
@@ -194,11 +194,11 @@ class freeWheeling_DisplayOne {
         }
         $msg .= rrwFormat::CellRow( "Trail:", $trailDisplay,
             "Photographer:", $photographerDisplay );
-        $msg .= rrwFormat::CellRow( "Location:", $recset[ "Location" ],
+        $msg .= rrwFormat::CellRow( "Location:", $recset[ "location" ],
             "Photo Date :", $recset[ "PhotoDate" ] );
-        if ( ( strlen( $recset[ "Comment" ] ) > 1 ) ) {
+        if ( ( strlen( $recset[ "comment" ] ) > 1 ) ) {
 
-            $msg .= "<tr><td valign='top' colspan=5>" . $recset[ "Comment" ] . "</td></tr>\n";
+            $msg .= "<tr><td valign='top' colspan=5>" . $recset[ "comment" ] . "</td></tr>\n";
         }
 
         $msg .= "</table>";
@@ -212,7 +212,7 @@ class freeWheeling_DisplayOne {
             $msg .= "<a href='" . htmlspecialchars( $http ) .
             "' >" . $keyWordItem . ",</a>";
         }
-        $msg .= "$eol<strong>Identifiable People:</strong>" . $recset[ "People" ] . "
+        $msg .= "$eol<strong>Identifiable People:</strong>" . $recset[ "people" ] . "
     <div id='missedClassifi'  onclick='openMissedClassifi(this,$photoname);'>
     if any of thie infomation is incorrect or missing. Please let us know E#863,
     so we can fix it $eol";

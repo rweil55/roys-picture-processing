@@ -455,18 +455,20 @@ function readexifItem( $filename, $item, & $msg ) {
     ini_set( "display_errors", true );
     error_reporting( E_ALL | E_STRICT );
 
-    if ( !file_exists( $filename ) )
-        throw new Exception( "$mdg$errorBeg E#431 readexifItem: $filename 
-                    does not exists $errorEnd" );
+    if ( !file_exists( $filename ) ) {
+        $tr = rrwFormat::backtrace(5);
+        throw new Exception( "$msg $errorBeg E#431 readexifItem: $filename 
+                    does not exists $errorEnd $tr $eol" );
+    }
     if ( filesize( $filename > 10000 ) )
-        throw new Exception( "$mdg$errorBeg E#432 readexifItem: $filename 
+        throw new Exception( "$msg $errorBeg E#432 readexifItem: $filename 
                     is to big " . round( filesize( $filename ) / 1024, 0 ) . " $errorEnd" );
     $exif = exif_read_data( $filename );
     if ( array_key_exists( $item, $exif ) )
         return $exif[ $tem ];
     return "&lt;Missing&gt;";
 }
-
+/* reading item done by readexifItem (...)
 function readexifPhoto( $filename, $item, & $msg ) {
     global $eol, $errorBeg, $errorEnd;
     $debugExif = true;
@@ -513,15 +515,16 @@ function readexifPhoto( $filename, $item, & $msg ) {
 
     return $textValue;
 }
-
+*/
 
 function pushToImage( $filename, $item, $value ) {
     global $eol;
+    global $photoPath;
     $msg = "";
     $debugExif = true;
-    ini_set( "display_errors", true );
-    error_reporting( E_ALL | E_STRICT );
-
+ 
+    if (false === strpos($filename, "home"))
+        $filename = "$photoPath/$filename" . "_cr.jpg";
     ini_set( 'memory_limit', '32M' );
     if ( $debugExif )$msg .= "pushToImage( $filename, $item, $value ) $eol";
     $tmpfname = str_replace( "jpg", "_copyright.jpg", $filename );
@@ -575,7 +578,7 @@ function pushToImage( $filename, $item, $value ) {
     if ( is_null( $textThing ) ) {
         $msg .= "tag did not exist, creae a new one $eol";
         $type = findTagtype( $tag );
-        $msg .= println( "Adding new I$tag of type $type with value" );
+        $msg .= println( "Adding new I$tag of type $type with value $value" );
         switch ( $type ) {
             case "copyright":
                 $textThing = new PelEntryCopyright( $value );
@@ -591,6 +594,7 @@ function pushToImage( $filename, $item, $value ) {
                 break;
         }
         $ifd0->addEntry( $textThing );
+        $textValue = "NULL";
     } else {
         $textValue = $textThing->getValue();
         $msg .= rrwUtil::print_r( $textValue, true, "found old value of $item" );
@@ -613,7 +617,14 @@ function pushToImage( $filename, $item, $value ) {
         throw new Exception( " $msg E#461 old size is $sizeOld, new size is $sizeNew,
                 difference is more than 500 please check$eol file not written $eol" );
     }
-
+    $ii = strrpos($filename,"/");
+    $basename = substr($filename,$ii);
+    $itemname = str_replace(".jpg", "", $basename);
+    $itemname = str_replace("_cr", "", $itemname);
+    $itemname = str_replace("_tmb", "", $itemname);
+    $comment  = "$basename -- $textValue -> $value";
+    $msg .= rrwUtil::InsertIntoHistory($itemname, $comment);
+    
     return $msg;
 }
 

@@ -48,7 +48,7 @@ class rrwPicSubmission {
             }
 
             // You should also check filesize here.
-            if ( $_FILES[ 'inputfile' ][ 'size' ] > 1000000 ) {
+            if ( $_FILES[ 'inputfile' ][ 'size' ] > 10000000 ) {
                 throw new RuntimeException( 'Exceeded filesize limit.' );
             }
 
@@ -84,14 +84,10 @@ class rrwPicSubmission {
                 "filename" => $DataFilename,
             );
             $cntchaged = $wpdbExtra->replace( $rrw_photos, $Insert );
+            $msg .= rrwUtil::InsertIntoHistory( $DataFilename, "uploaded " );
+            $msg .= "File was uploaded successfully to $newfile $eol";
             $msg .= "lets process upload dire$eol";
-            $msg .= processuploadDire();
-
-            // get size and existing tags, copyright ...
-            $sql = "select * from $rrw_photos where filename = '$DataFilename'";
-            $msg .= freewheeling_fixit::Do_forceDatabse2matchexif( $sql );
-
-            $msg .= "File is uploaded successfully to $newfile $eol";
+            $msg .= processuploadDire::upload();
 
         } catch ( RuntimeException $e ) {
             $msg .= $errorBeg . $e->getMessage() . $errorEnd;
@@ -106,6 +102,12 @@ class rrwPicSubmission {
         $msg = "";
 
         $photographer = rrwUtil::fetchparameterString( "photographer" );
+        if (empty($photographer)) {
+            if (array_key_exists("photographer", $_COOKIE) && 
+                                 ! empty($_COOKIE["photographer"]))
+            $photographer = $_COOKIE["photographer"];
+        }
+        $_COOKIE["photographer"] = $photographer;
         $msg .= "<form  method='post' enctype=\"multipart/form-data\" > ";
         $sqltaker = "select photographer from $rrw_photographers
                     order by photographer";

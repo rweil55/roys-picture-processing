@@ -115,6 +115,9 @@ class freewhilln_Administration_Pictures {
                         on ph.photographer = pers.photographer
                         where pers.photographer is null or ph.photographer = ''";
             $cntmissingPhotog = $wpdbExtra->get_var( $sqlmissingPhotog );
+            $sqlKeyWordcnt = "select distinct keyword from $rrw_keywords";
+            $recKeywords = $wpdbExtra->get_resultsA($sqlKeyWordcnt);
+            $cntKeywords = $wpdbExtra->num_rows;
 
 
             // --------------------------------------------------------- column 1
@@ -134,6 +137,7 @@ class freewhilln_Administration_Pictures {
                     in the photo tables $eol";
             $msg .= "$cntMore approximately <a href='/fix?task=addlist' target='list'>
                         photos to be added</a> $eol";
+            $msg .= "$cntKeywords distinct keywords$eol";
             //  -----------------------------------------------   column 2
             $msg .= "\n</td><td style='vertical-align:top'>\n
             <strong>Missing data counts</strong>$eol";

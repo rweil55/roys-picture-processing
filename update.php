@@ -1,4 +1,4 @@
-<?php 
+<?php
 // called by the Commit all changes button via action='update'8/11
 require_once "rrw_util_inc.php";
 require_once "updatedatabase.php";
@@ -6,67 +6,57 @@ require_once "updatedatabase.php";
 class freeWheeling_DisplayUpdate {
 
     static public function DisplayUpdate( $attr ) {
-     global $eol, $errorBeg, $errorEnd;
-       global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_photographer, $rrw_keywords;
+        global $eol, $errorBeg, $errorEnd;
+        global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_photographer, $rrw_keywords;
         global $photoUrl, $photoPath, $thumbUrl, $thumbPath, $highresUrl, $highresPath;
-        $msg ="";
+        $msg = "";
         ini_set( "display_errors", true );
 
         try {
             $debug = false;
             //   if ( $debug ) print rrwUtil::print_r( $_POST, true, "Post input" );
             $photoname = rrwUtil::fetchparameterString( "photoname", $attr );
-            if (empty($photoname))
-                throw new Exception ("$msg $errorBeg Missing parameters to update routine $errorEnd");
+            if ( empty( $photoname ) )
+                throw new Exception( "$msg $errorBeg Missing parameters to update routine $errorEnd" );
             $trailName = rrwUtil::fetchparameterString( "trailName", $attr );
             $photographer = rrwUtil::fetchparameterString( "photographer", $attr );
-            $keywordcnt = rrwUtil::fetchparameterString( "keywordcnt", $attr );
-            $commalist = rrwUtil::fetchparameterString( "commalist", $attr );
+            $copyright = rrwUtil::fetchparameterString( "copyright", $attr );
             $location = rrwUtil::fetchparameterString( "location", $attr );
             $photodate = rrwUtil::fetchparameterString( "photodate", $attr );
             $uploaddate = rrwUtil::fetchparameterString( "uploaddate", $attr );
             $comment = rrwUtil::fetchparameterString( "comment", $attr );
-            $people = rrwUtil::fetchparameterString( "People", $attr );
+            $people = rrwUtil::fetchparameterString( "people", $attr );
             $direonp = rrwUtil::fetchparameterString( "direonp", $attr );
+            list( $msgTemp, $keyWordList ) = self::fetchParameterKeywordList( $attr );
+            $msg .= $msgTemp;
 
             if ( ( strlen( $location ) < 1 ) )
-                if ( ( strlen( $location ) < 1 ) )
-                    $location = "Unspecified";
+                $location = "Unspecified";
             if ( ( strlen( $photodate ) < 1 ) )
                 $photodate = "Unknown";
 
-            $sql = "update $rrw_photos set trail_Name = '$trailName', 
-                photographer = '$photographer', location = '$location',
-                photodate = '$photodate', comment ='$comment',
-                people ='$people', uploaddate = '$uploaddate'";
-            if ( !empty( $direonp ) ) {
-                $direonp = str_replace( "\\\\", "/", $direonp );
-                $sql .= ", direonp = '$direonp' ";
-            }
-            $sql .= " where filename = '$photoname' ";
-            if ( $debug ) print "$sql<br>$eol";
-            $wpdbExtra->query( $sql );
-            if ( $debug ) print "checking for $keywordcnt items<br>\r";
-            $keywordList = "";
-            $seperator = "";
-            $cnt = 0;
-            if ( $debug ) print rrwUtil::print_r( $_POST, true, "Post" );
-            for ( $jj = 0; $jj < $keywordcnt; $jj++ ) {
-                $cnt++;
-                if ( $cnt > 300 )
-                    break;
-                $key = "keyword$jj";
-                $keywordnew = rrwUtil::fetchparameterString( "$key" );
-                if ( empty( $keywordnew ) )
-                    continue;
-                $keywordList .= "$keywordnew,";
-            }
-            if ( $debug ) print "keywordList: $keywordList $eol";
-            if ( $debug ) print "commalist: $commalist $eol";
-            $msg .= keywordEmpty( $photoname );
-            $msg .= keywordCommaList( $keywordList, $photoname );
-            $msg .= keywordCommaList( $commalist, $photoname );
-            $msg .= keyword2photo( $photoname ); // musst be called agter updating keywords
+            $sqlOld = "select * from $rrw_photos where filename = '$photoname'";
+            $recsold = $wpdbExtra->get_resultsA( $sqlOld );
+            if ( 1 < $wpdbExtra->num_rows )
+                $msg .= "$errorBeg E#858 caution more than one photos 
+                            database. $errorEnd";
+            if ( 0 == $wpdbExtra->num_rows )
+                throw new Exception( "$errorBeg no photo redond found,
+                        can not update $errorEnd $sqlOld $eol" );
+            $recOld = $recsold[ 0 ];
+  //          $msg .= rrwUtil::print_r( $recOld, true, "rec old" );
+            $msg .= self::compare( "copyright", $copyright, $recOld );
+            $msg .= self::compare( "trail_name", $trailName, $recOld );
+            $msg .= self::compare( "photographer", $photographer, $recOld );
+            $msg .= self::compare( "location", $location, $recOld );
+            $msg .= self::compare( "comment", $comment, $recOld );
+            $msg .= self::compare( "people", $people, $recOld );
+            $msg .= self::compare( "comment", $comment, $recOld );
+            $msg .= self::compare( "DireOnP", $direonp, $recOld );
+
+            $msg .= self::compare( "PhotoDate", $photodate, $recOld );
+            $msg .= self::compare( "photoKeyword", $keyWordList, $recOld );
+
             if ( $debug ) {
                 $sqlCheck = "select * from $rrw_photos where filename ='$photoname'";
                 $rec = $wpdbExtra->get_resultsA( $qlChexk );
@@ -81,5 +71,55 @@ class freeWheeling_DisplayUpdate {
         return $msg;
 
     } // end DisplayUpdate
+
+    private static function fetchParameterKeywordList( $attr ) {
+        // keyword display list is numbered, return comma seperated list
+        $msg = "";
+        $debug = false;
+
+        // get the new keywords entered
+        $keywordcnt = rrwUtil::fetchparameterString( "keywordcnt", $attr );
+        $keywordList = rrwUtil::fetchparameterString( "commalist", $attr );
+        $cnt = 0;
+        if ( $debug )$msg .= rrwUtil::print_r( $_POST, true, "Post" );
+        for ( $jj = 0; $jj < $keywordcnt; $jj++ ) {
+            $cnt++;
+            if ( $cnt > 300 )
+                break;
+            $key = "keyword$jj";
+            $keywordnew = rrwUtil::fetchparameterString( "$key", $attr );
+            if ( empty( $keywordnew ) )
+                continue;
+            $keywordList .= "$keywordnew,";
+        }
+        if ( $debug )$msg .= "keywordList: $keywordList $eol";
+        if ( $debug )$msg .= "commalist: $commalist $eol";
+        return array( $msg, $keywordList );
+    }
+
+    private static function compare( $itemName, $newValue, $rec ) {
+        //compare old and new value, update if different
+        global $eol, $errorBeg, $errorEnd;
+        global $wpdbExtra, $rrw_photos, $rrw_photographer, $rrw_keywords;
+        $msg = "";
+
+        $oldValue = $rec[ $itemName ];
+        if ( $newValue == $oldValue )
+            return $msg; // no update neeeded
+        $photoname = $rec[ "filename" ];
+        $update = array( $itemName => $newValue );
+        $key = array( "filename" => $photoname );
+        $cnt = $wpdbExtra->update( $rrw_photos, $update, $key );
+        $hisCom = "$itemName -- oldValue=> $newValue";
+        $msg .= rrwUtil::InsertIntoHistory( $photoname, $hisCom );
+        if ( "copyright" == $itemName )
+            $msg .= pushToImage( $photoname, "copyright", $newValue );
+        elseif ( "photoKeyword" == $itemName )
+            $msg .= keyword2photo( $photoname );
+        else
+        ; // no specail shove to image
+
+
+    }
 } // end class freeWheeling_DisplayUpdate
 ?>
