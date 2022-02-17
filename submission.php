@@ -21,7 +21,8 @@ class rrwPicSubmission {
         $msg = "";
 
         try {
-            $msg .= rrwUtil::print_r( $_FILES, true, "Files" );
+            $debugsubmit = false;
+            if ($debugsubmit) $msg .= rrwUtil::print_r( $_FILES, true, "Files" );
             $photographer = rrwUtil::fetchparameterString( "photographer" );
             if ( empty( $photographer ) )
                 throw new RuntimeException( 'you must selct a photographer.' );
@@ -86,8 +87,8 @@ class rrwPicSubmission {
             $cntchaged = $wpdbExtra->replace( $rrw_photos, $Insert );
             $msg .= rrwUtil::InsertIntoHistory( $DataFilename, "uploaded " );
             $msg .= "File was uploaded successfully to $newfile $eol";
-            $msg .= "lets process upload dire$eol";
-            $msg .= processuploadDire::upload();
+            if ($debugsubmit) $msg .= "lets process upload dire$eol";
+            $msg .= uploadProcessDire::upload();
 
         } catch ( RuntimeException $e ) {
             $msg .= $errorBeg . $e->getMessage() . $errorEnd;
@@ -130,8 +131,7 @@ class rrwPicSubmission {
             return $msg;
         }
         $msg .= "<input type='file' name='inputfile' id='inputfile' />
-                &nbsp; <input type='checkbox' name='replace' id='replace'>
-                repace existing image</input>$eol$eol";
+                &nbsp; <input type='checkbox' name='replacephoto' id='replacephoto'> repace existing image</input>$eol$eol";
 
         $msg .= "<input type='submit' name='submit' id='submit'
         value='Upload the picture, Display it so I can select the tags' /> $eol

@@ -11,45 +11,49 @@
  * Text Domain: Roys-picture-processng
  * Domain Path: /translation
  
-  * Version: 1.0.14
+  * Version: 1.0.16
 
  */
 // disable direct access
 
-use lsolesen\pel\Pel;
-use lsolesen\pel\PelConvert;
-use lsolesen\pel\PelCanonMakerNotes;
-use lsolesen\pel\PelDataWindow;
-use lsolesen\pel\PelEntryAscii;
-use lsolesen\pel\PelEntryByte;
-use lsolesen\pel\PelEntryCopyright;
-use lsolesen\pel\PelEntryLong;
-use lsolesen\pel\PelEntryNumber;
-use lsolesen\pel\PelEntryRational;
-use lsolesen\pel\PelEntryShort;
-use lsolesen\pel\PelEntrySRational;
-use lsolesen\pel\PelEntrySLong;
-use lsolesen\pel\PelEntryTime;
+ini_set("display_errors", true);
+error_reporting(E_ALL | E_STRICT);
+
+
+use lsolesen\ pel\ Pel;
+use lsolesen\ pel\ PelConvert;
+use lsolesen\ pel\ PelCanonMakerNotes;
+use lsolesen\ pel\ PelDataWindow;
+use lsolesen\ pel\ PelEntryAscii;
+use lsolesen\ pel\ PelEntryByte;
+use lsolesen\ pel\ PelEntryCopyright;
+use lsolesen\ pel\ PelEntryLong;
+use lsolesen\ pel\ PelEntryNumber;
+use lsolesen\ pel\ PelEntryRational;
+use lsolesen\ pel\ PelEntryShort;
+use lsolesen\ pel\ PelEntrySRational;
+use lsolesen\ pel\ PelEntrySLong;
+use lsolesen\ pel\ PelEntryTime;
 //use lsolesen\pel\PelEntryUndefined;
-use lsolesen\pel\PelEntryUserComment;
-use lsolesen\pel\PelEntryUserCopyright;
-use lsolesen\pel\PelEntryVersion;
-use lsolesen\pel\PelEntryWindowsString;
-use lsolesen\pel\PelEntryUndefined;
-use lsolesen\pel\PelExif;
-use lsolesen\pel\PelFormat;
-use lsolesen\pel\PelIfd;
-use lsolesen\pel\PelIfdException;
-use lsolesen\pel\PelIllegalFormatException;
-use lsolesen\pel\PelInvalidDataException;
-use lsolesen\pel\PelJpeg;
-use lsolesen\pel\PelJpegComment;
-use lsolesen\pel\PelJpegContent;
-use lsolesen\pel\PelJpegInvalidMarkerException;
-use lsolesen\pel\PelJpegMarker;
-use lsolesen\pel\PelMakerNotes;
-use lsolesen\pel\PelTag;
-use lsolesen\pel\PelTiff;
+use lsolesen\ pel\ PelEntryUserComment;
+use lsolesen\ pel\ PelEntryUserCopyright;
+use lsolesen\ pel\ PelEntryVersion;
+use lsolesen\ pel\ PelEntryWindowsString;
+use lsolesen\ pel\ PelEntryUndefined;
+use lsolesen\ pel\ PelExif;
+use lsolesen\ pel\ PelFormat;
+use lsolesen\ pel\ PelIfd;
+use lsolesen\ pel\ PelIfdException;
+use lsolesen\ pel\ PelIllegalFormatException;
+use lsolesen\ pel\ PelInvalidDataException;
+use lsolesen\ pel\ PelJpeg;
+use lsolesen\ pel\ PelJpegComment;
+use lsolesen\ pel\ PelJpegContent;
+use lsolesen\ pel\ PelJpegInvalidMarkerException;
+use lsolesen\ pel\ PelJpegMarker;
+use lsolesen\ pel\ PelMakerNotes;
+use lsolesen\ pel\ PelTag;
+use lsolesen\ pel\ PelTiff;
 
 ini_set( "display_errors", true );
 $pel = "/home/pillowan//www-shaw-weil-pictures/wp-content/plugins" .
@@ -97,15 +101,17 @@ require_once "rrw_util_inc.php";
 require_once "display_stuff_class.php";
 require_once "display_tables_class.php";
 // picture routines
+
 require_once "admin.php";
 require_once "displayone.php";
 require_once "DisplayPhotogaphers.php";
 require_once "displayphotos.php";
 require_once "DisplayTrails.php";
 require_once "fix.php";
+require_once "keywordHandling.php";
 require_once "submission.php";
 require_once "update.php";
-require_once "uploadphoto.php";
+require_once "uploadProcessDire.php";
 
 class FreewheelingCommon {
     public static function missingImageMessage( $from, $photoname = "" ) {
@@ -152,7 +158,7 @@ class FreewheelingCommon {
 
 function SetConstants( $whocalled ) {
     include "setConstants.php";
- }
+}
 
 function rrw_getAccessID() {
     $current_user = wp_get_current_user();
@@ -456,7 +462,7 @@ function readexifItem( $filename, $item, & $msg ) {
     error_reporting( E_ALL | E_STRICT );
 
     if ( !file_exists( $filename ) ) {
-        $tr = rrwFormat::backtrace(5);
+        $tr = rrwFormat::backtrace( 5 );
         throw new Exception( "$msg $errorBeg E#431 readexifItem: $filename 
                     does not exists $errorEnd $tr $eol" );
     }
@@ -521,12 +527,12 @@ function pushToImage( $filename, $item, $value ) {
     global $eol;
     global $photoPath;
     $msg = "";
-    $debugExif = true;
- 
-    if (false === strpos($filename, "home"))
+    $debugExif = false;
+
+    if ( false === strpos( $filename, "home" ) )
         $filename = "$photoPath/$filename" . "_cr.jpg";
     ini_set( 'memory_limit', '32M' );
-    if ( $debugExif )$msg .= "pushToImage( $filename, $item, $value ) $eol";
+    if ( $debugExif )$msg .= "( $filename, $item, $value ) $eol";
     $tmpfname = str_replace( "jpg", "_copyright.jpg", $filename );
     if ( $debugExif )$msg .= "tempfile is $tmpfname $eol";
     $contents = file_get_contents( $filename );
@@ -545,7 +551,7 @@ function pushToImage( $filename, $item, $value ) {
     if ( $debugExif )$msg .= "exif isloaded $eol";
     //  return $msg;
     if ( $exif == null ) {
-        $msg .= println( 'No APP1 section found, added new.' );
+        if ( $debugExif )$msg .= println( 'No APP1 section found, added new.' );
         $exif = new PelExif(); // create on
         $jpeg->setExif( $exif ); // insert it into the memory version
 
@@ -553,7 +559,7 @@ function pushToImage( $filename, $item, $value ) {
         $tiff = new PelTiff();
         $exif->setTiff( $tiff );
     } else {
-        $msg .= println( 'Found existing APP1 section.' );
+        if ( $debugExif )$msg .= println( 'Found existing APP1 section.' );
         $tiff = $exif->getTiff();
     }
     /*
@@ -567,18 +573,18 @@ function pushToImage( $filename, $item, $value ) {
     $ifd0 = $tiff->getIfd();
 
     if ( $ifd0 == null ) {
-        $msg .= println( 'No IFD found, adding new.' );
+        if ( $debugExif )$msg .= println( 'No IFD found, adding new.' );
         $ifd0 = new PelIfd( PelIfd::IFD0 );
         $tiff->setIfd( $ifd0 );
     }
-    $msg .= "That compleates setup, get/adjust the data $eol ";
+    if ( $debugExif )$msg .= "That compleates setup, get/adjust the data $eol ";
 
     $tag = convertText2EeixID( $item ); // item name into tag integer
     $textThing = $ifd0->getEntry( $tag );
     if ( is_null( $textThing ) ) {
         $msg .= "tag did not exist, creae a new one $eol";
         $type = findTagtype( $tag );
-        $msg .= println( "Adding new I$tag of type $type with value $value" );
+        if ( $debugExif )$msg .= println( "Adding new I$tag of type $type with value $value" );
         switch ( $type ) {
             case "copyright":
                 $textThing = new PelEntryCopyright( $value );
@@ -590,18 +596,18 @@ function pushToImage( $filename, $item, $value ) {
                 $textThing = new PelEntryByte( $tag, $value );
                 break;
             default:
-                throw new Exception( "E#488 Unknown findtagtype for $tag" ); 
+                throw new Exception( "E#488 Unknown findtagtype for $tag" );
                 break;
         }
         $ifd0->addEntry( $textThing );
         $textValue = "NULL";
     } else {
         $textValue = $textThing->getValue();
-        $msg .= rrwUtil::print_r( $textValue, true, "found old value of $item" );
+        if ( $debugExif ) $msg .= rrwUtil::print_r( $textValue, true, "found old value of $item" );
         $textThing->setValue( $value );
-        $msg .= "setting new value -- $value $eol";
+        if ( $debugExif )$msg .= "setting new value -- $value $eol";
     }
-    $msg .= println( "Writing file $tmpfname" );
+    if ( $debugExif )$msg .= println( "Writing file $tmpfname" );
     $fileInMemory->saveFile( $tmpfname );
     $sizeOld = filesize( $filename );
     $sizeNew = filesize( $tmpfname );
@@ -610,21 +616,23 @@ function pushToImage( $filename, $item, $value ) {
         unlink( $filename );
         rename( $tmpfname, $filename );
     } else {
-        if (true) {
+        if ( true ) {
             unlink( $filename );
-            rename( $tmpfname, $filename );            
+            rename( $tmpfname, $filename );
         }
         throw new Exception( " $msg E#461 old size is $sizeOld, new size is $sizeNew,
                 difference is more than 500 please check$eol file not written $eol" );
     }
-    $ii = strrpos($filename,"/");
-    $basename = substr($filename,$ii);
-    $itemname = str_replace(".jpg", "", $basename);
-    $itemname = str_replace("_cr", "", $itemname);
-    $itemname = str_replace("_tmb", "", $itemname);
-    $comment  = "$basename -- $textValue -> $value";
-    $msg .= rrwUtil::InsertIntoHistory($itemname, $comment);
-    
+    $ii = strrpos( $filename, "/" );
+    $basename = substr( $filename, $ii );
+    $itemname = str_replace( ".jpg", "", $basename );
+    $itemname = str_replace( "_cr", "", $itemname );
+    $itemname = str_replace( "_tmb", "", $itemname );
+    // copyright and comment may be stored as an arrray
+    $oldValue = rrwUtil::print_r( $textValue, true, "old value" );
+    $comment = "$basename -- $oldValue -> $value";
+    $msg .= rrwUtil::InsertIntoHistory( $itemname, $comment );
+
     return $msg;
 }
 
@@ -709,7 +717,6 @@ function println( $fmt, $value = "" ) {
     return $fmt;
     if ( !empty( $value ) )
         $fmt = sprintf( $fmt, $value );
-    print " $fmt $eol";
     return "$fmt $eol";
 }
 
@@ -724,9 +731,10 @@ function rrwPHPel( $argv ) {
     error_reporting( E_ALL | E_STRICT );
 
     $msg = "";
+    $debug = false;
     try {
         $msg .= SetConstants( "testPel" );
-        $msg .= println( "--------------------- emter rrwPHPel $eol" );
+        if ( $debugExif )$msg .= println( "--------------------- emter rrwPHPel $eol" );
 
         $prog = array_shift( $argv );
         $error = false;
@@ -764,19 +772,19 @@ function rrwPHPel( $argv ) {
          * line arguments.
          */
         if ( $error ) {
-            $msg .= println( 'Usage: %s [-d] <input> <output> [desc]', $prog );
-            $msg .= println( 'Optional arguments:' );
-            $msg .= println( '  -d    turn debug output on.' );
-            $msg .= println( '  desc  the new description.' );
-            $msg .= println( 'Mandatory arguments:' );
-            $msg .= println( '  input   the input file, a JPEG or TIFF image.' );
-            $msg .= println( '  output  the output file for the changed image.' );
+            if ( $debug )$msg .= println( 'Usage: %s [-d] <input> <output> [desc]', $prog );
+            if ( $debug )$msg .= println( 'Optional arguments:' );
+            if ( $debug )$msg .= println( '  -d    turn debug output on.' );
+            if ( $debug )$msg .= println( '  desc  the new description.' );
+            if ( $debug )$msg .= println( 'Mandatory arguments:' );
+            if ( $debug )$msg .= println( '  input   the input file, a JPEG or TIFF image.' );
+            if ( $debug )$msg .= println( '  output  the output file for the changed image.' );
             return $msg;
         }
 
         /* Any remaining arguments are considered the new description. */
         $description = implode( ' ', $argv );
-        $msg .= println( "the new desrription '$description'$eol" );
+        if ( $debug )$msg .= println( "the new desrription '$description'$eol" );
 
         /*
          * We typically need lots of RAM to parse TIFF images since they tend
@@ -790,9 +798,9 @@ function rrwPHPel( $argv ) {
          * instead of using one of the loadFile methods on PelJpeg or PelTiff
          * we store the data in a PelDataWindow.
          */
-        $msg .= println( 'Reading file "%s".', $input );
+        if ( $debug )$msg .= println( 'Reading file "%s".', $input );
         $buffer = file_get_contents( $input );
-        $msg .= println( "got " . strlen( $buffer ) . "bytes from the files" );
+        if ( $debug )$msg .= println( "got " . strlen( $buffer ) . "bytes from the files" );
         $data = new PelDataWindow( $buffer );
 
         /*
@@ -828,11 +836,10 @@ function rrwPHPel( $argv ) {
                  * Ups, there is no APP1 section in the JPEG file. This is where
                  * the Exif data should be.
                  */
-                $msg .= println( 'No APP1 section found, added new.' );
+                if ( $debug )$msg .= println( 'No APP1 section found, added new.' );
 
                 /*
-                 * In this case we simply create a new APP1 section (a PelExif
-                 * object) and adds it to the PelJpeg object.
+                 * In this case we simply create a new APP1 section (a PelExif * object) and adds it to the PelJpeg object.
                  */
                 $exif = new PelExif();
                 $jpeg->setExif( $exif );
@@ -845,7 +852,7 @@ function rrwPHPel( $argv ) {
                  * Surprice, surprice: Exif data is really just TIFF data! So we
                  * extract the PelTiff object for later use.
                  */
-                $msg .= println( 'Found existing APP1 section.' );
+                if ( $debug )$msg .= println( 'Found existing APP1 section.' );
                 $tiff = $exif->getTiff();
             }
         } elseif ( PelTiff::isValid( $data ) ) {
@@ -862,7 +869,7 @@ function rrwPHPel( $argv ) {
                  * The data was not recognized as either JPEG or TIFF data.
                  * Complain loudly, dump the first 16 bytes, and exit.
                  */
-                $msg .= println( 'Unrecognized image format! The first 16 bytes follow:', "" );
+                if ( $debug )$msg .= println( 'Unrecognized image format! The first 16 bytes follow:', "" );
                 PelConvert::bytesToDump( $data->getBytes( 0, 16 ) );
                 return $msg;;
             }
@@ -883,35 +890,37 @@ function rrwPHPel( $argv ) {
              * PelTiff object was inserted by the code above. But this is no
              * problem, we just create and inserts an empty PelIfd object.
              */
-            $msg .= println( 'No IFD found, adding new.' );
+            if ( $debug )$msg .= println( 'No IFD found, adding new.' );
             $ifd0 = new PelIfd( PelIfd::IFD0 );
             $tiff->setIfd( $ifd0 );
         }
 
-        $msg .= println( "That compleates setup, get/adjust the data $eol " );
+        if ( $debug )$msg .= println( "That compleates setup, get/adjust the data $eol " );
         /*
          * Each entry in an IFD is identified with a tag. This will load the
-         * ImageDescription entry if it is present. If the IFD does not
+         * ImageDescription entry if it is present. if the IFD does not
          * contain such an entry, null will be returned.
          */
-        $msg .= println( "  -------------------------------- $eol" );
+        if ( $debug )$msg .= println( "  -------------------------------- $eol" );
         $textList = array( "copyright", "desc", "date", "keyword" ); // "width", "height");
         foreach ( $textList as $text ) {
             $tagL = convertText2EeixID( $text );
             $textThing = $ifd0->getEntry( $tagL );
             if ( is_null( $textThing ) ) {
-                $msg .= println( "did not find an entry  for $text" );
+                if ( $debug )$msg .= println( "did not find an entry  for $text" );
             } else {
                 $textValue = $textThing->getValue();
-                $msg .= println( $textThing . rrwUtil::print_r( $textValue, true, "$text" ) );
+                if ( $debug )$msg .= println( $textThing . rrwUtil::print_r( $textValue, true, "$text" ) );
             }
         }
-        $msg .= println( "  -------------------------------- $eol" );
+        if ( $debug )
+            if ( $debug )$msg .= println( "  -------------------------------- $eol" );
 
         $desc = $ifd0->getEntry( $tag );
-        $msg .= println( "for $tag found the $desc $eol " );
-        //   return $msg;
-        //     We need to check if the image already had a description stored. 
+        if ( $debug )
+            if ( $debug )$msg .= println( "for $tag found the $desc $eol " );
+            //   return $msg;
+            //     We need to check if the image already had a description stored. 
         if ( $desc == null ) {
             //        The was no description in the image. 
 
@@ -920,7 +929,7 @@ function rrwPHPel( $argv ) {
             //   * the description. The constructor for PelEntryAscii needs to know
             //   * the tag and contents of the new entry.
             $type = findTagtype( $tag );
-            $msg .= println( "Adding new I$tag of type $type with $description" );
+            if ( $debug )$msg .= println( "Adding new I$tag of type $type with $description" );
             switch ( $type ) {
                 case "copyright":
                     $desc = new PelEntryCopyright( description );
@@ -947,8 +956,8 @@ function rrwPHPel( $argv ) {
         } else {
             //     An old description was found in the image. 
             $oldDescription = rrwUtil::print_r( $desc->getValue(), true, "existng" );
-            $msg .= println( "IMAGE_DESCRIPTION entry from $oldDescription" );
-            $msg .= println( "IMAGE_DESCRIPTION entry TO &nbsp; " . $description );
+            if ( $debug )$msg .= println( "IMAGE_DESCRIPTION entry from $oldDescription" );
+            if ( $debug )$msg .= println( "IMAGE_DESCRIPTION entry TO &nbsp; " . $description );
 
             // The description is simply updated with the new description. 
 
@@ -960,10 +969,10 @@ function rrwPHPel( $argv ) {
          * bytes with the getBytes method, and saving this in the output file
          * completes the script.
          */
-        $msg .= println( 'Writing file "%s".', $output );
+        if ( $debug )$msg .= println( 'Writing file "%s".', $output );
         $file->saveFile( $output );
-        $msg .= println( "finished with test Pel $eol" );
-        $msg .= println( "  -------------------------------- end PHPel  $eol" );
+        if ( $debug )$msg .= println( "finished with test Pel $eol" );
+        if ( $debug )$msg .= println( "  -------------------------------- end PHPel  $eol" );
 
     } catch ( Exception $ex ) {
         $msg .= "E#400 xxx catch "; // . $ex->get_message();
@@ -1155,18 +1164,18 @@ function reada3a4( $attr ) {
 }
 // picture tasks
 SetConstants( "by the short codes" );
-add_shortcode( "author2copyright", array( "freewheeling_fixit", "Author2Copyright") );
+add_shortcode( "author2copyright", array( "freewheeling_fixit", "Author2Copyright" ) );
 add_shortcode( "adminpictures", array( "freewhilln_Administration_Pictures",
     "administrationPicures" ) );
 add_shortcode( "displayphotos", array( "freewheeling_displayPhotos", "displayPhotos" ) );
 add_shortcode( "display-one-photo",
-              array( "freeWheeling_DisplayOne", "DisplayOne" ) );
+    array( "freeWheeling_DisplayOne", "DisplayOne" ) );
 add_shortcode( "display-photographer", array( "DisplayPhotographers", "Display" ) );
 add_shortcode( "displaytrail", array( "DisplayTrails", "Display" ) );
 add_shortcode( "displayupdate", array( "freeWheeling_DisplayUpdate", "DisplayUpdate" ) );
 add_shortcode( "fix", array( "freewheeling_fixit", "fit_it" ) );
 add_shortcode( "rrwPicSubmission", array( "rrwPicSubmission", "showForm" ) );
-add_shortcode( "upload", "processuploadDire" );
+add_shortcode( "upload", "uploadProcessDire" );
 
 add_shortcode( "insertdire", "insertdire" );
 add_shortcode( "perl", "testperl" );

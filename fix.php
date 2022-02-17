@@ -1,7 +1,7 @@
 <?php
 
-require_once "rrw_util_inc.php";
-require_once "display_tables_inc.php";
+//require_once "rrw_util_inc.php";
+//require_once "display_tables_inc.php";
 
 if ( class_exists( "freewheeling_fixit" ) )
     return;
@@ -14,16 +14,19 @@ class freewheeling_fixit {
         $msg = "";
 
         try {
-            $msg .= "fix routine $eol";
             $msg .= SetConstants( "updateDiretoryOnFileMatch" );
             $task = rrwUtil::fetchparameterString( "task" );
             switch ( $task ) { // those tasks which do not reqire a line in
                 case "jsondate":
                     $msg .= freewheeling_fixit::jsonDate();
                     return $msg;
+                case "listing":
+                    $msg .= freewheeling_fixit::listing();
+                    return $msg;
+                default:
+                    break;
             }
-
-            $msg .= self::checkForLogIn();
+            $msg .= self::checkForLogIn( "fix task '$task' " );
 
             switch ( $task ) {
                 case "add":
@@ -81,25 +84,8 @@ class freewheeling_fixit {
                 case "nocopyright":
                     $msg .= freewheeling_fixit::noCopyright();
                     break;
-                case "nodate":
-                    $msg .= freewheeling_fixit::noDate();
-                    break;
-                case "nokey":
-                    $msg .= freewheeling_fixit::noKeyWords();
-                    break;
-                case "nophotog":
-                    $msg .= freewheeling_fixit::missingPhotographer();
-                    break;
-                case "nosource":
-                    $msg .= freewheeling_fixit::noSource( "direonp",
-                        " source directory" );
-                    break;
                 case "notbike":
                     $msg .= freewheeling_fixit::setUseStatus( "notbike" );
-                    break;
-                case "notrailname":
-                    $msg .= freewheeling_fixit::nosource( "trail_name",
-                        " trail name" );
                     break;
                 case "photog":
                     $msg .= freewheeling_fixit::DisplayPhotogaphers( $attr );
@@ -130,7 +116,7 @@ copyright, keywords, meta, rename $eol";
                     break;
             }
         } catch ( Exception $ex ) {
-            $msg .= "$errorBeg E#495 fix routtine " . $ex->getMessage() . $errorEnd;
+            $msg .= "$errorBeg E#495 " . $ex->getMessage() . $errorEnd;
         }
         return $msg;
     }
@@ -572,49 +558,6 @@ copyright, keywords, meta, rename $eol";
         return $msg;
     }
 
-    private static function jsonDate() {
-        global $eol;
-        global $wpdbExtra, $rrw_photos, $rrw_photographers;
-        $msg = "";
-        $sql = "select filename, uploaddate from $rrw_photos ";
-        $msg .= "$sql $eol";
-
-        $rows = $wpdbExtra->get_resultsA( $sql );
-        $cnt = count( $rows );
-        $msg .= "There are $cnt photos with date. See this json file for information. ";
-        $msg .= json_encode( $rows );
-        return $msg;
-    }
-
-    private static function jsonReject() {
-        global $eol;
-        global $wpdbExtra, $rrw_source;
-        $msg = "";
-        $sql = "select searchname, sourcestatus from $rrw_source ";
-        $msg .= "$sql $eol";
-
-        $rows = $wpdbExtra->get_resultsA( $sql );
-        $cnt = count( $rows );
-        $msg .= "There are $cnt photos with date. ";
-        $msg .= json_encode( $rows );
-        return $msg;
-    }
-
-    private static function missingPhotographer() {
-        global $eol;
-        global $photoDB, $rrw_photos, $rrw_photographers;
-        $msg = "";
-
-        $sql = "select '' direonp, filename filename, photostatus from $rrw_photos
-                where photographer not in 
-                (select photographer from $rrw_photographers)
-                order by filename "; // photographer
-        $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
-            "photos without a photographer" );
-        return $msg;
-    }
-
-
     private static function byDate() { //get collection of photos between two dates
         global $eol;
         global $photoDB, $rrw_photos;
@@ -642,19 +585,7 @@ copyright, keywords, meta, rename $eol";
         return $msg;
 
     }
-    private static function noCopyright() {
-        global $eol;
-        global $rrw_photos;
-        $msg = "";
 
-        $sql = "select filename, trail_name, photoDate, photostatus
-            from $rrw_photos where copyright = '' ";
-        $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
-            "photos wih no copyright" );
-        $msg .= "Run <a href='/fix/?task=exif' target='admin'>Update copyright</a> $eol";
-        return $msg;
-
-    }
     private static function fileLike() {
         global $eol;
         global $photoDB, $rrw_source;
@@ -671,54 +602,19 @@ copyright, keywords, meta, rename $eol";
         return $msg;
     }
 
-    private static function noDate() {
-        global $eol;
-        global $wpdbExtra, $rrw_photos;
-        global $photoPath;
-        $msg = "";
-
-        $sql = "select filename, trail_name, photoDate
-            from $rrw_photos where photoDate = '' or photoDate = 'Unknown' ";
-        $recDates = $wpdbExtra->get_resultsA( $sql );
-        $cnt = 0;
-        $msg .= "<table>";
-        $msg .= rrwFormat::HeaderRow( "Photo", "Trail", "Database Date", "exif date" );
-        foreach ( $recDates as $recDate ) {
-            $cnt++;
-            if ( $cnt > 5000 )
-                break;
-            $photoName = $recDate[ "filename" ];
-            $photoDate = $recDate[ "photoDate" ];
-            $trailname = $recDate[ "trail_name" ];
-            $fullFilename = "$photoPath/$photoName" . "_cr.jpg";
-            $value = readexifItem( $fullFilename, "datetimeoriginal", $msg );
-            $photoDisplay = freewheeling_fixit::formatPhotoLink( $photoName );
-            $msg .= rrwFormat::CellRow( $photoDisplay, $trailname, $photoDate, $value );
-        }
-
-
-        $msg .= "</table>\n";
-        return $msg;
-    }
-    private static function noKeyWords() {
+    
+    private static function listing() {
         global $eol;
         global $rrw_photos;
         $msg = "";
-        $sql = "select filename, trail_name, photographer, photostatus
-            from $rrw_photos where photoKeyword = '' ";
-        $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
-            "photos wih no keywords" );
-        return $msg;
-    }
-
-    private static function noSource( $item, $description ) {
-        global $eol;
-        global $rrw_photos;
-        $msg = "";
+        $sqlWhere = rrwUtil::fetchparameterString( "where" );
+        $sqlWhere = str_replace( "xxy", "'", $sqlWhere );
+        $description = rrwUtil::fetchparameterString( "description" );
         //  item is  trail_name, direonp
-        $sql = "select filename, trail_name, photographer, $item, photostatus 
+        $sql = "select filename, trail_name, photographer, photostatus, 
+                        photokeyword
                 from $rrw_photos 
-                where $item = ''  order by trail_name "; // missng source
+                where $sqlWhere  order by filename "; // missng source
         $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
             "photos wih no $description" );
         return $msg;
@@ -734,7 +630,7 @@ copyright, keywords, meta, rename $eol";
             print( "<!-- sql request is \n\n$sql\n\n -->\n" );
             $missngsource = $wpdbExtra->get_resultsA( $sql );
             $missngsourceCnt = $wpdbExtra->num_rows;
-            $msg .= "There are $missngsourceCnt $desvripton $eol";
+            $msg .= "<strong>There are $missngsourceCnt $desvripton</strong> $eol";
             $cnt = 0;
             if ( 0 == $missngsourceCnt )
                 return $msg;
@@ -1079,6 +975,7 @@ copyright, keywords, meta, rename $eol";
         $rrw_photographers;
         global $photoPath, $thumbPath, $highresPath;
         $msg = "";
+        $debugForce = false;
         try {
             $photoname = $rec[ "filename" ];
             $databaseCopyright = $rec[ "copyright" ];
@@ -1098,17 +995,17 @@ copyright, keywords, meta, rename $eol";
             if ( empty( $fileExif ) || !is_array( $fileExif ) )
                 throw new Exception( "$errorBeg #854 Fetch of exif 
                                 from $fullFile failed $errorEnd" );
-            $msg .= rrwUtil::print_r($fileExif, true, "$fullFile exif ");
+           if ($debugForce) $msg .= rrwUtil::print_r( $fileExif, true, "$fullFile exif " );
             //  --------------------------------------------- datetime
             $FileDateTime = self::getPhotoDateTime( $fileExif );
             if ( empty( $FileDateTime ) && empty( $datebasePhotoDate ) )
             ; // do nothing
             elseif ( empty( $FileDateTime ) && !empty( $datebasePhotoDate ) )
-                pushToImage( $photoname, "datetimedigitized", $datebasePhotoDate );
+                $msg .= pushToImage( $photoname, "datetimedigitized", $datebasePhotoDate );
             elseif ( empty( $FileDateTime ) && !empty( $datebasePhotoDate ) )
                 $sqlUpdate[ "PhotoDate" ] = $FileDateTime;
             else { // both have data 
-                if ( $databasephotodate != $FileDateTime )
+                if ( $datebasePhotoDate != $FileDateTime )
                     $sqlUpdate[ "PhotoDate" ] = $FileDateTime;
             }
             // ---------------------------- ------------------ copyright
@@ -1118,8 +1015,8 @@ copyright, keywords, meta, rename $eol";
                 $fileCopyRight = "";
             if ( empty( $databaseCopyright ) && !empty( $databasePhotographer ) ) {
                 $sqlDefault = "select copyrightDefault from $rrw_photographers
-                            where photograher = 'databasePhotographer' ";
-                $databaseCopyright = $wpdbExtra ->get_var( $sqlDefault );
+                            where photographer = 'databasePhotographer' ";
+                $databaseCopyright = $wpdbExtra->get_var( $sqlDefault );
                 $sqlUpdate[ "Copyright" ] = $databaseCopyright;
             }
             if ( $fileCopyRight != $databaseCopyright )
@@ -1141,7 +1038,7 @@ copyright, keywords, meta, rename $eol";
             if ( empty( $fileKeywords ) && empty( $databaseKeyword ) )
             ; // do nothing
             elseif ( empty( $fileKeywords ) && !empty( $databaseKeyword ) )
-                pushToImage( $photoname, "XPKeywords", $databaseKeyword );
+                $msg = pushToImage( $photoname, "XPKeywords", $databaseKeyword );
             elseif ( !empty( $fileKeywords ) && empty( $databaseKeyword ) ) {
                 $sqlUpdate[ "photoKeyword" ] = $fileKeywords;
                 // update keyword table
@@ -1158,7 +1055,7 @@ copyright, keywords, meta, rename $eol";
             if ( count( $sqlUpdate ) > 0 ) { // now update the database
                 $answer = $wpdbExtra->update( $rrw_photos, $sqlUpdate,
                     array( "filename" => $photoname ) );
-                $msg .= "had " . count( $sqlUpdate ) .
+                if ($debugForce)$msg .= "had " . count( $sqlUpdate ) .
                 " to be updated in $answer record $eol";
             }
         } catch ( Exception $ex ) {
@@ -1169,21 +1066,21 @@ copyright, keywords, meta, rename $eol";
 
     private static function getPhotoDateTime( $fileExif ) {
         global $eol;
-        error_reporting( E_ALL | E_STRICT );
+        
+        $debugTime = false;
         // -----------------------------------------------------------  datetime
         // return the photo data in the formst YYYY-MM-DD
         // or return blank
         $pictureDate = ""; // date not present in photo
         if ( !is_array( $fileExif ) )
             return $pictureDate;
-        foreach ( array(    /* all times are strings  */
-            "datetimeoriginal", "DateTimeOriginal",
-            "datetimedigitized", 
-            "previewdatetime", "PreviewDateTime", 
-            "ModifyDate", "modifydate",
-     //       "gpstimestamp", "GPSTimeStamp", // rational64 number
-            "gpsdatestamp", "GPSDateStamp", 
-            "FileDateTime" ) as $dateKey ) {
+        foreach ( array( /* all times are strings  */
+                "datetimeoriginal", "DateTimeOriginal",
+                "datetimedigitized",
+                "previewdatetime", "PreviewDateTime",
+                "ModifyDate", "modifydate",
+                //       "gpstimestamp", "GPSTimeStamp", // rational64 number
+                "gpsdatestamp", "GPSDateStamp") as $dateKey ) {
             if ( array_key_exists( $dateKey, $fileExif ) ) {
                 $pictureDate = $fileExif[ $dateKey ];
                 break;
@@ -1192,12 +1089,18 @@ copyright, keywords, meta, rename $eol";
         if ( empty( $pictureDate ) )
             return $pictureDate;
         // now get the correct format
-        print "$pictureDate  --$dateKey $eol";
+        if (strncmp ("16450", $pictureDate, 5) == 0) {
+             if ($debugTime) print "pictureDate $pictureDate is unix ";
+           $pictureDate = gmdate("Y-m-d H:i", $pictureDate); 
+            if ($debugTime) print "calculate = $pictureDate";
+            return $pictureDate;
+        }
+        if (pictureDate) print "pictureDate $pictureDate $eol";
         $picdate = new DateTime( $pictureDate );
         $picFormated = $picdate->format( "Y-m-d" );
-        print "$pictureDate goes to $picFormated $eol";
-        return $picdate->format( "Y-m-d" );
-                // TimeZoneOffset
+        if ($debugTime) print "$pictureDate goes to $picFormated $eol";
+        return $picFormated;
+        // TimeZoneOffset
     } // end  getPhotoDateTime function
 
     private static function WipeDireOnP() {

@@ -1,13 +1,11 @@
 <?php
 // called by the Commit all changes button via action='update'8/11
-require_once "rrw_util_inc.php";
-require_once "updatedatabase.php";
 
 class freeWheeling_DisplayUpdate {
 
     static public function DisplayUpdate( $attr ) {
         global $eol, $errorBeg, $errorEnd;
-        global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_photographer, $rrw_keywords;
+        global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_photographers, $rrw_keywords;
         global $photoUrl, $photoPath, $thumbUrl, $thumbPath, $highresUrl, $highresPath;
         $msg = "";
         ini_set( "display_errors", true );
@@ -44,7 +42,7 @@ class freeWheeling_DisplayUpdate {
                 throw new Exception( "$errorBeg no photo redond found,
                         can not update $errorEnd $sqlOld $eol" );
             $recOld = $recsold[ 0 ];
-  //          $msg .= rrwUtil::print_r( $recOld, true, "rec old" );
+            // $msg .= rrwUtil::print_r($recOld, true, "Old records");
             $msg .= self::compare( "copyright", $copyright, $recOld );
             $msg .= self::compare( "trail_name", $trailName, $recOld );
             $msg .= self::compare( "photographer", $photographer, $recOld );
@@ -80,6 +78,7 @@ class freeWheeling_DisplayUpdate {
         // get the new keywords entered
         $keywordcnt = rrwUtil::fetchparameterString( "keywordcnt", $attr );
         $keywordList = rrwUtil::fetchparameterString( "commalist", $attr );
+        $keywordList .= ",";
         $cnt = 0;
         if ( $debug )$msg .= rrwUtil::print_r( $_POST, true, "Post" );
         for ( $jj = 0; $jj < $keywordcnt; $jj++ ) {
@@ -96,14 +95,17 @@ class freeWheeling_DisplayUpdate {
         if ( $debug )$msg .= "commalist: $commalist $eol";
         return array( $msg, $keywordList );
     }
-
-    private static function compare( $itemName, $newValue, $rec ) {
+  
+    public static function compare( $itemName, $newValue, $rec ) {
         //compare old and new value, update if different
         global $eol, $errorBeg, $errorEnd;
-        global $wpdbExtra, $rrw_photos, $rrw_photographer, $rrw_keywords;
+        global $wpdbExtra, $rrw_photos, $rrw_photographers, $rrw_keywords;
         $msg = "";
 
+        $dubigCompare = false;
+        if ( $dubigCompare )$msg .= " compare( $itemName, $newValue -> ";
         $oldValue = $rec[ $itemName ];
+        if ( $dubigCompare )$msg .= " $oldValue $eol";
         if ( $newValue == $oldValue )
             return $msg; // no update neeeded
         $photoname = $rec[ "filename" ];
@@ -112,14 +114,24 @@ class freeWheeling_DisplayUpdate {
         $cnt = $wpdbExtra->update( $rrw_photos, $update, $key );
         $hisCom = "$itemName -- oldValue=> $newValue";
         $msg .= rrwUtil::InsertIntoHistory( $photoname, $hisCom );
-        if ( "copyright" == $itemName )
-            $msg .= pushToImage( $photoname, "copyright", $newValue );
-        elseif ( "photoKeyword" == $itemName )
-            $msg .= keyword2photo( $photoname );
-        else
-        ; // no specail shove to image
-
-
-    }
+        // rrw_photo has one field updated, deal with the related.
+        if ( "copyright" == $itemName ) {
+            pushToImage( $photoname, "copyright", $newValue );
+        } elseif ( "photoKeyword" == $itemName ) {
+            $msg .= keywordHandling::remove( $photoname ); // remove all keywords
+            $msg .= keywordHandling::insertList( $photoname, $newValue );
+            //       $msg .= ( $photoname, "Keywords", $newValue );
+        } elseif ( "photodate" == $itemName ) {
+            $msg .= "$errorBeg E#701 date inside photo not updated $errorEnd";
+        } elseif ( "photographer" == $itemName ) {
+            $sqlCopy = "select copyrightDefault from $rrw_photographers
+                where photographer = '$newValue' ";
+            $newcopyright = $wpdbExtra->get_var( $sqlCopy );
+            $rec[ "copyright" ] = "forces update";
+            $msg .= self::compare( "copyright", $newcopyright, $rec );
+        } else
+            $msg .= ""; // no specail shove to image
+        return $msg;
+    } // end   function compare
 } // end class freeWheeling_DisplayUpdate
 ?>

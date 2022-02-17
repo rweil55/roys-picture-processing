@@ -54,7 +54,7 @@ class freewheeling_displayPhotos {
         }
   //      if ($debugPotos) $msg .= "beofre random where is '$where' $eol";
         if (strpos($where, "random") !== false)
-            $sql = "SELECT photo_id, filename FROM `wpls_0photos`
+            $sql = "SELECT photo_id, filename FROM $rrw_photos
                         where photostatus = 'use' order by rand() limit 21";
         $recFiles = $wpdbExtra->get_resultsA( $sql );
         $msg .= "Selection is $selectionIs -- found " . $wpdbExtra->num_rows . " photos to display. Click photo to enlage.";
@@ -72,14 +72,10 @@ class freewheeling_displayPhotos {
                 $msg .= "<a href='display-one-photo?photoname=$photoname' > 
                 $photoname </a> was not found.  $eol ";
             else {
-                $meta = exif_read_data( "$thumbPath/$filename" );
-                $height = $meta[ "COMPUTED" ][ "Height" ];
-                $height = $meta[ "COMPUTED" ][ "Height" ];
-                $width = $meta[ "COMPUTED" ][ "Width" ];
+                $meta = getimagesize( "$thumbPath/$filename" );
                 $onePhotoUrl = site_url( "/display-one-photo" );
                 $msg .= "
-                <img src='$imageTmb' alt='$filename' 
-                height ='$height' width='$width'
+                <img src='$imageTmb' alt='$filename' $meta[3]
                 onclick='openOnePhotopage(\"$photoname\")' />";
                 if ( current_user_can( "edit_posts" ) )
                     $msg .= "<br /><span class='rrwCaption'> $photoname</span>";

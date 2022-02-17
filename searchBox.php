@@ -28,10 +28,10 @@ class rrwPictures_searchBox {
         $msg .= "\n\n<span id='and_not'> and </span>\n\n";
         // ---------------------------------------  detail selection
 
-        $sql = "select ' Any Detail' selection, 'Any Detail' val union  
-                select  'random', ' random photos (21)' union
-                select keyword, concat(keyword, ' (', count(*), ')') cnt 
-            from $rrw_keywords group by keyword ";
+        $sql = "select ' Any Detail' selection, 'Any Detail' val 
+                union  select  'random', ' random photos (21)ccc' 
+                union  select keyword, concat(keyword, ' (', count(*), ')') cnt 
+                        from $rrw_keywords group by keyword ";
         $msg .= rrwPictures_searchBox::pictureDisplayDropDownsql( $wpdbExtra, $rrw_keywords, "selection", $sql, "" );
         if ( $tablecss )
             $msg .= "\n</td>\n<td class='rrwHeaderTDleft' >";
@@ -56,7 +56,7 @@ class rrwPictures_searchBox {
             $exifUrl = "/wp-content/plugins/roys-picture-processng/Exif/html";
             $msg = "
             <p>[ <a href='/admin' target='admin' >admin </a>]
-            [ <a href='/fix?task=add' target='admin' >add </a> ]
+            [ <a href='/submission' target='admin' >submit photo </a> ]
             [ c:\_e &nbsp; php sub.php ]
             [ <a href='/upload' target='admin' >process upload </a> ]
             [ <a href='/fix?task=tag' target='one' >
@@ -78,7 +78,12 @@ class rrwPictures_searchBox {
             $debugDisplayDropDownsql = false;
         if ( $debugDisplayDropDownsql ) print "DisplayDropDownsql(db_access, 
                 $table, $toBeUpdated, $sql, $currentvalue)$eol";
-        $rows = $wpdbExtra->get_resultsA( $sql );
+        $site = get_site_url();
+        // Thia test enables us to test 'roys header' 'switchname'
+        if ( false !== strpos( get_site_url(), "demo" ) )
+            $rows = array();
+        else
+            $rows = $wpdbExtra->get_resultsA( $sql );
         $out = "<select name='$toBeUpdated' id='$toBeUpdated' label='$toBeUpdated'> \n";
         foreach ( $rows as $row ) {
             $rowValue = $row[ "selection" ];

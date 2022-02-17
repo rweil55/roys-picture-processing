@@ -107,16 +107,13 @@ class freewhilln_Administration_Pictures {
                         or copyright = '' ";
             $cntBadCopyright = $wpdbExtra->get_var( $sqlBadCopyright );
 
-            $sqlmissingExif = "SELECT count(*) FROM $rrw_source
-                        where originalexif = ''";
-            $cntmissingExif = $wpdbExtra->get_var( $sqlmissingExif );
             $sqlmissingPhotog = "SELECT count(*) FROM $rrw_photos ph
                    left join $rrw_photographers pers 
                         on ph.photographer = pers.photographer
                         where pers.photographer is null or ph.photographer = ''";
             $cntmissingPhotog = $wpdbExtra->get_var( $sqlmissingPhotog );
             $sqlKeyWordcnt = "select distinct keyword from $rrw_keywords";
-            $recKeywords = $wpdbExtra->get_resultsA($sqlKeyWordcnt);
+            $recKeywords = $wpdbExtra->get_resultsA( $sqlKeyWordcnt );
             $cntKeywords = $wpdbExtra->num_rows;
 
 
@@ -127,8 +124,8 @@ class freewhilln_Administration_Pictures {
             $msg .= "$photoRowCnt photos in the photo database$eol";
             $msg .= "$photorejectCnt photos rejected/duplicates $eol";
             $msg .= "$keyWithCnt distinct photos in the keyword database$eol";
-            $msg .= freewhilln_Administration_Pictures::EmptyCount( "direonp" ) .
-            " with <a href='/fix?task=nosource' target='list' > no source file</a> $eol
+            $msg .= self::EmptyCount( "direonp", "source file" );
+            $msg .= "
                 $before3_17 with load dates before 3/17 $eol
                 $after3_17 with load dates after 3/17 $eol";
             $msg .= "$photogUsedCnt <a  href='/display-photographers/'
@@ -141,23 +138,18 @@ class freewhilln_Administration_Pictures {
             //  -----------------------------------------------   column 2
             $msg .= "\n</td><td style='vertical-align:top'>\n
             <strong>Missing data counts</strong>$eol";
-            $msg .= freewhilln_Administration_Pictures::EmptyCount( "trail_name" ) .
-            " photos with <a href='/fix?task=notrailname'  target='list'>
-                    no trail name</a> $eol";
-            $msg .= "$cntmissingPhotog photos with <a href='/fix?task=nophotog'
-             target='list' > no/incorrect Photographers</a> $eol";
-            $msg .= freewhilln_Administration_Pictures::EmptyCount( "location" ) . " photos with <a href='/fix?task=nokey'  target='list'> 
-                    with no Location</a> $eol";
-            $msg .= freewhilln_Administration_Pictures::EmptyCount( "PhotoDate", true ) .
-            " photos with <a href='/fix?task=nodate'  target='list'> 
-                    no Photo date</a> $eol";
-            $msg .= freewhilln_Administration_Pictures::EmptyCount( "photoKeyword" ) . " photos with <a href='/fix?task=nokey' > 
-                    with no associated keyword</a> $eol";
-            $msg .= "$cntBadCopyright with <a href='/fix/?task=badcopyright'
-                     target='list'> incorrect copyright</a> $eol";
-            $msg .= "$keyMissingCnt photos in photo table - not in keyword table $keyMissingList $eol
-            $photoMissingCnt keywords in keyword table - 
-                    not in photo table $photoMissingList $eol  
+
+            $msg .= self::EmptyCount( "trail_name", "trail name" );
+            $msg .= self::EmptyCount( "photographer", "Photographers" );
+            $msg .= self::EmptyCount( "location", "location" );
+            $msg .= self::EmptyCount( "PhotoDate", "Photo Date" );
+            $msg .= self::EmptyCount( "photoKeyword", "keywords" );
+            $msg .= self::EmptyCount( "copyright", "copyright" );
+            $msg .= self::EmptyCount( "photokeyword", "keywords" );
+            $msg .= self::EmptyCount( "DireOnP", "source directory" );
+            $msg .= self::EmptyCount( "height", "height" );
+            $msg .= self::EmptyCount( "width", "width" );
+            $msg .= "
             $cntKeywordDup duplicate  <a href='/fix?task=keyworddups' target='list'>
                     photoName-Keywords </a> $eol
             ";
@@ -230,17 +222,32 @@ Too upload new photos.
         return $msg;
     } // end function
 
-    private static function EmptyCount( $item, $unknown = false ) {
+    private static function EmptyCount( $item, $description ) {
+        $msg = "";
+
+        $sqlWhere = "( $item = '' or $item = 'unknown' ) and photostatus = 'use' ";
+        $msg .= self::SQLcount( $item, $description, $sqlWhere );
+        return $msg;
+    } // end enptycount
+
+    private static function SQLcount( $item, $description, $sqlWhere ) {
         global $wpdbExtra, $rrw_photos;
-        $sql = "select count(*) from $rrw_photos where $item = '' 
-                and photostatus = 'use' ";
-        if ( $unknown )
-            $sql .= " or $item = 'unknown' ";
-        //       print ( "<!-- sql is $sql -->\n" );
+        global $eol;
+        $msg = "";
+
+        $sql = "select count(*) from $rrw_photos where $sqlWhere";
+        //       print ( "<!-- sql is $sql -->\n" );"
         $cnt = $wpdbExtra->get_var( $sql );;
-        return $cnt;
-    }
-   
+        $query = str_replace( "'", "xxy", $sqlWhere );
+        $msg .= "$cnt photos with no 
+            <a href='/fix/?task=listing&amp;where=$query" .
+        "&amp;description=$description' >
+            $description</a>";
+        if ( !empty( Trim( $description ) ) )
+            $msg .= $eol;
+        return $msg;
+    } // end SQLcount
+
 
 } //end Class 
 

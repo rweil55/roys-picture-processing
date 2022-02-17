@@ -14,7 +14,7 @@ class uploadProcessDire {
         //      moves to the high_resoltion directory
         //
         $msg = "";
-        $debug = true;
+        $debug = false;
 
         $cntUploaded = 0;
         try {
@@ -47,27 +47,32 @@ class uploadProcessDire {
                         minetype is $mime_type, 
                         it should .jpg, " /*.png or .gif"*/ );
                 }
-                $DataFilename = substr( $entry, 0, strlen( $entry ) - 4 );
-                $msg .= "DataFilename just aftercreate $DataFilename $eol";
+                $photoname = substr( $entry, 0, strlen( $entry ) - 4 );
+                if ( $debug )$msg .= "photoname just aftercreate $photoname $eol";
                 $pregResults = preg_match( "/[-a-zA-z0-9 _]*/",
-                    $DataFilename, $matchs );
+                    $photoname, $matchs );
                 if ( 1 != count( $matchs ) )
                     throw new RuntimeException( "file name can consist of only
                 letters, numbers, and spaces" );
                 // --------------------------- deal with database entry
-                $msg .= "DataFilename just matchs $DataFilename $eol";
+                if ( $debug )$msg .= "photoname just matchs $photoname $eol";
                 $sqlRec = "select * from $rrw_photos 
-                        where filename = '$DataFilename'";
+                        where filename = '$photoname'";
                 $recs = $wpdbExtra->get_resultsA( $sqlRec );
                 if ( 1 == $wpdbExtra->num_rows ) {
                     $photographer = $recs[ 0 ][ "photographer" ];
+                    $sqldate = "update $rrw_photos set uploaddate = now() 
+                                where filename ='$photoname' ";
+                    $cnt = $wpdbExtra->query( $sqldate );
                 } else {
-                    $wpdbExtra->insert( $rrw_photos,
-                        array( "filename" => $DataFilename ) );
+                    $insertData = array( "filename" => $photoname,
+                        "uploaddate" => date( "Y-m-d H:i" ) );
+                    $wpdbExtra->insert( $rrw_photos, $insertData );
                     $photographer = ""; // record not there 
                     $sqlRec = "select * from $rrw_photos 
-                        where filename = '$DataFilename'";
+                        where filename = '$photoname'";
                     $recs = $wpdbExtra->get_resultsA( $sqlRec );
+                    $recOld = $rec[ 0 ];
                 }
                 if ( false ) {
                     // debug the exif routineand data
@@ -81,7 +86,10 @@ class uploadProcessDire {
 
                 $msg .= self::MakeImakeImages( $sourceFile, $photographer );
 
-                $searchFile = "$photoPath/$DataFilename" . "_cr.jpg";
+                $recs[ 0 ][ "photographer" ] = ""; //cause photographer and copyright
+                $msg .= freeWheeling_DisplayUpdate::compare( "photographer", $photographer, $recs[ 0 ] );
+                $searchFile = "$photoPath/$photoname" . "_cr.jpg";
+                $recs[ 0 ][ "photographer" ] = $photographer;
                 $msg .= freewheeling_fixit::Do_forceDatabse2matchexif( $recs[ 0 ] );
 
                 return $msg;
@@ -93,7 +101,7 @@ class uploadProcessDire {
         $msg .= "\n\nuploaded $cntUploaded files in " .
         rrwUtil::deltaTimer( "uploading files" ) . "\n\n";
         return $msg;
-    } // end function uploadProcessDire::upload
+    } // end function uploadProcessDire
 
 
     private static function MakeImakeImages( $sourceFile, $photographer ) {
@@ -104,7 +112,7 @@ class uploadProcessDire {
         //      creates the thumbnail version
         //      moves to the high_resoltion directory
 
-        $debug = true;
+        $debug = false;
         $msg = "";
         try {
             $fileSplit = pathinfo( $sourceFile );
@@ -153,7 +161,7 @@ class uploadProcessDire {
             $fontSize = 12; #	height of the copyright text
             $fontfile = "arial.ttf";
             $fontfile = "/home/pillowan/www-shaw-weil-pictures/wp-content/plugins/roys-picture-processng/mvboli.ttf";
-            $debugImageWork = true;
+            $debugImageWork = false;
             if ( !file_exists( $fontfile ) ) {
                 $msg .= "bad font $fontfile ";
                 throw new Exception( "$msg $errorBeg E#812 Problems with the font file $errorEnd" );
@@ -200,22 +208,22 @@ class uploadProcessDire {
             if ( $debugImageWork )$msg .= " thumbnail saved to $fullFfileThumb $eol";
             imagedestroy( $img_tmb ); // free memory
             // --------------------------------------------- resize copyright
-            $msg .= "x x x x x x x x $eol";
             $maxHeight = 768;
-            $aspect = $h_src / $w_src;  
+            $aspect = $h_src / $w_src;
             if ( $h_src > $maxHeight ) {
                 $h_cr = $maxHeight;
-                $w_cr = $h_cr * $aspect;
+                $w_cr = $h_cr / $aspect;
                 $img_copyright =
                     self::resizeImage( $img_src, $w_src, $h_src, $w_cr, $h_cr );
                 if ( $debugImageWork )$msg .= "aspect = $aspect image 
-                    resized $w_src X $hsrc to $w_cr X $h_cr $eol";
+                    resized $w_src X $h_src to $w_cr X $h_cr $eol";
+
             } else {
                 $img_copyright = $img_src;
                 $h_cr = $h_src;
                 $w_cr = $w_src;
             }
-            // img_copywite has been created. 
+            // img_copywite has been created.
             if ( empty( $photographer ) ) {
                 // skip adding the bottom line, just write the file
                 if ( $debugImageWork )$msg .= "about to write file to $fullFilePhoto ...";
@@ -279,8 +287,6 @@ class uploadProcessDire {
                 if ( !imagedestroy( $img_src ) ) // free memory
                     throw new Exception( "$msg E#628 imagedestroy( img_sec )" );
             } // end of drawing photographer name
-
-            $msg .= "$eol <a href='/display-one-photo?photoname=$filename'  target='one'>$filename</a>$eol";
         } // end try
         catch ( Exception $ex ) {
             $msg .= $errorBeg . $ex->getMessage() . $errorEnd;

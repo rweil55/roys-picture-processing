@@ -8,31 +8,31 @@ class freeWheeling_DisplayOne {
         // display full size and thumbnail and the meta data infomaion
         ini_set( "display_errors", true );
         global $photoUrl, $photoPath, $thumbUrl, $site_url;
-        global $wpdbExtra, $rrw_photos, $rrw_trails, $rrw_photographers, 
+        global $wpdbExtra, $rrw_photos, $rrw_trails, $rrw_photographers,
         $rrw_keywords, $rrw_access;
         global $eol;
         $msg = "";
         $debugPath = false;
-         
+
         try {
             include "setConstants.php";
             $photoname = rrwUtil::fetchparameterString( "photoname", $attr );
-            $photoname = str_replace("_tmb", "", $photoname);
-             $photoname = str_replace(".jpg", "", $photoname);
+            $photoname = str_replace( "_tmb", "", $photoname );
+            $photoname = str_replace( ".jpg", "", $photoname );
             if ( $debugPath )$msg .= "**** 1 ******displayOne:photoPath $photoPath <br/>";
             //	if thumbs is true them display thumbnail, else display fill size
-           if ( $debugPath )$msg .= " DisplayOne ($photoname )   ... ";
-           $current_user = wp_get_current_user();
-           if ( ! ( $current_user instanceof WP_User ) ) 
-               $ser = "Guest";
+            if ( $debugPath )$msg .= " DisplayOne ($photoname )   ... ";
+            $current_user = wp_get_current_user();
+            if ( !( $current_user instanceof WP_User ) )
+                $ser = "Guest";
             else
-                $user =  $current_user->name;
- 
-            $ip = $_SERVER['REMOTE_ADDR'];
-            
+                $user = $current_user->name;
+
+            $ip = $_SERVER[ 'REMOTE_ADDR' ];
+
             $sqlAccess = "Insert into $rrw_access (accessphotoname, accessIP,accessuser)
                 values ('$photoname', '$ip', '$user')";
-            $answer = $wpdbExtra->query($sqlAccess);
+            $answer = $wpdbExtra->query( $sqlAccess );
             if ( "nokey" == $photoname ) {
                 $sqlNoKey = "select filename from $rrw_photos  where not filename in 
                 (select distinct keywordFilename from $rrw_keywords )";
@@ -54,39 +54,48 @@ class freeWheeling_DisplayOne {
                 return $msg;
             }
             $recset = $recset_query[ 0 ];
-            $photoname = $recset[ "filename" ]; 
+            $photoname = $recset[ "filename" ];
             $photographer = $recset[ "photographer" ];
             $direonp = $recset[ "DireOnP" ];
             $trail_name = $recset[ "trail_name" ];
             if ( $debugPath )$msg .= "**** 5 ******displayOne:photoUrl $photoPath <br/>";
             $htmlfileref1 = "$photoUrl/{$photoname}_cr.jpg";
             $fullfilename1 = "$photoPath/{$photoname}_cr.jpg";
-            if ( !file_exists( $fullfilename1 ) ) {
+            $htmlfileref2 = "$thumbUrl/{$photoname}_tmb.jpg";
+            $fullfilename2 = "$thumbPath/{$photoname}_tmb.jpg";
+              if ( !file_exists( $fullfilename1 ) ) {
                 $msg .= FreewheelingCommon::missingImageMessage( "E#957 
                         in display a photo, looking for image file $fullfilename1.
                         URL = " . home_url(), $photoname );
                 return $msg;
-
             }
-            list( $w_cr, $h_cr, $type, $attr ) = getimagesize( $fullfilename1 );
+            /*  displaywidth is based on screen size 
+            $imageinfo = getimagesize( $fullfilename1 );
+            $displayHeight = $imageinfo[ 0 ];
+            $displayWidth = $imageinfo[ 1 ];
             $maxHeight = 400;
-            if ( $h_cr > $maxHeight )
+            if ( $displayHeight > $maxHeight ) {
                 $displayHeight = $maxHeight;
-            else
-                $displayHeight = $h_cr;
-            $fullfilename2 = "$thumbUrl/{$photoname}_tmb.jpg";
-            list( $h_tmb, $w_tmb, $type_tmb, $attr_tmb ) = getimagesize( $fullfilename2 );
+                $displaywidth = $displaywidth * ( $displayHeight / $maxHeight );
+            }
+            */
+            $thumbInfo = getimagesize($fullfilename2);
+            $thumbsize = $thumbInfo[3];
             if ( false ) {
+                // let wordpress determine image size
                 $msg .= "<figure class='wp-block-image size-large'><img 
                 src='$htmlfileref1' class='wp-image-49'/></figure>";
             } else {
                 $h_screen = rrwUtil::fetchparameterInteger( "h_screen" ) - 30;
                 $w_screen = rrwUtil::fetchparameterInteger( "w_screen" );
-                $aspect = $w_screen / $h_screen;
-                $adjust = $h_screen / $h_cr;
-                $w_desired = round( $w_cr * $adjust, 0 ) . "px";
+          //      $aspect = $w_screen / $h_screen;
+          //      $adjust = $h_screen / $h_cr;
+          //      $w_desired = round( $w_cr * $adjust, 0 ) . "px";
                 $msg .= "<img src='$htmlfileref1' alt='Trail Photo'
-                        height='auto' width='$w_desired' id='bigImage' />$eol";
+                        height='auto' width='$$w_screen' id='bigImage' />
+                        &nbsp; ";
+                $msg .= "<img src='$htmlfileref2' alt='small Trail Photo'
+                    $thumbsize id='smallImage' />$eol";
                 //print "adjust = $adjust, width=$w_desired $eol";
             }
             $msg .= freeWheeling_DisplayOne::DisplayTableDataOne( $recset );
@@ -105,8 +114,8 @@ class freeWheeling_DisplayOne {
             // --------------------------------------------------- update section
             // --------------------------------------------------- update section
             // --------------------------------------------------- update section
-            $msg .= "<br /><form action='/update' method='post' >";
-            if ( $debugPath )$msg .= "***** 4 *****displayOne:photoPath $photoPath <br/>";
+            $msg .= "<br /><form action='/update' method='post' >\n";
+           if ( $debugPath )$msg .= "***** 4 *****displayOne:photoPath $photoPath <br/>";
 
             $sql = "Select * from $rrw_photos 
                         where filename = '$photoname' ";
@@ -116,19 +125,22 @@ class freeWheeling_DisplayOne {
                 throw new Exception( "406 not find while looking for trail $eol 
                         $eol $sql $eol $eol" );
             $rec_photo = $rec_photo_query[ 0 ];
-
-            $msg .= $rec_photo[ "filename" ] . " &nbsp; 
+            
+            $msg .= "<input type='hidden' name='copyright' id='copyright'
+                value='" . $rec_photo["copyright"] . "' /> \n;";
+            $msg .= "<a href='$photoUrl/{$photoname}_cr.jpg'>
+                $photoname</a>&nbsp; 
             [ <a href='/admin'>admin </a> ] [ <A href='fix?task=tag' >tag </a> ]
             &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 
             [ <a href='/fix?task=deletephoto&del2=$photoname&del3=$photoname'>
             Delete photo ]</a> $eol";
             #listbox2( $db, $table, $field, $oldvalue, $sortField )
             $msg .= "<strong>Trail:</strong>" .
-                freeWheeling_DisplayOne::listbox2( $wpdbExtra, "$rrw_trails",
+            freeWheeling_DisplayOne::listbox2( $wpdbExtra, "$rrw_trails",
                 "trailName", $trail_name, "trailName" ) . $eol;
             $msg .= "<strong>Photogrpher:</strong>" .
-                freeWheeling_DisplayOne::listbox2( $wpdbExtra, "$rrw_photographers",
-                "photographer", $photographer, "photographer" )  . $eol;
+            freeWheeling_DisplayOne::listbox2( $wpdbExtra, "$rrw_photographers",
+                "photographer", $photographer, "photographer" ) . $eol;
             $msg .= "\n" . "<strong>Photo Date:</strong>
                 <input type='text' name='photodate' size='20' value=\"" . $rec_photo[ "PhotoDate" ] . "\">" . "\n" . "$eol 
                 <strong>upload date:</strong> 
@@ -145,7 +157,7 @@ class freeWheeling_DisplayOne {
                 [ <a href='http://127.0.0.1/pict/sub.php?direname=$direonp'
                 target='submit' > new picture file</a> ] 
                 [ <a href='/display-one-photo/?photoname=nokey'> 
-                        No keywords</a>]
+                        Next no keywords</a>]
         <input type='hidden' name='photoname' id='photoname' value='$photoname' />
         <br /><input type='submit' value=\"Commit all changes\" id='submit1' name='submit1' > ";
             // --------------------------------------------------  keyword list
@@ -161,7 +173,7 @@ class freeWheeling_DisplayOne {
                 <input type='submit' value=\"Commit all changes\"> &nbsp;
                 <input type='reset'>
                 <a href='/display-one-photo/?photoname=nokey'> 
-                        No keywords</a>
+                        Next no keywords</a>
             <img src='$fullfilename2' alt='small size image' />
                </form>";
             if ( file_exists( $fullfilename1 ) ) {
@@ -232,7 +244,7 @@ class freeWheeling_DisplayOne {
     }
 
     private static function DisplayTableDataOne( $recset ) {
-        global $photoUrl, $photoPath;
+        global $photoUrl, $photoPath, $highresPath;
         global $eol;
         $msg = "";
 
@@ -255,23 +267,32 @@ class freeWheeling_DisplayOne {
             $sizeDisplay = " not found $fullname ";
         else
             $sizeDisplay = $photoSize[ 0 ] . " x " . $photoSize[ 1 ];
+        $fullHighRes = "$highresPath/$photoname.jpg";
+        $photoSize = getimagesize( $fullHighRes );
+        if ( !is_array( $photoSize ) )
+            $sizeHighres = " not found $fullname ";
+        else
+            $sizeHighres = $photoSize[ 0 ] . " x " . $photoSize[ 1 ];
+
 
         //  -------------------------------------------------- Now the display
-       $msg .= " File is <a href='$photoUrl/{$photoname}_cr.jpg'>$photoname</a>
+        $msg .= " File is <a href='$photoUrl/{$photoname}_cr.jpg'>$photoname</a>
                 &nbsp; &nbsp; &nbsp; &nbsp; " . $recset[ 'comment' ] . "$eol";
         $msg .= "\n<div class='rrwOnePhoto'><table> \n ";
         $msg .= rrwFormat::CellRow( "Trail: ", $trailDisplay,
             "Photographer: ", $photographerDisplay );
         $msg .= rrwFormat::CellRow( "Location: ", $recset[ "location" ],
             "Photo Date: ", $recset[ "PhotoDate" ] );
-        $msg .= rrwFormat::CellRow( "Photo Size ", $sizeDisplay );
+        $msg .= rrwFormat::CellRow( "Photo Size ",
+            "<a href='$photoUrl/{$photoname}_cr.jpg'>this $sizeDisplay</a>,
+                High Resolution size $sizeHighres" );
         $msg .= "</table>";
         $copyRight = $recset[ "copyright" ];
-        if (empty($copyRight))
+        if ( empty( $copyRight ) )
             $copyRight = "Copyright missing from file - Assume all rights reserved
                 <a href='/author2copyright/?filename=$photoname' >.</a>";
-        $msg .=  "$copyRight $eol";
-    
+        $msg .= "$copyRight $eol";
+
         # -------------------- keywords
         $msg .= "<strong>Existing keywords:</strong>\n";
         $words = explode( ",", $recset[ "photoKeyword" ] );
@@ -288,7 +309,7 @@ class freeWheeling_DisplayOne {
         $msg .= "$eol<strong>Identifiable People:</strong>" . $recset[ "people" ] . "
 <div id='missedClassifi' onclick='openMissedClassifi(this,$photoname);'>
     if any of this infomation is incorrect or missing. Please
-    <a href='/webmaster-feedback'>let us knowE#862</a>$eol";
+    <a href='/webmaster-feedback'>let us know</a>$eol";
         return $msg;
 
     } // end display table
