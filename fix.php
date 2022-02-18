@@ -25,6 +25,9 @@ class freewheeling_fixit {
                     return $msg;
                 default:
                     break;
+                case "exif":
+                    $msg .= self::displayExif( $attr );
+                    return $msg;
             }
             $msg .= self::checkForLogIn( "fix task '$task' " );
 
@@ -243,6 +246,25 @@ copyright, keywords, meta, rename $eol";
         $msg .= "</table\n";
         $msg .= "processed $cntDire files $eol";
         return ( $msg );
+    }
+
+    private static function displayExif( $attr ) {
+        global $eol;
+        global $photoPath, $highresPath;
+        $msg = "";
+        $photoname = rrwUtil::fetchparameterString( "photoname" );
+        $file1 = "$highresPath/$photoname.jpg";
+        $file2 = "$photoPath/${photoname}_cr.jpg";
+        $exif1 = rrw_exif_read_data( $file1 );
+        $exif2 = rrw_exif_read_data( $file2 );
+        $display1 = rrwUtil::print_r( $exif1, true, "${photoname}.jpg" );
+        $display2 = rrwUtil::print_r( $exif2, true, "${photoname}_cr.jpg" );
+        $msg .= "<table>" . rrwFormat::headerRow( $file1, $file2 ) .
+        rrwFormat::CellRow( $display1, $display2 ) .
+        "</table> 
+        $eol<img src='$file2' />";
+        return $msg;
+
     }
 
     private static function extraKeyword() {
@@ -602,7 +624,7 @@ copyright, keywords, meta, rename $eol";
         return $msg;
     }
 
-    
+
     private static function listing() {
         global $eol;
         global $rrw_photos;
@@ -991,11 +1013,11 @@ copyright, keywords, meta, rename $eol";
             $msg .= "<a href='display-one-photo?photoname=$photoname' target='one'          >$photoname </a>, ";
             // --------------------------------------------- exif
             // https://exiftool.org/TagNames/EXIF.html list most tags
-            $fileExif = exif_read_data( $fullFile );
+            $fileExif = rrw_exif_read_data( $fullFile );
             if ( empty( $fileExif ) || !is_array( $fileExif ) )
                 throw new Exception( "$errorBeg #854 Fetch of exif 
                                 from $fullFile failed $errorEnd" );
-           if ($debugForce) $msg .= rrwUtil::print_r( $fileExif, true, "$fullFile exif " );
+            if ( $debugForce )$msg .= rrwUtil::print_r( $fileExif, true, "$fullFile exif " );
             //  --------------------------------------------- datetime
             $FileDateTime = self::getPhotoDateTime( $fileExif );
             if ( empty( $FileDateTime ) && empty( $datebasePhotoDate ) )
@@ -1055,7 +1077,7 @@ copyright, keywords, meta, rename $eol";
             if ( count( $sqlUpdate ) > 0 ) { // now update the database
                 $answer = $wpdbExtra->update( $rrw_photos, $sqlUpdate,
                     array( "filename" => $photoname ) );
-                if ($debugForce)$msg .= "had " . count( $sqlUpdate ) .
+                if ( $debugForce )$msg .= "had " . count( $sqlUpdate ) .
                 " to be updated in $answer record $eol";
             }
         } catch ( Exception $ex ) {
@@ -1066,7 +1088,7 @@ copyright, keywords, meta, rename $eol";
 
     private static function getPhotoDateTime( $fileExif ) {
         global $eol;
-        
+
         $debugTime = false;
         // -----------------------------------------------------------  datetime
         // return the photo data in the formst YYYY-MM-DD
@@ -1080,7 +1102,7 @@ copyright, keywords, meta, rename $eol";
                 "previewdatetime", "PreviewDateTime",
                 "ModifyDate", "modifydate",
                 //       "gpstimestamp", "GPSTimeStamp", // rational64 number
-                "gpsdatestamp", "GPSDateStamp") as $dateKey ) {
+                "gpsdatestamp", "GPSDateStamp" ) as $dateKey ) {
             if ( array_key_exists( $dateKey, $fileExif ) ) {
                 $pictureDate = $fileExif[ $dateKey ];
                 break;
@@ -1089,16 +1111,16 @@ copyright, keywords, meta, rename $eol";
         if ( empty( $pictureDate ) )
             return $pictureDate;
         // now get the correct format
-        if (strncmp ("16450", $pictureDate, 5) == 0) {
-             if ($debugTime) print "pictureDate $pictureDate is unix ";
-           $pictureDate = gmdate("Y-m-d H:i", $pictureDate); 
-            if ($debugTime) print "calculate = $pictureDate";
+        if ( strncmp( "16450", $pictureDate, 5 ) == 0 ) {
+            if ( $debugTime ) print "pictureDate $pictureDate is unix ";
+            $pictureDate = gmdate( "Y-m-d H:i", $pictureDate );
+            if ( $debugTime ) print "calculate = $pictureDate";
             return $pictureDate;
         }
-        if (pictureDate) print "pictureDate $pictureDate $eol";
+        if ( $debugTime ) print "pictureDate $pictureDate $eol";
         $picdate = new DateTime( $pictureDate );
         $picFormated = $picdate->format( "Y-m-d" );
-        if ($debugTime) print "$pictureDate goes to $picFormated $eol";
+        if ( $debugTime ) print "$pictureDate goes to $picFormated $eol";
         return $picFormated;
         // TimeZoneOffset
     } // end  getPhotoDateTime function

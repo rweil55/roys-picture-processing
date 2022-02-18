@@ -177,7 +177,7 @@ class freeWheeling_DisplayOne {
             <img src='$fullfilename2' alt='small size image' />
                </form>";
             if ( file_exists( $fullfilename1 ) ) {
-                $meta = exif_read_data( $fullfilename1 );
+                $meta = rrw_exif_read_data( $fullfilename1 );
                 if ( false !== $meta ) {
                     $msg .= rrwUtil::print_r( $meta, true, "EXIF data for $fullfilename1" );
                 } else {

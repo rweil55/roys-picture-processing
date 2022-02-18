@@ -72,10 +72,10 @@ class uploadProcessDire {
                 if ( false ) {
                     // debug the exif routineand data
                     foreach ( array( "COMPUTED", "ANY_TAG", "IFDO", "COMMENT", "EXIF" ) as $section ) {
-                        $exif = exif_read_data( $sourceFile, $section );
+                        $exif = rrw_exif_read_data( $sourceFile, $section );
                         $msg .= rrwUtil::print_r( $exif, true, "Section $section" );
                     }
-                    $exif = exif_read_data( $sourceFile );
+                    $exif = rrw_exif_read_data( $sourceFile );
                     $msg .= rrwUtil::print_r( $exif, true, "no section " );
                 }
 

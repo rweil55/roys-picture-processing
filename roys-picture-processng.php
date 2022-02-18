@@ -11,7 +11,7 @@
  * Text Domain: Roys-picture-processng
  * Domain Path: /translation
  
-  * Version: 1.0.16
+  * Version: 1.0.20
 
  */
 // disable direct access
@@ -100,6 +100,7 @@ require_once "freewheelingeasy-wpdpExtra.php";
 require_once "rrw_util_inc.php";
 require_once "display_stuff_class.php";
 require_once "display_tables_class.php";
+require_once "display_tables_inc.php";
 // picture routines
 
 require_once "admin.php";
@@ -421,7 +422,7 @@ function doCopyright( $item ) {
                         target='rename' > rename </a> ";
                 //         continue;
                 if ($debugExif) print "about  exif_read_data( $fullFilename $eol)"; 
-                $meta = exif_read_data( $fullFilename );
+                $meta = rrw_exif_read_data( $fullFilename );
                 if ($debugExif) print "looking for key $item $eol";
                 if ( array_key_exists( "$exifItem", $meta ) )
                     $metaItem = $meta[ "$exifItem" ];
@@ -469,59 +470,11 @@ function readexifItem( $filename, $item, & $msg ) {
     if ( filesize( $filename > 10000 ) )
         throw new Exception( "$msg $errorBeg E#432 readexifItem: $filename 
                     is to big " . round( filesize( $filename ) / 1024, 0 ) . " $errorEnd" );
-    $exif = exif_read_data( $filename );
+    $exif = rrw_exif_read_data( $filename );
     if ( array_key_exists( $item, $exif ) )
         return $exif[ $tem ];
     return "&lt;Missing&gt;";
 }
-/* reading item done by readexifItem (...)
-function readexifPhoto( $filename, $item, & $msg ) {
-    global $eol, $errorBeg, $errorEnd;
-    $debugExif = true;
-
-    ini_set( 'memory_limit', '32M' );
-    error_reporting( E_ALL | E_STRICT );
-    if ( $debugExif )$msg .= "readexifItem( $filename, $item ) $eol";
-    if ( !file_exists( $filename ) ) {
-        $msg .= "$msg $errorBeg E#468 $filename was not founnd $errorEnd ";
-        return "";
-    }
-    $contents = file_get_contents( $filename );
-    //   return $msg;
-    $data = new PelDataWindow( $contents );
-    if ( $debugExif )$msg .= " new PelDataWindow worked  $eol";
-    //    return $msg;
-
-    $jpeg = $fileInMemory = new PelJpeg();
-    if ( $debugExif )$msg .= " new PelJpeg() worked  $eol";
-    //    return $msg;
-    $jpeg->load( $data );
-    if ( $debugExif )$msg .= "load worked  $eol";
-    //  return $msg;
-    $exif = $jpeg->getExif(); // get the desired data
-    if ( $debugExif )$msg .= "exif isloaded $eol";
-    //  return $msg;
-    if ( is_null( $exif ) )
-        return "";
-    $tiff = $exif->getTiff();
-    if ( is_null( $tiff ) )
-        return "";
-    $ifd0 = $tiff->getIfd();
-    if ( $debugExif )$msg .= "ifd0 isloaded $eol";
-    if ( $ifd0 == null )
-        return "";
-    $tag = convertText2EeixID( $item ); // item name into tag integer
-    if ( $debugExif )$msg .= "tag = $tag $eol";
-    $textThing = $ifd0->getEntry( $tag );
-    if ( $debugExif )$msg .= "textThing isloaded $eol";
-    if ( is_null( $textThing ) )
-        return "";
-    $textValue = $textThing->getValue();
-    if ( $debugExif )$msg .= "returning value $value $eol";
-
-    return $textValue;
-}
-*/
 
 function pushToImage( $filename, $item, $value ) {
     global $eol;
@@ -1126,7 +1079,7 @@ function dumpMeta( $file1 = "", $file2 = "" ) {
         $file1 = fetchparameterString( "file" );
     if ( "" == $file2 )
         $file2 = fetchparameterString( "file2" );
-    $temp1 = exif_read_data( $file1 );
+    $temp1 = rrw_exif_read_data( $file1 );
     $temp1 = rrwUtil::print_r( $temp1, true, " file $file1" );
     $iiComment = strpos( $temp1, "UserCommentEncoding" );
     if ( $iiComment > 1 )
@@ -1137,7 +1090,7 @@ function dumpMeta( $file1 = "", $file2 = "" ) {
         $temp2 = "$eol $file2 $eol $errorBeg E#460 file does not exist $errorEnd";
         $temp2Size = 0;
     } else {
-        $temp2 = exif_read_data( $file2 );
+        $temp2 = rrw_exif_read_data( $file2 );
         $temp2 = rrwUtil::print_r( $temp2, true, " file $file2" );
         $iiComment = strpos( $temp2, "UserCommentEncoding" );
         if ( $iiComment > 1 )
@@ -1151,6 +1104,12 @@ function dumpMeta( $file1 = "", $file2 = "" ) {
     return $msg;
 }
 
+function rrw_exif_read_data($file) {
+    error_reporting(E_ALL ^ E_WARNING);
+    $exifArray = exif_read_data($file);
+    error_reporting (E_ALL || E_STRICT);
+    return $exifArray;
+}
 function reada3a4( $attr ) {
     // reads and displays the meta data for file f1, f2
     ini_set( "display_errors", true );
@@ -1175,7 +1134,7 @@ add_shortcode( "displaytrail", array( "DisplayTrails", "Display" ) );
 add_shortcode( "displayupdate", array( "freeWheeling_DisplayUpdate", "DisplayUpdate" ) );
 add_shortcode( "fix", array( "freewheeling_fixit", "fit_it" ) );
 add_shortcode( "rrwPicSubmission", array( "rrwPicSubmission", "showForm" ) );
-add_shortcode( "upload", "uploadProcessDire" );
+add_shortcode( "upload", array("uploadProcessDire", "upload") );
 
 add_shortcode( "insertdire", "insertdire" );
 add_shortcode( "perl", "testperl" );
