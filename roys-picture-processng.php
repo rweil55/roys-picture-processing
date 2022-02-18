@@ -11,7 +11,7 @@
  * Text Domain: Roys-picture-processng
  * Domain Path: /translation
  
-  * Version: 1.0.20
+  * Version: 1.0.21
 
  */
 // disable direct access
@@ -109,6 +109,7 @@ require_once "DisplayPhotogaphers.php";
 require_once "displayphotos.php";
 require_once "DisplayTrails.php";
 require_once "fix.php";
+require_once "fixTaskList.php";
 require_once "keywordHandling.php";
 require_once "submission.php";
 require_once "update.php";
@@ -1133,6 +1134,7 @@ add_shortcode( "display-photographer", array( "DisplayPhotographers", "Display" 
 add_shortcode( "displaytrail", array( "DisplayTrails", "Display" ) );
 add_shortcode( "displayupdate", array( "freeWheeling_DisplayUpdate", "DisplayUpdate" ) );
 add_shortcode( "fix", array( "freewheeling_fixit", "fit_it" ) );
+add_shortcode( "fixtasklist", array( "fixTaskList", "showlist" ) );
 add_shortcode( "rrwPicSubmission", array( "rrwPicSubmission", "showForm" ) );
 add_shortcode( "upload", array("uploadProcessDire", "upload") );
 

@@ -151,8 +151,10 @@ class freewhilln_Administration_Pictures {
             $msg .= self::EmptyCount( "width", "width" );
             $msg .= "
             $cntKeywordDup duplicate  <a href='/fix?task=keyworddups' target='list'>
-                    photoName-Keywords </a> $eol
-            ";
+                    photoName-Keywords </a> $eol" .
+            freewheelingfis::extraKeywordCnts(false) . " kewords in 
+                    phots table, but not in keyword table$eol";
+
             //  -------------------------------------------  column 3
             $msg .= "</td><td style='vertical-align:top'>
             <strong>Specilized search </strong>$eol 
