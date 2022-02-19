@@ -110,11 +110,14 @@ class freeWheeling_DisplayOne {
             if ( !current_user_can( 'edit_posts' ) )
                 return $msg;
 
-            $msg .= "<hr><br />";
+            $msg .= "<hr>";
             // --------------------------------------------------- update section
             // --------------------------------------------------- update section
             // --------------------------------------------------- update section
-            $msg .= "<br /><form action='/update' method='post' >\n";
+            $msg .= "
+            <form action='/update' method='post' >
+            <table><tr><td>
+            ";
            if ( $debugPath )$msg .= "***** 4 *****displayOne:photoPath $photoPath <br/>";
 
             $sql = "Select * from $rrw_photos 
@@ -151,8 +154,14 @@ class freeWheeling_DisplayOne {
             "<br><strong>People:</strong>
             <input type='text' name='people' size='50' value=\"" . $rec_photo[ "people" ] . "\">" . "\n" .
             "<br><strong>Comments:</strong>
-            <textarea name='comment' rows='5' cols='50' >" . $rec_photo[ "comment" ] . "</textarea>\n" .
-            "<br><strong>Source Directory:</strong>
+            <textarea name='comment' rows='5' cols='50' >" . $rec_photo[ "comment" ] . "</textarea>
+            </td><td align='left'>
+            <img src='$htmlfileref2' alt='small Trail Photo'
+                    $thumbsize id='smallImage' />
+            </td></tr>
+            </table>     
+            
+            <strong>Source Directory:</strong>
             $direonp  
                 [ <a href='http://127.0.0.1/pict/sub.php?direname=$direonp'
                 target='submit' > new picture file</a> ] 
@@ -169,12 +178,17 @@ class freeWheeling_DisplayOne {
             $cntChk = 0;
             $cntTot = 0;
             $msg .= freeWheeling_DisplayOne::keywodCheckboxes( $photoname ) . "
+            
+            
                 <input type='hidden' name='photoname' value='$photoname' />
                 <input type='submit' value=\"Commit all changes\"> &nbsp;
                 <input type='reset'>
                 <a href='/display-one-photo/?photoname=nokey'> 
                         Next no keywords</a>
-            <img src='$fullfilename2' alt='small size image' />
+                <img src='$htmlfileref2' alt='small Trail Photo'
+                    $thumbsize id='smallImage' valign='top' />
+       
+         <!--   <img src='$fullfilename2' alt='small size image' /> -->
                </form>";
             if ( file_exists( $fullfilename1 ) ) {
                 $meta = rrw_exif_read_data( $fullfilename1 );
@@ -309,7 +323,7 @@ class freeWheeling_DisplayOne {
         $msg .= "$eol<strong>Identifiable People:</strong>" . $recset[ "people" ] . "
 <div id='missedClassifi' onclick='openMissedClassifi(this,$photoname);'>
     if any of this infomation is incorrect or missing. Please
-    <a href='/webmaster-feedback'>let us know</a>$eol";
+    <a href='/webmaster-feedback'>let us know</a></div>$eol";
         return $msg;
 
     } // end display table

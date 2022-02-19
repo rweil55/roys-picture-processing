@@ -11,55 +11,53 @@
  * Text Domain: Roys-picture-processng
  * Domain Path: /translation
  
-  * Version: 1.0.21
-
+  * Version: 1.0.22
  */
 // disable direct access
+ini_set( "display_errors", true );
+error_reporting( E_ALL | E_STRICT );
 
-ini_set("display_errors", true);
-error_reporting(E_ALL | E_STRICT);
-
-
-use lsolesen\ pel\ Pel;
-use lsolesen\ pel\ PelConvert;
-use lsolesen\ pel\ PelCanonMakerNotes;
-use lsolesen\ pel\ PelDataWindow;
-use lsolesen\ pel\ PelEntryAscii;
-use lsolesen\ pel\ PelEntryByte;
-use lsolesen\ pel\ PelEntryCopyright;
-use lsolesen\ pel\ PelEntryLong;
-use lsolesen\ pel\ PelEntryNumber;
-use lsolesen\ pel\ PelEntryRational;
-use lsolesen\ pel\ PelEntryShort;
-use lsolesen\ pel\ PelEntrySRational;
-use lsolesen\ pel\ PelEntrySLong;
-use lsolesen\ pel\ PelEntryTime;
+use lsolesen\pel\Pel;
+use lsolesen\pel\PelConvert;
+use lsolesen\pel\PelCanonMakerNotes;
+use lsolesen\pel\PelDataWindow;
+use lsolesen\pel\PelEntryAscii;
+use lsolesen\pel\PelEntryByte;
+use lsolesen\pel\PelEntryCopyright;
+use lsolesen\pel\PelEntryLong;
+use lsolesen\pel\PelEntryNumber;
+use lsolesen\pel\PelEntryRational;
+use lsolesen\pel\PelEntryShort;
+use lsolesen\pel\PelEntrySRational;
+use lsolesen\pel\PelEntrySLong;
+use lsolesen\pel\PelEntryTime;
 //use lsolesen\pel\PelEntryUndefined;
-use lsolesen\ pel\ PelEntryUserComment;
-use lsolesen\ pel\ PelEntryUserCopyright;
-use lsolesen\ pel\ PelEntryVersion;
-use lsolesen\ pel\ PelEntryWindowsString;
-use lsolesen\ pel\ PelEntryUndefined;
-use lsolesen\ pel\ PelExif;
-use lsolesen\ pel\ PelFormat;
-use lsolesen\ pel\ PelIfd;
-use lsolesen\ pel\ PelIfdException;
-use lsolesen\ pel\ PelIllegalFormatException;
-use lsolesen\ pel\ PelInvalidDataException;
-use lsolesen\ pel\ PelJpeg;
-use lsolesen\ pel\ PelJpegComment;
-use lsolesen\ pel\ PelJpegContent;
-use lsolesen\ pel\ PelJpegInvalidMarkerException;
-use lsolesen\ pel\ PelJpegMarker;
-use lsolesen\ pel\ PelMakerNotes;
-use lsolesen\ pel\ PelTag;
-use lsolesen\ pel\ PelTiff;
+use lsolesen\pel\PelEntryUserComment;
+use lsolesen\pel\PelEntryUserCopyright;
+use lsolesen\pel\PelEntryVersion;
+use lsolesen\pel\PelEntryWindowsString;
+use lsolesen\pel\PelEntryUndefined;
+use lsolesen\pel\PelExif;
+use lsolesen\pel\PelFormat;
+use lsolesen\pel\PelIfd;
+use lsolesen\pel\PelIfdException;
+use lsolesen\pel\PelIllegalFormatException;
+use lsolesen\pel\PelInvalidDataException;
+use lsolesen\pel\PelJpeg;
+use lsolesen\pel\PelJpegComment;
+use lsolesen\pel\PelJpegContent;
+use lsolesen\pel\PelJpegInvalidMarkerException;
+use lsolesen\pel\PelJpegMarker;
+use lsolesen\pel\PelMakerNotes;
+use lsolesen\pel\PelTag;
+use lsolesen\pel\PelTiff;
 
 ini_set( "display_errors", true );
 $pel = "/home/pillowan//www-shaw-weil-pictures/wp-content/plugins" .
 "/roys-picture-processng/pel-master/src";
 require_once "$pel/Pel.php";
 require_once "$pel/PelException.php";
+require_once "$pel/PelInvalidArgumentException.php";
 require_once "$pel/PelJpegInvalidMarkerException.php";
 require_once "$pel/PelJpegContent.php";
 require_once "$pel/PelMakerNotes.php";
@@ -82,7 +80,6 @@ require_once "$pel/PelEntryUndefined.php";
 require_once "$pel/PelEntryUserComment.php";
 require_once "$pel/PelEntryVersion.php";
 require_once "$pel/PelEntryWindowsString.php";
-//require_once "$pel/PelEntryUndefined.php";
 require_once "$pel/PelExif.php";
 require_once "$pel/PelFormat.php";
 require_once "$pel/PelIfd.php";
@@ -94,7 +91,6 @@ require_once "$pel/PelJpegComment.php";
 require_once "$pel/PelJpegMarker.php";
 require_once "$pel/PelTag.php";
 require_once "$pel/PelTiff.php";
-
 // commonly used rutines
 require_once "freewheelingeasy-wpdpExtra.php";
 require_once "rrw_util_inc.php";
@@ -102,7 +98,6 @@ require_once "display_stuff_class.php";
 require_once "display_tables_class.php";
 require_once "display_tables_inc.php";
 // picture routines
-
 require_once "admin.php";
 require_once "displayone.php";
 require_once "DisplayPhotogaphers.php";
@@ -114,7 +109,6 @@ require_once "keywordHandling.php";
 require_once "submission.php";
 require_once "update.php";
 require_once "uploadProcessDire.php";
-
 class FreewheelingCommon {
     public static function missingImageMessage( $from, $photoname = "" ) {
         $msg = "This is somewhat embarrassing. The image that you
@@ -127,7 +121,6 @@ class FreewheelingCommon {
                 and tell us what you did to get here ($from) ";
         return $msg;
     } // end funvtion missingImageMessage
-
     public static function copyMeta( $inputPath, $outputPath ) {
         global $eol, $errorBeg, $errorEnd;
         $msg = "";
@@ -135,7 +128,6 @@ class FreewheelingCommon {
         $debug = true;
         ini_set( "displaoy_errors", true );
         error_reporting( E_ALL | E_STRICT );
-
         try {
             $inputPel = new PelJpeg( $inputPath );
             $outputPel = new PelJpeg( $outputPath );
@@ -157,11 +149,9 @@ class FreewheelingCommon {
         return "$msg Meta copied from $eol$inputPath $eol $outputPath $eol";
     }
 } // end of class
-
 function SetConstants( $whocalled ) {
     include "setConstants.php";
 }
-
 function rrw_getAccessID() {
     $current_user = wp_get_current_user();
     if ( !( $current_user instanceof WP_User ) )
@@ -174,15 +164,12 @@ function rrw_getAccessID() {
     $id .= "-" . rrwUtil::fetchparameterString( "USERNAME" );
     return $id;
 }
-
 function updateAccessTable( $photoname, $search ) {
     global $wpdbExtra, $rrw_access;
     global $picrureCookieName;
     global $eol;
     $msg = "";
-
     $userid = rrw_getAccessID();
-
     $update = array( "accessIP" => $userid );
     if ( !empty( $user ) )
         $update[ "accessuser" ] = $user;
@@ -193,7 +180,6 @@ function updateAccessTable( $photoname, $search ) {
     $answer = $wpdbExtra->insert( $rrw_access, $update );
     return $msg;
 }
-
 function direReport( $field, $report = "" ) {
     // count the number of items for a particular field
     global $wpdbExtra, $rrw_photos, $rrw_source;
@@ -208,97 +194,6 @@ function direReport( $field, $report = "" ) {
     $msg .= "there are $blank blank $field out of $total photos $report $eol";
     return $msg;
 }
-/*
-
-function insertdire( $attr ) {
-    global $eol;
-    global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords;
-    $startTime = new DateTime();
-    $msg = "";
-    $msg .= SetConstants( "insertdire" );
-    $msg .= updateDiretoryOnFileMatch();
-    $msg .= updatePhotekeywordsFromKeywordTable();
-    $endTime = new DateTime();
-    $minutes = $endTime->diff( $startTime );
-    $minutes = $minutes->format( "%i:%s" );
-    $msg .= "totaltime $minutes $eol";
-    return $msg;
-}
-
-function updatePhotekeywordsFromKeywordTable() {
-    // used to eliminate the keyword table
-    // moves the keyword entirs into a field in the photo database
-    global $eol;
-    global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords;
-    $msg = "";
-
-    $sql2 = "select keywordFileName, keyword from $rrw_keywords
-            order by keywordFileName, keyword ";
-    $msg .= " -----------------  $sql2 $eol";
-    $recs = $wpdbExtra->get_resultsA( $sql2 );
-    $cntrecs = $wpdbExtra->num_rows;
-    $msg .= "Found $cntrecs rows of data $eol";
-    $cntInsert = 0;
-    $keywordlist = "";
-    $pastFileName = $recs[ 0 ][ "keywordFileName" ];
-    foreach ( $recs as $rec ) {
-        $keyword = $rec[ "keyword" ];
-        $keywordFileName = $rec[ "keywordFileName" ];
-        if ( empty( $keyword ) )
-            continue;
-        if ( $pastFileName != $keywordFileName ) {
-            $cntInsert++;
-            if ( $cntInsert > 3000 )
-                break;
-            $keywordlist = substr( $keywordlist, 1 ); // remove leading coma
-            $sqlup = "update $rrw_photos set photoKeyword = '$keywordlist'
-                    where keywordFileName = $pastFileName ";
-            $cntUps = $wpdbExtra->query( $sqlup );
-            $msg .= "$cntUps -- $sqlup $eol";
-            $pastFileName = $keywordFileName;
-            $keywordlist = "";
-        }
-        $keywordlist .= ", $keyword";
-        //       $msg .= "new key = $keyword --- list is $keywordlist $eol";
-    }
-    return $msg;
-
-} // END updatePhotekeywordsFromKeywordTable
-
-function updateDiretoryOnFileMatch() {
-    // used to relate the entries in photo datta database to the file location on spoke
-    // if file name matchs then update the diterctory field
-    global $eol;
-    global $wpdbExtra, $rrw_photos, $rrw_source;
-    $msg = "";
-
-    $msg .= SetConstants( "updateDiretoryOnFileMatch" );
-    $sql = "select photo_id, sourcedire, directory, sourcefilename, filename 
-            from $rrw_source 
-            right join $rrw_photos on filename = sourcefilename
-            where directory is null";
-    $msg .= "$sql $eol";
-    return $msg;
-    $recs = $wpdbExtra->get_resultsA( $sql );
-    $cntrecs = $wpdbExtra->num_rows;
-    $msg .= "Found $cntrecs rows of data $eol";
-    $cntInsert = 0;
-    foreach ( $recs as $rec ) {
-        $cntInsert++;
-        if ( $cntInsert > 500 )
-            break;
-        $sourcedire = $rec[ "sourcedire" ];
-        $photo_id = $rec[ "photo_id" ];
-        $sqlins = "update $rrw_photos set directory = '$sourcedire'
-                    where photo_id = $photo_id ";
-        $updateCnt = $wpdbExtra->query( $sqlins );
-        $msg .= "$updateCnt -- $sqlins $eol ";
-
-    }
-    return $msg;
-} // wns updateDiretoryOnFileMatch
-
-*/
 
 function updateRename( $filename, $newname, $sourceFullName ) {
     global $eol;
@@ -335,7 +230,6 @@ function updateRename( $filename, $newname, $sourceFullName ) {
                 upload picture file </a> $eol ";
     return $msg;
 }
-
 /*
 function doCopyright( $item ) {
     global $eol;
@@ -462,7 +356,6 @@ function readexifItem( $filename, $item, & $msg ) {
     $debugExif = true;
     ini_set( "display_errors", true );
     error_reporting( E_ALL | E_STRICT );
-
     if ( !file_exists( $filename ) ) {
         $tr = rrwFormat::backtrace( 5 );
         throw new Exception( "$msg $errorBeg E#431 readexifItem: $filename 
@@ -476,13 +369,11 @@ function readexifItem( $filename, $item, & $msg ) {
         return $exif[ $tem ];
     return "&lt;Missing&gt;";
 }
-
 function pushToImage( $filename, $item, $value ) {
     global $eol;
     global $photoPath;
     $msg = "";
     $debugExif = false;
-
     if ( false === strpos( $filename, "home" ) )
         $filename = "$photoPath/$filename" . "_cr.jpg";
     ini_set( 'memory_limit', '32M' );
@@ -494,7 +385,6 @@ function pushToImage( $filename, $item, $value ) {
     $data = new PelDataWindow( $contents );
     if ( $debugExif )$msg .= " new PelDataWindow worked  $eol";
     //    return $msg;
-
     $jpeg = $fileInMemory = new PelJpeg();
     if ( $debugExif )$msg .= " new PelJpeg() worked  $eol";
     //    return $msg;
@@ -508,7 +398,6 @@ function pushToImage( $filename, $item, $value ) {
         if ( $debugExif )$msg .= println( 'No APP1 section found, added new.' );
         $exif = new PelExif(); // create on
         $jpeg->setExif( $exif ); // insert it into the memory version
-
         /* We then create an empty TIFF structure in the APP1 section. */
         $tiff = new PelTiff();
         $exif->setTiff( $tiff );
@@ -525,14 +414,12 @@ function pushToImage( $filename, $item, $value ) {
      * where the image description should be stored.
      */
     $ifd0 = $tiff->getIfd();
-
     if ( $ifd0 == null ) {
         if ( $debugExif )$msg .= println( 'No IFD found, adding new.' );
         $ifd0 = new PelIfd( PelIfd::IFD0 );
         $tiff->setIfd( $ifd0 );
     }
     if ( $debugExif )$msg .= "That compleates setup, get/adjust the data $eol ";
-
     $tag = convertText2EeixID( $item ); // item name into tag integer
     $textThing = $ifd0->getEntry( $tag );
     if ( is_null( $textThing ) ) {
@@ -557,7 +444,7 @@ function pushToImage( $filename, $item, $value ) {
         $textValue = "NULL";
     } else {
         $textValue = $textThing->getValue();
-        if ( $debugExif ) $msg .= rrwUtil::print_r( $textValue, true, "found old value of $item" );
+        if ( $debugExif )$msg .= rrwUtil::print_r( $textValue, true, "found old value of $item" );
         $textThing->setValue( $value );
         if ( $debugExif )$msg .= "setting new value -- $value $eol";
     }
@@ -586,10 +473,8 @@ function pushToImage( $filename, $item, $value ) {
     $oldValue = rrwUtil::print_r( $textValue, true, "old value" );
     $comment = "$basename -- $oldValue -> $value";
     $msg .= rrwUtil::InsertIntoHistory( $itemname, $comment );
-
     return $msg;
 }
-
 function testperl() {
     global $gallery, $eol;
     ini_set( 'display_errors', 1 );
@@ -602,13 +487,11 @@ function testperl() {
     $filename = "$gallery/a3.jpg";
     $last_line = system( 'ls', $retval );
     $msg .= "$eol last line $last_line $eol";
-
     $exifLastLine = system( "Exif/exiftool -s $filename" );
     $msg .= "$eol exif last line -- $exifLastLine  $eol";
     $msg .= "$eol perhaps";
     return $msg;
 }
-
 function writea5( $attr ) {
     ini_set( "display_errors", true );
     global $gallery, $eol;
@@ -630,7 +513,6 @@ function writea5( $attr ) {
      */
     $er->addComment( "This is the commentss" );
     $msg .= "phpExifWriter( comment added $eol";
-
     /**
      * Write back the content to a file
      */
@@ -639,8 +521,6 @@ function writea5( $attr ) {
     $msg .= reada3a4( $attr );
     return $msg;
 }
-
-
 /**
  * PEL: PHP Exif Library.
  * A library with support for reading and
@@ -663,9 +543,7 @@ function writea5( $attr ) {
  * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA 02110-1301 USA
  */
-
 /* a printf() variant that appends a newline to the output. */
-
 function println( $fmt, $value = "" ) {
     global $eol;
     return $fmt;
@@ -673,7 +551,6 @@ function println( $fmt, $value = "" ) {
         $fmt = sprintf( $fmt, $value );
     return "$fmt $eol";
 }
-
 function rrwPHPel( $argv ) {
     /*
      * Store the name of the script in $prog and remove this first part of
@@ -683,16 +560,13 @@ function rrwPHPel( $argv ) {
     ini_set( 'display_errors', 1 );
     ini_set( 'display_startup_errors', 1 );
     error_reporting( E_ALL | E_STRICT );
-
     $msg = "";
     $debug = false;
     try {
         $msg .= SetConstants( "testPel" );
         if ( $debugExif )$msg .= println( "--------------------- emter rrwPHPel $eol" );
-
         $prog = array_shift( $argv );
         $error = false;
-
         /*
          * The next argument could be -d to signal debug mode where lots of
          * extra information is printed out when the image is parsed.
@@ -701,14 +575,12 @@ function rrwPHPel( $argv ) {
             Pel::setDebug( true );
             array_shift( $argv );
         }
-
         /* The mandatory input filename. */
         if ( isset( $argv[ 0 ] ) ) {
             $input = array_shift( $argv );
         } else {
             $error = true;
         }
-
         /* The mandatory output filename. */
         if ( isset( $argv[ 0 ] ) ) {
             $output = array_shift( $argv );
@@ -735,17 +607,14 @@ function rrwPHPel( $argv ) {
             if ( $debug )$msg .= println( '  output  the output file for the changed image.' );
             return $msg;
         }
-
         /* Any remaining arguments are considered the new description. */
         $description = implode( ' ', $argv );
         if ( $debug )$msg .= println( "the new desrription '$description'$eol" );
-
         /*
          * We typically need lots of RAM to parse TIFF images since they tend
          * to be big and uncompressed.
          */
         ini_set( 'memory_limit', '32M' );
-
         /*
          * The input file is now read into a PelDataWindow object. At this
          * point we do not know if the file stores JPEG or TIFF data, so
@@ -756,7 +625,6 @@ function rrwPHPel( $argv ) {
         $buffer = file_get_contents( $input );
         if ( $debug )$msg .= println( "got " . strlen( $buffer ) . "bytes from the files" );
         $data = new PelDataWindow( $buffer );
-
         /*
          * The static isValid methods in PelJpeg and PelTiff will tell us in
          * an efficient maner which kind of data we are dealing with.
@@ -769,7 +637,6 @@ function rrwPHPel( $argv ) {
              * getBytes method), so we store $jpeg as $file too.
              */
             $jpeg = $file = new PelJpeg();
-
             /*
              * We then load the data from the PelDataWindow into our PelJpeg
              * object. No copying of data will be done, the PelJpeg object will
@@ -777,27 +644,23 @@ function rrwPHPel( $argv ) {
              * required.
              */
             $jpeg->load( $data );
-
             /*
              * The PelJpeg object contains a number of sections, one of which
              * might be our Exif data. The getExif() method is a convenient way
              * of getting the right section with a minimum of fuzz.
              */
             $exif = $jpeg->getExif();
-
             if ( $exif == null ) {
                 /*
                  * Ups, there is no APP1 section in the JPEG file. This is where
                  * the Exif data should be.
                  */
                 if ( $debug )$msg .= println( 'No APP1 section found, added new.' );
-
                 /*
                  * In this case we simply create a new APP1 section (a PelExif * object) and adds it to the PelJpeg object.
                  */
                 $exif = new PelExif();
                 $jpeg->setExif( $exif );
-
                 /* We then create an empty TIFF structure in the APP1 section. */
                 $tiff = new PelTiff();
                 $exif->setTiff( $tiff );
@@ -810,33 +673,32 @@ function rrwPHPel( $argv ) {
                 $tiff = $exif->getTiff();
             }
         } elseif ( PelTiff::isValid( $data ) ) {
-                /*
-                 * The data was recognized as TIFF data. We prepare a PelTiff
-                 * object to hold it, and record in $file that the PelTiff object is
-                 * the top-most object (the one on which we will call getBytes).
-                 */
-                $tiff = $file = new PelTiff();
-                /* Now load the data. */
-                $tiff->load( $data );
-            } else {
-                /*
-                 * The data was not recognized as either JPEG or TIFF data.
-                 * Complain loudly, dump the first 16 bytes, and exit.
-                 */
-                if ( $debug )$msg .= println( 'Unrecognized image format! The first 16 bytes follow:', "" );
-                PelConvert::bytesToDump( $data->getBytes( 0, 16 ) );
-                return $msg;;
-            }
             /*
-             * TIFF data has a tree structure much like a file system. There is a
-             * root IFD (Image File Directory) which contains a number of entries
-             * and maybe a link to the next IFD. The IFDs are chained together
-             * like this, but some of them can also contain what is known as
-             * sub-IFDs. For our purpose we only need the first IFD, for this is
-             * where the image description should be stored.
+             * The data was recognized as TIFF data. We prepare a PelTiff
+             * object to hold it, and record in $file that the PelTiff object is
+             * the top-most object (the one on which we will call getBytes).
              */
+            $tiff = $file = new PelTiff();
+            /* Now load the data. */
+            $tiff->load( $data );
+        } else {
+            /*
+             * The data was not recognized as either JPEG or TIFF data.
+             * Complain loudly, dump the first 16 bytes, and exit.
+             */
+            if ( $debug )$msg .= println( 'Unrecognized image format! The first 16 bytes follow:', "" );
+            PelConvert::bytesToDump( $data->getBytes( 0, 16 ) );
+            return $msg;;
+        }
+        /*
+         * TIFF data has a tree structure much like a file system. There is a
+         * root IFD (Image File Directory) which contains a number of entries
+         * and maybe a link to the next IFD. The IFDs are chained together
+         * like this, but some of them can also contain what is known as
+         * sub-IFDs. For our purpose we only need the first IFD, for this is
+         * where the image description should be stored.
+         */
         $ifd0 = $tiff->getIfd();
-
         if ( $ifd0 == null ) {
             /*
              * No IFD in the TIFF data? This probably means that the image
@@ -848,7 +710,6 @@ function rrwPHPel( $argv ) {
             $ifd0 = new PelIfd( PelIfd::IFD0 );
             $tiff->setIfd( $ifd0 );
         }
-
         if ( $debug )$msg .= println( "That compleates setup, get/adjust the data $eol " );
         /*
          * Each entry in an IFD is identified with a tag. This will load the
@@ -869,7 +730,6 @@ function rrwPHPel( $argv ) {
         }
         if ( $debug )
             if ( $debug )$msg .= println( "  -------------------------------- $eol" );
-
         $desc = $ifd0->getEntry( $tag );
         if ( $debug )
             if ( $debug )$msg .= println( "for $tag found the $desc $eol " );
@@ -877,8 +737,6 @@ function rrwPHPel( $argv ) {
             //     We need to check if the image already had a description stored. 
         if ( $desc == null ) {
             //        The was no description in the image. 
-
-
             //   * In this case we simply create a new PelEntryAscii object to hold
             //   * the description. The constructor for PelEntryAscii needs to know
             //   * the tag and contents of the new entry.
@@ -898,23 +756,17 @@ function rrwPHPel( $argv ) {
                     throw new Exception( "E#488 Unknown findtagtype for $tag" );
                     break;
             }
-
-
             //    * This will insert the newly created entry with the description
             //    * into the IFD.
-
             $ifd0->addEntry( $desc );
             //        if ("copyright" == $type)
             //          $desc->setValue($description );
-
         } else {
             //     An old description was found in the image. 
             $oldDescription = rrwUtil::print_r( $desc->getValue(), true, "existng" );
             if ( $debug )$msg .= println( "IMAGE_DESCRIPTION entry from $oldDescription" );
             if ( $debug )$msg .= println( "IMAGE_DESCRIPTION entry TO &nbsp; " . $description );
-
             // The description is simply updated with the new description. 
-
         }
         /*
          * At this point the image on disk has not been changed, it is only
@@ -927,13 +779,11 @@ function rrwPHPel( $argv ) {
         $file->saveFile( $output );
         if ( $debug )$msg .= println( "finished with test Pel $eol" );
         if ( $debug )$msg .= println( "  -------------------------------- end PHPel  $eol" );
-
     } catch ( Exception $ex ) {
         $msg .= "E#400 xxx catch "; // . $ex->get_message();
     }
     return $msg;
 }
-
 function convertText2EeixID( $text ) {
     // codes from https://www.exiftool.org/TagNames/EXIF.html
     global $eol, $errorBeg, $errorEnd;
@@ -958,7 +808,6 @@ function convertText2EeixID( $text ) {
     }
     // assert never  get here.
 }
-
 function findTagtype( $tag ) {
     switch ( $tag ) {
         case PelTag::COPYRIGHT:
@@ -967,7 +816,6 @@ function findTagtype( $tag ) {
             return "ascii";
         case 0x9c9e: // (WindowsXPKeywords)
             return "byte";
-
             //       case PelTag::GPS_LATITUDE:
             //        case PelTag::GPS_LONGITUDE:
             //        case GPS_ALTITUDE:
@@ -983,8 +831,6 @@ function findTagtype( $tag ) {
             throw new Exception( "E#484 Invalid Tag Nameof '$text'" );
     }
 }
-
-
 function testpel2( $attr ) {
     global $gallery, $eol;
     $msg = "";
@@ -992,7 +838,6 @@ function testpel2( $attr ) {
     // lnowntags for the 5th parameter 
     $input_file = "/home/pillowan/www-shaw-weil-pictures/photos/028682_ms5-73_011798_cr.jpg";
     //  $output_file = "/home/pillowan/www-shaw-weil-pictures/photos/028682_ms5-73_011798_cr.jpg";
-
     //  $input_file = "$gallery/a3.jpg";
     $output_file = "$gallery/a5.jpg";
     // Copyright info to add
@@ -1001,11 +846,9 @@ function testpel2( $attr ) {
     $msg .= dumpMeta( $input_file, $output_file );
     return $msg;
 }
-
 function changeItem( $input_file, $output_file, $item, $newVale ) {
     global $gallery, $eol;
     $msg = "";
-
     $tag = convertText2EeixID( $item );
     $argv = array( "rrwPHPel",
         //        "-d",
@@ -1017,7 +860,6 @@ function changeItem( $input_file, $output_file, $item, $newVale ) {
     $msg .= rrwPHPel( $argv );
     return $msg;
 }
-
 function testpel() {
     global $gallery, $eol;
     $msg = "";
@@ -1041,8 +883,6 @@ function testpel() {
     }
     return $msg;
 }
-
-
 function testpel3() {
     global $photoPath, $eol;
     $msg = "";
@@ -1056,7 +896,6 @@ function testpel3() {
         $tag = convertText2EeixID( "desc" ); // works
         $tag = convertText2EeixID( "keyword" ); // fails
         $tag = convertText2EeixID( "copyright" ); // works
-
         $argv = array( "rrwPHPel",
             //       "-d",
             $input_file,
@@ -1068,11 +907,9 @@ function testpel3() {
     } catch ( Exception $ex ) {
         $msg .= "E#400 testpel3 catch " . $ex->get_message();
     }
-
     $msg .= dumpMeta( $input_file, $output_file );
     return $msg;
 }
-
 function dumpMeta( $file1 = "", $file2 = "" ) {
     global $eol, $errorBeg, $errorEnd;
     $msg = "";
@@ -1104,11 +941,10 @@ function dumpMeta( $file1 = "", $file2 = "" ) {
     $msg .= "</table>";
     return $msg;
 }
-
-function rrw_exif_read_data($file) {
-    error_reporting(E_ALL ^ E_WARNING);
-    $exifArray = exif_read_data($file);
-    error_reporting (E_ALL || E_STRICT);
+function rrw_exif_read_data( $file ) {
+    error_reporting( E_ALL ^ E_WARNING );
+    $exifArray = exif_read_data( $file );
+    error_reporting( E_ALL || E_STRICT );
     return $exifArray;
 }
 function reada3a4( $attr ) {
@@ -1136,15 +972,13 @@ add_shortcode( "displayupdate", array( "freeWheeling_DisplayUpdate", "DisplayUpd
 add_shortcode( "fix", array( "freewheeling_fixit", "fit_it" ) );
 add_shortcode( "fixtasklist", array( "fixTaskList", "showlist" ) );
 add_shortcode( "rrwPicSubmission", array( "rrwPicSubmission", "showForm" ) );
-add_shortcode( "upload", array("uploadProcessDire", "upload") );
-
+add_shortcode( "upload", array( "uploadProcessDire", "upload" ) );
 add_shortcode( "insertdire", "insertdire" );
 add_shortcode( "perl", "testperl" );
 add_shortcode( "addtag", "addtag" );
 add_shortcode( "reada3a4", "reada3a4" );
 add_shortcode( "writea5", "writea5" );
 add_shortcode( "testPel", "testPel3" );
-
 require 'plugin_update_check.php';
 $MyUpdateChecker = new PluginUpdateChecker_2_0(
     'http://pluginserver.royweil.com/roys-picture-processng.php',
@@ -1152,6 +986,4 @@ $MyUpdateChecker = new PluginUpdateChecker_2_0(
     'roys-very-picture-processng',
     1
 );
-
-
 ?>

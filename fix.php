@@ -1055,7 +1055,7 @@ copyright, keywords, meta, rename $eol";
             $sqlUpdate = array();
             if ( !file_exists( $fullFile ) )
                 throw new Exception( "$errorBeg E#448  file $fullFile not found $errorEnd" );
-            $msg .= "<a href='display-one-photo?photoname=$photoname' target='one'          >$photoname </a>, ";
+            if($debugForce) $msg .= "<a href='display-one-photo?photoname=$photoname' target='one'          >$photoname </a>, ";
             // --------------------------------------------- exif
             // https://exiftool.org/TagNames/EXIF.html list most tags
             $fileExif = rrw_exif_read_data( $fullFile );

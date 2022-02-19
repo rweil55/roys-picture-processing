@@ -145,7 +145,7 @@ class uploadProcessDire {
             if ( file_exists( $FullfileHighRes ) ) { // check for existing
                 $replacephoto = rrwUtil::fetchparameterString( "replacephoto" );
                 if ( 'on' == $replacephoto ) {
-                    $msg .= "Per your request existing phot will be replaced $eol";
+                    $msg .= "Per your request existing photo will be replaced $eol";
                     unlink( $FullfileHighRes );
                 } else {
                     $dateMod = filemtime( $FullfileHighRes );

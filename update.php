@@ -1,15 +1,12 @@
 <?php
 // called by the Commit all changes button via action='update'8/11
-
 class freeWheeling_DisplayUpdate {
-
     static public function DisplayUpdate( $attr ) {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_photographers, $rrw_keywords;
         global $photoUrl, $photoPath, $thumbUrl, $thumbPath, $highresUrl, $highresPath;
         $msg = "";
         ini_set( "display_errors", true );
-
         try {
             $debug = false;
             //   if ( $debug ) print rrwUtil::print_r( $_POST, true, "Post input" );
@@ -27,12 +24,10 @@ class freeWheeling_DisplayUpdate {
             $direonp = rrwUtil::fetchparameterString( "direonp", $attr );
             list( $msgTemp, $keyWordList ) = self::fetchParameterKeywordList( $attr );
             $msg .= $msgTemp;
-
             if ( ( strlen( $location ) < 1 ) )
                 $location = "Unspecified";
             if ( ( strlen( $photodate ) < 1 ) )
                 $photodate = "Unknown";
-
             $sqlOld = "select * from $rrw_photos where filename = '$photoname'";
             $recsold = $wpdbExtra->get_resultsA( $sqlOld );
             if ( 1 < $wpdbExtra->num_rows )
@@ -51,10 +46,8 @@ class freeWheeling_DisplayUpdate {
             $msg .= self::compare( "people", $people, $recOld );
             $msg .= self::compare( "comment", $comment, $recOld );
             $msg .= self::compare( "DireOnP", $direonp, $recOld );
-
             $msg .= self::compare( "PhotoDate", $photodate, $recOld );
             $msg .= self::compare( "photoKeyword", $keyWordList, $recOld );
-
             if ( $debug ) {
                 $sqlCheck = "select * from $rrw_photos where filename ='$photoname'";
                 $rec = $wpdbExtra->get_resultsA( $qlChexk );
@@ -67,14 +60,11 @@ class freeWheeling_DisplayUpdate {
             print "E#490" . $ex->getMessage();
         }
         return $msg;
-
     } // end DisplayUpdate
-
     private static function fetchParameterKeywordList( $attr ) {
         // keyword display list is numbered, return comma seperated list
         $msg = "";
         $debug = false;
-
         // get the new keywords entered
         $keywordcnt = rrwUtil::fetchparameterString( "keywordcnt", $attr );
         $keywordList = rrwUtil::fetchparameterString( "commalist", $attr );
@@ -101,7 +91,6 @@ class freeWheeling_DisplayUpdate {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_photos, $rrw_photographers, $rrw_keywords;
         $msg = "";
-
         $dubigCompare = false;
         if ( $dubigCompare )$msg .= " compare( $itemName, $newValue -> ";
         $oldValue = $rec[ $itemName ];
