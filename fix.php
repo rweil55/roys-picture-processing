@@ -52,6 +52,9 @@ class freewheeling_fixit {
                 case "deletephoto":
                     $msg .= freewheeling_fixit::deletePhoto();
                     break;
+                 case "sourcepush":
+                    $msg .= freewheeling_fixit::sourcePush();
+                    break;
                 case "SourceLoc":
                     $msg .= freewheeling_fixit::direonpOnFileMatch();
                     break;
@@ -68,7 +71,7 @@ class freewheeling_fixit {
                     $msg .= freewheeling_fixit::extraKeyword();
                     break;
                 case "filelike":
-                    $msg .= freewheeling_fixit::filelike();
+                    $msg .= freewheeling_fixit::filelike($attr);
                     break;
                 case "filesmissing":
                     $msg .= self::filesmissing();
@@ -200,8 +203,8 @@ copyright, keywords, meta, rename $eol";
         }
         $cntFound = 0;
         foreach ( $dirlistRes as $highres ) {
-            $highresTest = str_replace(".jpg", "", $highres);
-            $highresTest = str_replace("$highresPath/", "", $highresTest);
+            $highresTest = str_replace( ".jpg", "", $highres );
+            $highresTest = str_replace( "$highresPath/", "", $highresTest );
             if ( !array_key_exists( $highresTest, $photolist ) ) {
                 $msg .= "$highresTest is not in the photo table,
                 but we have a high resolotion photo $eol ";
@@ -671,19 +674,64 @@ copyright, keywords, meta, rename $eol";
         return $msg;
     }
 
-    private static function fileLike() {
+    public static function fileLike($attr) {
         global $eol;
-        global $photoDB, $rrw_source;
+        global $wpdbExtra, $rrw_source;
         $msg = "";
 
-        $slqFind = "select filename from $rrw_photos where copyright = ''
-            and not $photogrhers =''";
-        $msg .= "found " .
+        $partial = rrwUtil::fetchparameterString( "partial", $attr );
+        $msg .= "<form method='get' action='/fix/'>
+            <input type='text' id='partial' name='partial' value='$partial' />
+            <input type='hidden' id='task' name='task' value='filelike' />
+            <input type='submit' value='go find' />
+            </form>";
+        if ( empty( $partial ) )
+            return $msg;
 
-        $sql = "update $rrw_photos set copyright = (select copyrightdefault from $rrw_photographers )}"; // missng source
-        $msg .= ( "<!-- sql is $sql -->\n" );
-        $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
-            "source with file name like '$partfile'" );
+        // lets look
+        foreach (array("sourceFullName, searchName",
+                       "searchName, sourceFullName") as $sort) {
+            $msg .= "<hr> <strong>sorted by $sort</strong> $eol";
+        $sqlFind = "select searchName, sourceFullName from $rrw_source 
+                where searchName like '%$partial%' 
+                or sourceFullName like '%$partial%' 
+                order by $sort ";
+        $recs = $wpdbExtra->get_resultsA( $sqlFind );
+        $msg .= "Found " . $wpdbExtra->num_rows . " records like '$partial' $eol";
+
+        $msg .= "<table>\n";
+        $color = rrwUtil::colorswap();
+        foreach ( $recs as $rec ) {
+        $color = rrwUtil::colorswap($color);
+           
+            $photoname = $rec[ "searchName" ];
+            $dironp = $rec[ "sourceFullName" ];
+            $link ="<a href='/fix/task=pushSurce&photoname=$photoname" .
+                    "&source=$dironp' > update photoname</a> ";
+            $msg .= rrwFormat::CellRow( $color, $photoname, $dironp, $link );
+        }
+        $msg .= "</table>\n";
+        }
+        return $msg;
+    }
+    
+    private static function sourcePush ($attr) {
+             global $eol;
+        global $wpdbExtra, $rrw_photo;
+        $msg = "";
+ 
+        $photoname = rrwUtil::fetchprameterString("photonamd");
+        $source = rrwUtil::fetchprameterString("source");
+        if (enpty($photoname) || empty($source))
+            throw new Exception ("$msg $errorBeg 
+                    E#657 missing photoname or source dire $errorEnd");
+        $sqlUpdate = "update $rrw_aphotos set dironp = '$source'
+                            where filename = '$photoname'";
+        $cntUpdate = $wpdbExtra->query($sqlUpdate);
+        if (1 != $cntUpdate)
+            throw new Exception ("$msg $errorBeg 
+                    E#658 record did <strong>not</strong> update $errorEnd");
+        $msg .= "record updated $eol";
         return $msg;
     }
 
@@ -1055,7 +1103,7 @@ copyright, keywords, meta, rename $eol";
             $sqlUpdate = array();
             if ( !file_exists( $fullFile ) )
                 throw new Exception( "$errorBeg E#448  file $fullFile not found $errorEnd" );
-            if($debugForce) $msg .= "<a href='display-one-photo?photoname=$photoname' target='one'          >$photoname </a>, ";
+            if ( $debugForce )$msg .= "<a href='display-one-photo?photoname=$photoname' target='one'          >$photoname </a>, ";
             // --------------------------------------------- exif
             // https://exiftool.org/TagNames/EXIF.html list most tags
             $fileExif = rrw_exif_read_data( $fullFile );

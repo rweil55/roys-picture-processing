@@ -63,10 +63,11 @@ class freeWheeling_DisplayOne {
             $fullfilename1 = "$photoPath/{$photoname}_cr.jpg";
             $htmlfileref2 = "$thumbUrl/{$photoname}_tmb.jpg";
             $fullfilename2 = "$thumbPath/{$photoname}_tmb.jpg";
-              if ( !file_exists( $fullfilename1 ) ) {
+            if ( !file_exists( $fullfilename1 ) ) {
                 $msg .= FreewheelingCommon::missingImageMessage( "E#957 
                         in display a photo, looking for image file $fullfilename1.
                         URL = " . home_url(), $photoname );
+                $msg .= freewheeling_fixit::filelike( array( "partial" => $photoname ) );
                 return $msg;
             }
             /*  displaywidth is based on screen size 
@@ -79,8 +80,8 @@ class freeWheeling_DisplayOne {
                 $displaywidth = $displaywidth * ( $displayHeight / $maxHeight );
             }
             */
-            $thumbInfo = getimagesize($fullfilename2);
-            $thumbsize = $thumbInfo[3];
+            $thumbInfo = getimagesize( $fullfilename2 );
+            $thumbsize = $thumbInfo[ 3 ];
             if ( false ) {
                 // let wordpress determine image size
                 $msg .= "<figure class='wp-block-image size-large'><img 
@@ -88,9 +89,9 @@ class freeWheeling_DisplayOne {
             } else {
                 $h_screen = rrwUtil::fetchparameterInteger( "h_screen" ) - 30;
                 $w_screen = rrwUtil::fetchparameterInteger( "w_screen" );
-          //      $aspect = $w_screen / $h_screen;
-          //      $adjust = $h_screen / $h_cr;
-          //      $w_desired = round( $w_cr * $adjust, 0 ) . "px";
+                //      $aspect = $w_screen / $h_screen;
+                //      $adjust = $h_screen / $h_cr;
+                //      $w_desired = round( $w_cr * $adjust, 0 ) . "px";
                 $msg .= "<img src='$htmlfileref1' alt='Trail Photo'
                         height='auto' width='$$w_screen' id='bigImage' />
                         &nbsp; ";
@@ -118,7 +119,7 @@ class freeWheeling_DisplayOne {
             <form action='/update' method='post' >
             <table><tr><td>
             ";
-           if ( $debugPath )$msg .= "***** 4 *****displayOne:photoPath $photoPath <br/>";
+            if ( $debugPath )$msg .= "***** 4 *****displayOne:photoPath $photoPath <br/>";
 
             $sql = "Select * from $rrw_photos 
                         where filename = '$photoname' ";
@@ -128,9 +129,9 @@ class freeWheeling_DisplayOne {
                 throw new Exception( "406 not find while looking for trail $eol 
                         $eol $sql $eol $eol" );
             $rec_photo = $rec_photo_query[ 0 ];
-            
+
             $msg .= "<input type='hidden' name='copyright' id='copyright'
-                value='" . $rec_photo["copyright"] . "' /> \n;";
+                value='" . $rec_photo[ "copyright" ] . "' /> \n;";
             $msg .= "<a href='$photoUrl/{$photoname}_cr.jpg'>
                 $photoname</a>&nbsp; 
             [ <a href='/admin'>admin </a> ] [ <A href='fix?task=tag' >tag </a> ]
@@ -161,8 +162,14 @@ class freeWheeling_DisplayOne {
             </td></tr>
             </table>     
             
-            <strong>Source Directory:</strong>
-            $direonp  
+            <strong>Source Directory:</strong>";
+            if ( empty( $dironp ) ) {
+                $msg .= "Search: 
+                <a href='/fix/?task=filelike&partiel=$photoname' >$photoname</a>";
+            } else {
+                $msg .= $direonp;
+            }
+            $msg .= "                
                 [ <a href='http://127.0.0.1/pict/sub.php?direname=$direonp'
                 target='submit' > new picture file</a> ] 
                 [ <a href='/display-one-photo/?photoname=nokey'> 
