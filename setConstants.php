@@ -2,6 +2,7 @@
 
 global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords, $rrw_trails;
 global $rrw_photographer, $rrw_photographers, $rrw_access, $rrw_history;
+global $rrw_digipix;
 global $eol, $errorBeg, $errorEnd;
 global $photoUrl, $photoPath, $thumbUrl, $thumbPath, $highresUrl, $highresPath;
 global $rejectUrl, $rejectPath;
@@ -32,6 +33,7 @@ try {
     $rrw_keywords = $tablePrefix . "keywords";
     $rrw_photographers = $tablePrefix . "photographers";
     $rrw_trails = $tablePrefix . "trails";
+    $rrw_digipix = $tablePrefix . "digipix";
 
     $siteUrl = get_site_url();
     $photoUrl = "$siteUrl/photos";

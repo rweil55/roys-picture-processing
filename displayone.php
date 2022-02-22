@@ -129,13 +129,18 @@ class freeWheeling_DisplayOne {
                 throw new Exception( "406 not find while looking for trail $eol 
                         $eol $sql $eol $eol" );
             $rec_photo = $rec_photo_query[ 0 ];
+            $photographer = $rec_photo["photographer"];
 
-            $msg .= "<input type='hidden' name='copyright' id='copyright'
-                value='" . $rec_photo[ "copyright" ] . "' /> \n;";
+            
+
+             $msg .= "<input type='hidden' name='copyright' id='copyright'
+                value='" . $rec_photo["copyright"] . "' /> \n;";
             $msg .= "<a href='$photoUrl/{$photoname}_cr.jpg'>
-                $photoname</a>&nbsp; 
-            [ <a href='/admin'>admin </a> ] [ <A href='fix?task=tag' >tag </a> ]
+                $photoname</a> ] &nbsp; 
+            [ uploaded $uploaddate 
+           
             &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 
+            
             [ <a href='/fix?task=deletephoto&del2=$photoname&del3=$photoname'>
             Delete photo ]</a> $eol";
             #listbox2( $db, $table, $field, $oldvalue, $sortField )
@@ -149,7 +154,8 @@ class freeWheeling_DisplayOne {
                 <input type='text' name='photodate' size='20' value=\"" . $rec_photo[ "PhotoDate" ] . "\">" . "\n" . "$eol 
                 <strong>upload date:</strong> 
                 <input type='text' name='uploaddate' size='20' 
-        value=\"" . $rec_photo[ "uploaddate" ] . "\">" . "\n" .
+        value=\"" . $rec_photo[ "uploaddate" ] . "\">\n" .
+                " <a href='/submission/?photographer=$photographer&inputfile=" . "$photoname&replacephoto=on' >reload image </a> " .
             "<br>Location: <input type='text' name='location' size='50' 
         value=\"" . $rec_photo[ "location" ] . "\">" . "\n" .
             "<br><strong>People:</strong>

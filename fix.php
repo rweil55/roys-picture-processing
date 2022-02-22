@@ -14,6 +14,7 @@ class freewheeling_fixit {
         $msg = "";
 
         try {
+            $msg .= rrwUtil::allowedToEdit( "fix things" );
             $msg .= SetConstants( "updateDiretoryOnFileMatch" );
             $task = rrwUtil::fetchparameterString( "task" );
             switch ( $task ) { // those tasks which do not reqire a line in
@@ -52,7 +53,7 @@ class freewheeling_fixit {
                 case "deletephoto":
                     $msg .= freewheeling_fixit::deletePhoto();
                     break;
-                 case "sourcepush":
+                case "sourcepush":
                     $msg .= freewheeling_fixit::sourcePush();
                     break;
                 case "SourceLoc":
@@ -71,7 +72,7 @@ class freewheeling_fixit {
                     $msg .= freewheeling_fixit::extraKeyword();
                     break;
                 case "filelike":
-                    $msg .= freewheeling_fixit::filelike($attr);
+                    $msg .= freewheeling_fixit::filelike( $attr );
                     break;
                 case "filesmissing":
                     $msg .= self::filesmissing();
@@ -98,10 +99,43 @@ class freewheeling_fixit {
                     $msg .= freewheeling_fixit::test();
                     break;
                 default:
-                    $msg .= "#498 unkown task of'$task' $eol Try bydate,cleanup,
-copyright,filelike, mosource, rename, removecreditline --
-future direonp, close, keyword, meta
-copyright, keywords, meta, rename $eol";
+                    $msg .= "
+       <a href='/fix/?task=add' >upload photos from the source table</a>$eol 
+       <a href='/fix/?task=addlist' >list available photos from the source      
+                                        table</a>$eol 
+       <a href='/fix/?task=by date' > list photos aded between 'startdate' and
+                                        'enddate' </a>$eol 
+       <a href='/admin#delete' > delete photo - See admin </a>$eol 
+       <a href='/fix/?task=duplicatephoto' > set duplicate photo flag </a>$eol 
+       <a href='/fix/?task=exifmissing' > photo with no exif data </a>$eol 
+       <a href='/fix/?task=forcedatabase' > force database to match exif </a>$eol 
+       <a href='/fix/?task=rename' > rename a photo </a>$eol 
+   <strong>File consistancy</strong>$eol
+      <a href='/fix/?task=highresmissing' > high resolution image
+                                            missing </a>$eol 
+      <a href='/fix/?task=photomissing' > photo information missing</a>$eol 
+      <a href='/fix/?task=filesmissing' > highres missng _cr, _tmb </a>$eol 
+       
+   <strong>Copyright</strong>$eol
+     <a href='/fix/?task=badcopyright' > copyright not begining with 
+                                        copyright </a>$eol
+       <a href='/fix/?task=copyrightfix' > fix missing Copyright based on 
+                                        photographer </a>$eol 
+    <strong>souce data</strong>$eol
+        <a href='/fix/?task=SourceLocClose' > close match photoname of  
+                                            dire/photoname spoke</a>$eol 
+       <a href='/fix/?task=SourceLocMatch' > close match photoname of  
+                                            dire/photoname spoke </a>$eol 
+      <a href='/fix/?task=filelike' > find source file like 'partfile' </a>$eol 
+   <strong>keywords</strong>$eol
+      <a href='/fix/?task=keywordDups' > list photos with 
+                                            duplicate keywords </a>$eol 
+       <a href='/fix/?task=extrakeyword' > list sql to update keyword table
+                                                from photo descrioin</a>$eol 
+        <a href='/fix/?task=keywordForm' > merge/delete keywords </a>$eol 
+     
+      ";
+                    return $msg;
                     break;
             }
         } catch ( Exception $ex ) {
@@ -674,9 +708,9 @@ copyright, keywords, meta, rename $eol";
         return $msg;
     }
 
-    public static function fileLike($attr) {
+    public static function fileLike( $attr ) {
         global $eol;
-        global $wpdbExtra, $rrw_source;
+        global $wpdbExtra, $rrw_source, $rrw_digipix;
         $msg = "";
 
         $partial = rrwUtil::fetchparameterString( "partial", $attr );
@@ -689,48 +723,61 @@ copyright, keywords, meta, rename $eol";
             return $msg;
 
         // lets look
-        foreach (array("sourceFullName, searchName",
-                       "searchName, sourceFullName") as $sort) {
+
+        foreach ( array( "sourceFullName, searchName",
+                "searchName, sourceFullName" ) as $sort ) {
             $msg .= "<hr> <strong>sorted by $sort</strong> $eol";
-        $sqlFind = "select searchName, sourceFullName from $rrw_source 
+            $sqlFind = "select searchName, sourceFullName from $rrw_source 
                 where searchName like '%$partial%' 
                 or sourceFullName like '%$partial%' 
+                union  
+                select digifilename, digipath from $rrw_digipix 
+                where digifilename like '%$partial%' 
+                or digipath like '%$partial%' 
                 order by $sort ";
-        $recs = $wpdbExtra->get_resultsA( $sqlFind );
-        $msg .= "Found " . $wpdbExtra->num_rows . " records like '$partial' $eol";
 
-        $msg .= "<table>\n";
-        $color = rrwUtil::colorswap();
-        foreach ( $recs as $rec ) {
-        $color = rrwUtil::colorswap($color);
-           
-            $photoname = $rec[ "searchName" ];
-            $dironp = $rec[ "sourceFullName" ];
-            $link ="<a href='/fix/task=pushSurce&photoname=$photoname" .
-                    "&source=$dironp' > update photoname</a> ";
-            $msg .= rrwFormat::CellRow( $color, $photoname, $dironp, $link );
-        }
-        $msg .= "</table>\n";
+            $recs = $wpdbExtra->get_resultsA( $sqlFind );
+            $msg .= "Found " . $wpdbExtra->num_rows . " records like '$partial' $eol";
+
+            $msg .= "<table>\n";
+            $color = rrwUtil::colorswap();
+            foreach ( $recs as $rec ) {
+                $color = rrwUtil::colorswap( $color );
+
+                $photoname = $rec[ "searchName" ];
+                $direonp = $rec[ "sourceFullName" ];
+                $link = "<a href='/fix/task=pushSurce&photoname=$photoname" .
+                "&source=$direonp' > update photoname</a> ";
+                if ( strncmp( "g:", $direonp, 2 ) == 0 )
+                    $first = "<a href='http://127.0.0.1/" . substr( $direonp, 3 ) . "/$photoname' 
+                target='showiamge' >$photoname</a>";
+                else
+                    $first = "$photoname";
+                $msg .= rrwFormat::CellRow( $color, $first, $direonp, $link );
+            }
+
+
+            $msg .= "</table>\n";
         }
         return $msg;
     }
-    
-    private static function sourcePush ($attr) {
-             global $eol;
+
+    private static function sourcePush( $attr ) {
+        global $eol;
         global $wpdbExtra, $rrw_photo;
         $msg = "";
- 
-        $photoname = rrwUtil::fetchprameterString("photonamd");
-        $source = rrwUtil::fetchprameterString("source");
-        if (enpty($photoname) || empty($source))
-            throw new Exception ("$msg $errorBeg 
-                    E#657 missing photoname or source dire $errorEnd");
+
+        $photoname = rrwUtil::fetchprameterString( "photonamd" );
+        $source = rrwUtil::fetchprameterString( "source" );
+        if ( enpty( $photoname ) || empty( $source ) )
+            throw new Exception( "$msg $errorBeg 
+                    E#657 missing photoname or source dire $errorEnd" );
         $sqlUpdate = "update $rrw_aphotos set dironp = '$source'
                             where filename = '$photoname'";
-        $cntUpdate = $wpdbExtra->query($sqlUpdate);
-        if (1 != $cntUpdate)
-            throw new Exception ("$msg $errorBeg 
-                    E#658 record did <strong>not</strong> update $errorEnd");
+        $cntUpdate = $wpdbExtra->query( $sqlUpdate );
+        if ( 1 != $cntUpdate )
+            throw new Exception( "$msg $errorBeg 
+                    E#658 record did <strong>not</strong> update $errorEnd" );
         $msg .= "record updated $eol";
         return $msg;
     }
