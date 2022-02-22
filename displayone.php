@@ -58,6 +58,7 @@ class freeWheeling_DisplayOne {
             $photographer = $recset[ "photographer" ];
             $direonp = $recset[ "DireOnP" ];
             $trail_name = $recset[ "trail_name" ];
+            $uploaddate = $recset[ "uploaddate" ];
             if ( $debugPath )$msg .= "**** 5 ******displayOne:photoUrl $photoPath <br/>";
             $htmlfileref1 = "$photoUrl/{$photoname}_cr.jpg";
             $fullfilename1 = "$photoPath/{$photoname}_cr.jpg";
@@ -204,7 +205,12 @@ class freeWheeling_DisplayOne {
          <!--   <img src='$fullfilename2' alt='small size image' /> -->
                </form>";
             if ( file_exists( $fullfilename1 ) ) {
-                $meta = rrw_exif_read_data( $fullfilename1 );
+                try {
+                    $meta = rrw_exif_read_data( $fullfilename1 );
+                   }  // end try
+                catch (Exception $ex) {
+                    $msg .= $ex->getMessage() . "$errorBeg  E#668 error loading the exif for '$fullfilename1' $errorEnd";
+                }
                 if ( false !== $meta ) {
                     $msg .= rrwUtil::print_r( $meta, true, "EXIF data for $fullfilename1" );
                 } else {

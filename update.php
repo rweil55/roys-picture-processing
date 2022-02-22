@@ -34,7 +34,7 @@ class freeWheeling_DisplayUpdate {
                 $msg .= "$errorBeg E#858 caution more than one photos 
                             database. $errorEnd";
             if ( 0 == $wpdbExtra->num_rows )
-                throw new Exception( "$errorBeg no photo redond found,
+                throw new Exception( "$errorBeg no photo record found,
                         can not update $errorEnd $sqlOld $eol" );
             $recOld = $recsold[ 0 ];
             // $msg .= rrwUtil::print_r($recOld, true, "Old records");
@@ -51,13 +51,13 @@ class freeWheeling_DisplayUpdate {
             if ( $debug ) {
                 $sqlCheck = "select * from $rrw_photos where filename ='$photoname'";
                 $rec = $wpdbExtra->get_resultsA( $qlChexk );
-                $msg .= rrwUtil::print_r( $rec, true, "Check redord" );
+                $msg .= rrwUtil::print_r( $rec, true, "Check record" );
                 $msg .= "<h3>Update completed</h3>
                 <a href='/display-one-photo/?photoname=$photoname' >$photoname</a>";
             } else
                 $msg .= freeWheeling_DisplayOne::DisplayOne( null );
         } catch ( Exception $ex ) {
-            print "E#490" . $ex->getMessage();
+            $msg .= "E#490" . $ex->getMessage();
         }
         return $msg;
     } // end DisplayUpdate
@@ -85,7 +85,7 @@ class freeWheeling_DisplayUpdate {
         if ( $debug )$msg .= "commalist: $commalist $eol";
         return array( $msg, $keywordList );
     }
-  
+
     public static function compare( $itemName, $newValue, $rec ) {
         //compare old and new value, update if different
         global $eol, $errorBeg, $errorEnd;

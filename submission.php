@@ -22,7 +22,7 @@ class rrwPicSubmission {
 
         try {
             $debugsubmit = false;
-            if ($debugsubmit) $msg .= rrwUtil::print_r( $_FILES, true, "Files" );
+            if ( $debugsubmit )$msg .= rrwUtil::print_r( $_FILES, true, "Files" );
             $photographer = rrwUtil::fetchparameterString( "photographer" );
             if ( empty( $photographer ) )
                 throw new RuntimeException( 'you must selct a photographer.' );
@@ -81,13 +81,31 @@ class rrwPicSubmission {
                 throw new RuntimeException( 'Failed to move uploaded file.' );
             }
             // ---- file to be created in upload, now create database record
-            $Insert = array( "photographer" => $photographer,
-                "filename" => $DataFilename,
-            );
-            $cntchaged = $wpdbExtra->replace( $rrw_photos, $Insert );
+            $sqlExisting = "select * from $rrw_photos 
+                        where filename = '$DataFilename'";
+            $recs = $wpdbExtra->get_resultsA( $sqlExisting );
+            if ( 0 == $wpdbExtra->num_rows ) {
+                $Insert = array(
+                    "photographer" => $photographer,
+                    "filename" => $DataFilename,
+                    "uploaddate" => date( "Y-m-d" ),
+                );
+                $cntchaged = $wpdbExtra->insert( $rrw_photos, $Insert );
+                $msg .= rrwUtil::InsertIntoHistory( $DataFilename, "
+                                        new photograper photographer" );
+            } else {
+                $update = array( "uploaddate" => date( "Y-m-d" ) );
+                $photographerOld = $recs[ 0 ][ "photographer" ];
+                if ( $photographer != $photographerOld ) {
+                    $update[ "photographer" ] = $photographer;
+                    $cnt = $wpdbExtra->update( $rrw_photos, $update, array( "filename = '$DataFilename' " ) );
+                    $msg .= rrwUtil::InsertIntoHistory( $DataFilename, "
+                        photograper $photographerOld -> $photographer" );
+                }
+            }
             $msg .= rrwUtil::InsertIntoHistory( $DataFilename, "uploaded " );
             $msg .= "File was uploaded successfully to $newfile $eol";
-            if ($debugsubmit) $msg .= "lets process upload dire$eol";
+            if ( $debugsubmit )$msg .= "lets process upload dire$eol";
             $msg .= uploadProcessDire::upload();
 
         } catch ( RuntimeException $e ) {
@@ -103,12 +121,12 @@ class rrwPicSubmission {
         $msg = "";
 
         $photographer = rrwUtil::fetchparameterString( "photographer" );
-        if (empty($photographer)) {
-            if (array_key_exists("photographer", $_COOKIE) && 
-                                 ! empty($_COOKIE["photographer"]))
-            $photographer = $_COOKIE["photographer"];
+        if ( empty( $photographer ) ) {
+            if ( array_key_exists( "photographer", $_COOKIE ) &&
+                !empty( $_COOKIE[ "photographer" ] ) )
+                $photographer = $_COOKIE[ "photographer" ];
         }
-        $_COOKIE["photographer"] = $photographer;
+        $_COOKIE[ "photographer" ] = $photographer;
         $msg .= "<form  method='post' enctype=\"multipart/form-data\" > ";
         $sqltaker = "select photographer from $rrw_photographers
                     order by photographer";
@@ -134,7 +152,7 @@ class rrwPicSubmission {
                 &nbsp; <input type='checkbox' name='replacephoto' id='replacephoto'> repace existing image</input>$eol$eol";
 
         $msg .= "<input type='submit' name='submit' id='submit'
-        value='Upload the picture, Display it so I can select the tags' /> $eol
+        value='Upload the picture, Display it so I can select the keywords' /> $eol
         </form> $eol;";
         $msg .= "not yet";
         return $msg;

@@ -1153,7 +1153,12 @@ class freewheeling_fixit {
             if ( $debugForce )$msg .= "<a href='display-one-photo?photoname=$photoname' target='one'          >$photoname </a>, ";
             // --------------------------------------------- exif
             // https://exiftool.org/TagNames/EXIF.html list most tags
-            $fileExif = rrw_exif_read_data( $fullFile );
+            try {
+                $fileExif = rrw_exif_read_data( $fullFile );
+            } // end try
+            catch ( Exception $ex ) {
+                throw new Exception( "$msg E#469 " . $ex->getMessage() . " while        reading exif of '$fullFile' in Do_forceDatabse2matchexif " );
+            }
             if ( empty( $fileExif ) || !is_array( $fileExif ) )
                 throw new Exception( "$errorBeg #854 Fetch of exif 
                                 from $fullFile failed $errorEnd" );
@@ -1221,7 +1226,7 @@ class freewheeling_fixit {
                 " to be updated in $answer record $eol";
             }
         } catch ( Exception $ex ) {
-            $msg .= "$msg E#440 in exif " . $ex->getMessage();
+            $msg .= "$msg E#440 in Do_forceDatabse2matchexif " . $ex->getMessage();
         }
         return $msg;
     } // end function exif
@@ -1230,39 +1235,46 @@ class freewheeling_fixit {
         global $eol;
 
         $debugTime = false;
-        // -----------------------------------------------------------  datetime
-        // return the photo data in the formst YYYY-MM-DD
-        // or return blank
-        $pictureDate = ""; // date not present in photo
-        if ( !is_array( $fileExif ) )
-            return $pictureDate;
-        foreach ( array( /* all times are strings  */
-                "datetimeoriginal", "DateTimeOriginal",
-                "datetimedigitized",
-                "previewdatetime", "PreviewDateTime",
-                "ModifyDate", "modifydate",
-                //       "gpstimestamp", "GPSTimeStamp", // rational64 number
-                "gpsdatestamp", "GPSDateStamp" ) as $dateKey ) {
-            if ( array_key_exists( $dateKey, $fileExif ) ) {
-                $pictureDate = $fileExif[ $dateKey ];
-                break;
+        try {
+            // -----------------------------------------------------------  datetime
+            // return the photo data in the formst YYYY-MM-DD
+            // or return blank
+            $pictureDate = ""; // date not present in photo
+            if ( !is_array( $fileExif ) )
+                return $pictureDate;
+            foreach ( array( /* all times are strings  */
+                    "datetimeoriginal", "DateTimeOriginal",
+                    "datetimedigitized",
+                    "previewdatetime", "PreviewDateTime",
+                    "ModifyDate", "modifydate",
+                    //       "gpstimestamp", "GPSTimeStamp", // rational64 number
+                    "gpsdatestamp", "GPSDateStamp" ) as $dateKey ) {
+                if ( array_key_exists( $dateKey, $fileExif ) ) {
+                    $pictureDate = $fileExif[ $dateKey ];
+                    break;
+                }
             }
+            if ( empty( $pictureDate ) )
+                return $pictureDate;
+            // now get the correct format
+            if ( strncmp( "16450", $pictureDate, 5 ) == 0 ) {
+                if ( $debugTime ) print "pictureDate $pictureDate is unix ";
+                $pictureDate = gmdate( "Y-m-d H:i", $pictureDate );
+                if ( $debugTime ) print "calculate = $pictureDate";
+                return $pictureDate;
+            }
+            if ( $debugTime ) print "pictureDate $pictureDate $eol";
+            $picdate = new DateTime( $pictureDate );
+            $picFormated = $picdate->format( "Y-m-d" );
+            if ( $debugTime ) print "$pictureDate goes to $picFormated $eol";
+            return $picFormated;
+        } // end try
+        catch ( Exception $ex ) {
+            print $ex->getMessage() . "$errorBeg  E#673 somewher in 
+                getPhotoDateTime with a datekey of $datekey $errorEnd";
+            return "";
         }
-        if ( empty( $pictureDate ) )
-            return $pictureDate;
-        // now get the correct format
-        if ( strncmp( "16450", $pictureDate, 5 ) == 0 ) {
-            if ( $debugTime ) print "pictureDate $pictureDate is unix ";
-            $pictureDate = gmdate( "Y-m-d H:i", $pictureDate );
-            if ( $debugTime ) print "calculate = $pictureDate";
-            return $pictureDate;
-        }
-        if ( $debugTime ) print "pictureDate $pictureDate $eol";
-        $picdate = new DateTime( $pictureDate );
-        $picFormated = $picdate->format( "Y-m-d" );
-        if ( $debugTime ) print "$pictureDate goes to $picFormated $eol";
-        return $picFormated;
-        // TimeZoneOffset
+        return $msg;
     } // end  getPhotoDateTime function
 
     private static function test() {
