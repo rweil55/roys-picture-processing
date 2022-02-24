@@ -2,7 +2,7 @@
 class freewheeling_displayPhotos {
     static public function displayPhotos( $attr ) {
         global $eol;
-        global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords;
+        global $wpdbExtra, $rrw_photos, $rrw_keywords;
         global $photoUrl, $photoPath, $thumbUrl, $thumbPath,
         $highresUrl, $highresPath;
         $msg = "";

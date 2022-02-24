@@ -139,19 +139,12 @@ class freeWheeling_DisplayOne {
 
 
             $msg .= "<input type='hidden' name='copyright' id='copyright'
-                value='$copyright' /> \n;";
-            $msg .= "<a href='$photoUrl/{$photoname}_cr.jpg'>
-                $photoname</a> ] &nbsp; 
-            [ uploaded $uploaddate 
-           
-            &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 
-            
-            [ <a href='/fix?task=deletephoto&del2=$photoname&del3=$photoname'>
-            Delete photo ]</a> $eol";
-            #listbox2( $db, $table, $field, $oldvalue, $sortField )
+                value='$copyright' /> \n";
             $msg .= "<strong>Trail:</strong>" .
             freeWheeling_DisplayOne::listbox2( $wpdbExtra, "$rrw_trails",
-                "trailName", $trail_name, "trailName" ) . $eol;
+                "trailName", $trail_name, "trailName" ) . " &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 
+            [ <a href='/fix?task=deletephoto&del2=$photoname&del3=$photoname'>
+            Delete photo ]</a> $eol";
             $msg .= "<strong>Photogrpher:</strong>" .
             freeWheeling_DisplayOne::listbox2( $wpdbExtra, "$rrw_photographers",
                 "photographer", $photographer, "photographer" ) . $eol;
@@ -168,7 +161,7 @@ class freeWheeling_DisplayOne {
             <input type='text' name='people' size='50' 
                         value='$people' >" . "\n" .
             "<br><strong>Comments:</strong>
-            <textarea name='comment' rows='5' cols='50' >'$comment' </textarea>
+            <textarea name='comment' rows='5' cols='50' >$comment</textarea>
             </td><td align='left'>
             <img src='$htmlfileref2' alt='small Trail Photo'
                     $thumbsize id='smallImage' />
@@ -178,7 +171,7 @@ class freeWheeling_DisplayOne {
             <strong>Source Directory:</strong>";
             if ( empty( $dironp ) ) {
                 $msg .= "Search: 
-                <a href='/fix/?task=filelike&partiel=$photoname' >$photoname</a>";
+                <a href='/fix/?task=filelike&partial=$photoname' >$photoname</a>";
             } else {
                 $msg .= $direonp;
             }

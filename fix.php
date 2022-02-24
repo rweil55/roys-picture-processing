@@ -820,8 +820,11 @@ class freewheeling_fixit {
         global $eol;
         global $rrw_photos;
         $msg = "";
+        
         $sqlWhere = rrwUtil::fetchparameterString( "where" );
         $sqlWhere = str_replace( "xxy", "'", $sqlWhere );
+        $sqlWhere = htmlspecialchars_decode ($sqlWhere);
+        
         $description = rrwUtil::fetchparameterString( "description" );
         //  item is  trail_name, direonp
         $sql = "select filename, trail_name, photographer, photostatus, 

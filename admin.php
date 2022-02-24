@@ -39,14 +39,6 @@ class freewhilln_Administration_Pictures {
             $msg .= ( "<!-- sql is $sql -->\n" );
             $missngsource = $wpdbExtra->get_var( $sql );;
             $missngsourceCnt = $wpdbExtra->num_rows;
-            $sql = "select filename from $rrw_photos where uploaddate < '2021-03-17' ";
-            $msg .= ( "<!-- sql is $sql -->\n" );
-            $missngsource = $wpdbExtra->get_var( $sql );;
-            $before3_17 = $wpdbExtra->num_rows;
-            $sql = "select filename from $rrw_photos where uploaddate >= '2021-03-17' ";
-            $msg .= ( "<!-- sql is $sql -->\n" );
-            $missngsource = $wpdbExtra->get_var( $sql );;
-            $after3_17 = $wpdbExtra->num_rows;
             $sql = "select Filename from $rrw_photos 
                         where Filename not in (
                                 select keywordFilename 
@@ -84,7 +76,7 @@ class freewhilln_Administration_Pictures {
                 group by keyword, keywordFilename having count(*) > 1";
             $recKeywordDup = $wpdbExtra->get_resultsA( $sqlKeywordDups );
             $cntKeywordDup = $wpdbExtra->num_rows;
-            $sqlMore = "select count(*) from $rrw_digipix where sourcestatus = 'use' and sourcePath like '%w-pa-trails%' or
+            $sqlMore = "select count(*) from $rrw_digipix where sourcestatus = 'use' and ( sourcePath like '%w-pa-trails%' or
                       sourcePath like '%ytrek%' ) and 
                      not sourceFilename in (select filename from $rrw_photos)";
             $cntMore = $wpdbExtra->get_var( $sqlMore );
@@ -108,9 +100,10 @@ class freewhilln_Administration_Pictures {
             $msg .= "$photorejectCnt photos rejected/duplicates $eol";
             $msg .= "$keyWithCnt distinct photos in the keyword database$eol";
             $msg .= self::EmptyCount( "direonp", "source file" );
-            $msg .= "
-                $before3_17 with load dates before 3/17 $eol
-                $after3_17 with load dates after 3/17 $eol";
+            $msg .= self::SQLcount("with load dates before 3/17", 
+                             "uploaddate < '2021-03-17' " );
+            $msg .= self::SQLcount("with load dates after 3/16", 
+                             "uploaddate > '2021-03-16' " );
             $msg .= "$photogUsedCnt <a  href='/display-photographers/'
                     target='list' >
                     distinct photographers</a> used of $PhotogTotalCnt 
@@ -216,10 +209,11 @@ Too upload new photos.
     private static function EmptyCount( $item, $description ) {
         $msg = "";
         $sqlWhere = "( $item = '' or $item = 'unknown' ) and photostatus = 'use' ";
-        $msg .= self::SQLcount( $item, $description, $sqlWhere );
+        $msg .= self::SQLcount( $description, $sqlWhere );
         return $msg;
     } // end enptycount
-    private static function SQLcount( $item, $description, $sqlWhere ) {
+    
+    private static function SQLcount( $description, $sqlWhere ) {
         global $wpdbExtra, $rrw_photos;
         global $eol;
         $msg = "";
