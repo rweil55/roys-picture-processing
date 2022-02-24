@@ -283,7 +283,7 @@ class freeWheeling_DisplayOne {
     }
 
     private static function DisplayTableDataOne( $recset ) {
-        global $photoUrl, $photoPath, $highresPath;
+        global $photoUrl, $photoPath, $highresPath, $thumbPath;
         global $eol;
         $msg = "";
 
@@ -300,19 +300,27 @@ class freeWheeling_DisplayOne {
         } else {
             $photographerDisplay = $recset[ "photographer" ] . "</td>\n ";
         }
+        
         $fullname = "$photoPath/$photoname" . "_cr.jpg";
         if ( file_exists( $fullname ) ) {
             $photoSize = getimagesize( $fullname );
             $sizeDisplay = $photoSize[ 3 ];
         } else
             $sizeDisplay = "";
+        
         $fullHighRes = "$highresPath/$photoname.jpg";
-        if (file_exists($fullHighRes)) {
-        $photoSize = getimagesize( $fullHighRes );
-        if ( !is_array( $photoSize ) )
-             $sizeHighres = $photoSize[ 3];
+        if ( file_exists( $fullHighRes ) ) {
+            $photoSize = getimagesize( $fullHighRes );
+            $sizeHighres = $photoSize[ 3 ];
         } else
-            $sizeHighres  ="";
+            $sizeHighres = "";
+        
+        $fullThumb = "$thumbPath/$photoname" . "_tmb.jpg";
+        if ( file_exists( $fullThumb ) ) {
+            $photoSize = getimagesize( $fullThumb );
+            $sizeThumb = $photoSize[ 3 ];
+        } else
+            $sizeThumb = "";
         //  -------------------------------------------------- Now the display
         $msg .= " File is <a href='$photoUrl/{$photoname}_cr.jpg'>$photoname</a>
                 &nbsp; &nbsp; &nbsp; &nbsp; " . $recset[ 'comment' ] . "$eol";
@@ -322,8 +330,8 @@ class freeWheeling_DisplayOne {
         $msg .= rrwFormat::CellRow( "Location: ", $recset[ "location" ],
             "Photo Date: ", $recset[ "PhotoDate" ] );
         $msg .= rrwFormat::CellRow( "Photo Size ",
-            "<a href='$photoUrl/{$photoname}_cr.jpg'>this $sizeDisplay</a>,
-                High Resolution size $sizeHighres" );
+            "<a href='$photoUrl/{$photoname}_cr.jpg'>this - $sizeDisplay</a>,
+                High Resolution - $sizeHighres, ThumbNail - $sizeThumb " );
         $msg .= "</table>";
         $copyRight = $recset[ "copyright" ];
         if ( empty( $copyRight ) )

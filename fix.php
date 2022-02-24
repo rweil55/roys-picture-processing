@@ -52,12 +52,6 @@ class freewheeling_fixit {
                 case "deletephoto":
                     $msg .= freewheeling_fixit::deletePhoto();
                     break;
-                case "sourcepush":
-                    $msg .= freewheeling_fixit::sourcePush();
-                    break;
-                case "SourceLoc":
-                    $msg .= freewheeling_fixit::direonpOnFileMatch();
-                    break;
                 case "duplicatephoto":
                     $msg .= freewheeling_fixit::setUseStatus( "duplicate" );
                     break;
@@ -81,6 +75,15 @@ class freewheeling_fixit {
                     break;
                 case "photomissing":
                     $msg .= self::photomissing();
+                    break;
+                case "sourcepush":
+                    $msg .= freewheeling_fixit::sourcePush();
+                    break;
+                case "SourceLoc":
+                    $msg .= freewheeling_fixit::direonpOnFileMatch();
+                    break;
+                case "upload":
+                    $msg .= self::upload();
                     break;
                 case "keyworddups":
                     $msg .= freewheeling_fixit::keywordDups();
@@ -186,16 +189,16 @@ class freewheeling_fixit {
         $dirlistRes = self::getFileList( $highresPath );
         $dirlist_cr = self::getFileList( $photoPath );
         $dirlist_cr = self::getFileList( $photoPath );
-        
+
         $msg .= "<strong>There is high resolution image, 
                     but no display (_cr) image </strong><br>";
         foreach ( $dirlistRes as $file => $fileFull ) {
             if ( !array_key_exists( $file, $dirlist_cr ) )
                 $msg .= "$fileFull is not in $photoPath $eol ";
         }
-     $msg .= "<strong>There isdisplay (_cr) image, 
+        $msg .= "<strong>There isdisplay (_cr) image, 
                     but no high resolution image </strong><br>";
-           foreach ( $dirlist_cr as $file => $fileFull ) {
+        foreach ( $dirlist_cr as $file => $fileFull ) {
             if ( !array_key_exists( $file, $dirlistRes ) )
                 $msg .= "$fileFull is not in $highresPath $eol ";
         }
@@ -233,9 +236,9 @@ class freewheeling_fixit {
         global $highresPath;
         $msg = "";
 
-       $msg .= "<strong>There is high resolution image, 
+        $msg .= "<strong>There is high resolution image, 
                     but no meta information in the database </strong><br>";
-         $dirlistRes = self::getFileList( $highresPath );
+        $dirlistRes = self::getFileList( $highresPath );
 
         $sqlall = "select filename from $rrw_photos";
         $recAlls = $wpdbExtra->get_resultsA( $sqlall );
@@ -257,6 +260,9 @@ class freewheeling_fixit {
         return $msg;
     }
 
+    private static function upload() {
+        return "not yet imlmented";
+    }
 
     public static function Author2Copyright( $attr ) {
         // copy the database coppyright to the photo
@@ -354,7 +360,7 @@ class freewheeling_fixit {
 
     public static function extraKeywordCnts( $list = false ) {
         global $eol;
-        global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords, $rrw_trails;
+        global $wpdbExtra, $rrw_photos, $rrw_digipix, $rrw_keywords, $rrw_trails;
         $msg = "";
 
         $sqlKey = "select keyword from $rrw_keywords";
@@ -403,15 +409,15 @@ class freewheeling_fixit {
 
     private static function setUseStatus( $newStatus ) {
         global $eol, $errorBeg, $errorEnd;
-        global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords, $rrw_trails;
+        global $wpdbExtra, $rrw_photos, $rrw_digipix, $rrw_keywords, $rrw_trails;
         global $photoPath, $thumbPath, $highresPath;
         $msg = "";
         $debug = false;
         $photoname = rrwUtil::fetchparameterString( "photoname" );
         if ( empty( $photoname ) )
             return "$msg $eol $errorBeg No photoname specifed $errorEnd";
-        $sqlsetUseStatus = "update $rrw_source set sourcestatus = '$newStatus' 
-                        where searchname = '$photoname'";
+        $sqlsetUseStatus = "update $rrw_digipix set sourcestatus = '$newStatus' 
+                        where sourceFilename = '$photoname'";
         $answer = $wpdbExtra->query( $sqlsetUseStatus );
         $msg .= "$answer &nbsp; $sqlsetUseStatus $eol ";
         $sqlsetUseStatus = "update $rrw_photos set photostatus = '$newStatus' 
@@ -429,7 +435,7 @@ class freewheeling_fixit {
 
     private static function addphotos() {
         global $eol;
-        global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords, $rrw_trails;
+        global $wpdbExtra, $rrw_photos, $rrw_digipix, $rrw_keywords, $rrw_trails;
         global $photoPath, $thumbPath, $highresPath;
         $msg = "";
         $debug = false;
@@ -445,11 +451,11 @@ class freewheeling_fixit {
             $trailname = $recCoor[ "trailName" ];
             $shortname = $recCoor[ "trail_short_name" ];
             $msg .= "----- Extracting $trailname with $shortname $eol";
-            $sql = "SELECT sourceFullName, searchname from $rrw_source 
-                    where not searchname in 
+            $sql = "SELECT sourcePath, sourceFilename from $rrw_digipix 
+                    where not sourceFilename in 
                         (select filename from $rrw_photos) 
-                        and sourcestatus = 'use' and sourceFullName like '%$shortname%'
-                        order by searchname";
+                        and sourcestatus = 'use' and sourceFilename like '%$shortname%'
+                        order by sourceFilename";
             if ( $debug )$msg .= "$sql $eol";
             $recPhotos = $wpdbExtra->get_resultsA( $sql );
             $msg .= "found " . $wpdbExtra->num_rows . " of photos to add $eol";
@@ -460,8 +466,8 @@ class freewheeling_fixit {
                 $cnt++;
                 if ( $cnt > 10 )
                     break 2;
-                $filename = $recPhoto[ "searchname" ];
-                $direonp = $recPhoto[ "sourceFullName" ];
+                $filename = $recPhoto[ "sourceFilename" ];
+                $direonp = $recPhoto[ "sourcePath" ];
                 $msg .= rrwFormat::CellRow( $filename, $trailname, $direonp );
                 $sqlInsert = "insert into $rrw_photos (filename, trail_name, photographer, 
             direonp) values (
@@ -484,21 +490,21 @@ class freewheeling_fixit {
     }
     public static function addsearch( $fields ) {
         global $eol;
-        global $rrw_photos, $rrw_source;
+        global $rrw_photos, $rrw_digipix;
         $msg = "";
 
-        $sql = "select $fields from $rrw_source where sourcestatus = 'use' and
-                    (sourcefullname like '%w-pa-trails%' or
-                     sourcefullname like '%ytrek%' ) and 
-                    not searchname in (select filename from $rrw_photos)";
+        $sql = "select $fields from $rrw_digipix where sourcestatus = 'use' and
+                    (sourcePath like '%w-pa-trails%' or
+                     sourcePath like '%ytrek%' ) and 
+                    not sourceFilename in (select filename from $rrw_photos)";
         return $sql;
     }
     private static function addList() {
         // display a list of field that might added
         global $eol;
         $msg = "";
-        $sql = freewheeling_fixit::addsearch( " searchname, sourcefullname" ) .
-        " order by sourcefullname, searchname"; // a sql to find addtional files to add
+        $sql = freewheeling_fixit::addsearch( " sourceFilename, sourcePath" ) .
+        " order by sourcePath, sourceFilename"; // a sql to find addtional files to add
         $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
             "photos that might be uploaded", 20 );
         return $msg;
@@ -507,7 +513,7 @@ class freewheeling_fixit {
     private static function deletePhoto() {
 
         global $eol, $errorBeg, $errorEnd;
-        global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords;
+        global $wpdbExtra, $rrw_photos, $rrw_digipix, $rrw_keywords;
         global $photoPath, $thumbPath, $highresPath, $rejectPath;
         $msg = "";
 
@@ -540,8 +546,8 @@ class freewheeling_fixit {
         $answer = $wpdbExtra->query( $sql );
         $msg .= "$answer keyword record, &nbsp; ";
 
-        $sqlreject = "update $rrw_source set sourcestatus = 'reject' 
-                        where searchname = '$filename'";
+        $sqlreject = "update $rrw_digipix set sourcestatus = 'reject' 
+                        where sourceFilename = '$filename'";
         $answer = $wpdbExtra->query( $sqlreject );
         $msg .= "$answer source record, &nbsp; ";
 
@@ -598,10 +604,10 @@ class freewheeling_fixit {
         global $eol;
         global $wpdbExtra, $rrw_keywords, $rrw_photos;
         $msg = "";
-        
+
         $submit = rrwUtil::fetchparameterString( "submit" );
         if ( empty( $submit ) ) {
-            if (!isset($old))
+            if ( !isset( $old ) )
                 $old = "";
             $msg .= "<form> 
             Old Keyword:<input type='text' name='old' id = 'old' />,
@@ -671,11 +677,11 @@ class freewheeling_fixit {
         $msg = "";
 
         $startdate = rrwUtil::fetchparameterString( "startdate" );
-        $startdate = new DateTime ($startdate);
-        $startdate = $startdate->format("Y-m-d");   
+        $startdate = new DateTime( $startdate );
+        $startdate = $startdate->format( "Y-m-d" );
         $enddate = rrwUtil::fetchparameterString( "enddate" );
-        $enddate = new DateTime ($enddate);
-        $enddate = $enddate->format("Y-m-d");
+        $enddate = new DateTime( $enddate );
+        $enddate = $enddate->format( "Y-m-d" );
         $update = " DATE_FORMAT(uploaddate, '%Y-%m-%d') ";
         $sql = "select direonp, filename, photostatus from $rrw_photos where 
     '$startdate' <= $update and $update < '$enddate'"; // missng source
@@ -726,7 +732,7 @@ class freewheeling_fixit {
 
     public static function fileLike( $attr ) {
         global $eol;
-        global $wpdbExtra, $rrw_source, $rrw_digipix;
+        global $wpdbExtra, $rrw_digipix;
         $msg = "";
 
         $partial = rrwUtil::fetchparameterString( "partial", $attr );
@@ -740,16 +746,13 @@ class freewheeling_fixit {
 
         // lets look
 
-        foreach ( array( "sourceFullName, searchName",
-                "searchName, sourceFullName" ) as $sort ) {
+        foreach ( array( "sourcePath, sourceFilename",
+                "sourceFilename, sourcePath" ) as $sort ) {
             $msg .= "<hr> <strong>sorted by $sort</strong> $eol";
-            $sqlFind = "select searchName, sourceFullName from $rrw_source 
-                where searchName like '%$partial%' 
-                or sourceFullName like '%$partial%' 
-                union  
-                select digifilename, digipath from $rrw_digipix 
-                where digifilename like '%$partial%' 
-                or digipath like '%$partial%' 
+            $sqlFind = "
+                select sourcefilename, sourcepath, sourceaspect from $rrw_digipix 
+                where sourcefilename like '%$partial%' 
+                or sourcepath like '%$partial%' 
                 order by $sort ";
 
             $recs = $wpdbExtra->get_resultsA( $sqlFind );
@@ -760,16 +763,20 @@ class freewheeling_fixit {
             foreach ( $recs as $rec ) {
                 $color = rrwUtil::colorswap( $color );
 
-                $photoname = $rec[ "searchName" ];
-                $direonp = $rec[ "sourceFullName" ];
-                $link = "<a href='/fix/task=pushSurce&photoname=$photoname" .
-                "&source=$direonp' > update photoname</a> ";
-                if ( strncmp( "g:", $direonp, 2 ) == 0 )
+                $photoname = $rec[ "sourcefilename" ];
+                $direonp = $rec[ "sourcepath" ];
+                $aspect = $rec[ "sourceaspect" ];
+                $link = " [ <a href='/fix/?task=sourcepush&photoname=$photoname" .
+                "&sourcepath=$direonp' > update sourcename</a> ] ";
+                $link .= " [ <a href='/fix/?task=upload&photoname=$photoname" .
+                "&source=$direonp' > upload and process</a> ] ";
+                if ( strncmp( "d:", $direonp, 2 ) == 0 )
                     $first = "<a href='http://127.0.0.1/" . substr( $direonp, 3 ) . "/$photoname' 
-                target='showiamge' >$photoname</a>";
+                target='showimage' >$photoname</a>";
                 else
                     $first = "$photoname";
-                $msg .= rrwFormat::CellRow( $color, $first, $direonp, $link );
+                $msg .= rrwFormat::CellRow( $color, $first, $aspect,
+                    $direonp, $link );
             }
 
 
@@ -778,25 +785,35 @@ class freewheeling_fixit {
         return $msg;
     }
 
-    private static function sourcePush( $attr ) {
-        global $eol;
-        global $wpdbExtra, $rrw_photo;
+    private static function sourcePush( $attr = "" ) {
+        global $eol, $errorBeg, $errorEnd;
+        global $wpdbExtra, $rrw_photos;
         $msg = "";
 
-        $photoname = rrwUtil::fetchprameterString( "photonamd" );
-        $source = rrwUtil::fetchprameterString( "source" );
-        if ( enpty( $photoname ) || empty( $source ) )
+        $photoname = rrwPara::String( "photoname", $attr );
+        $sourcePath = rrwPara::String( "sourcepath", $attr );
+        if ( empty( $photoname ) || empty( $sourcePath ) )
             throw new Exception( "$msg $errorBeg 
-                    E#657 missing photoname or source dire $errorEnd" );
-        $sqlUpdate = "update $rrw_aphotos set dironp = '$source'
+                    E#657 missing photoname or sourcePath dire $errorEnd" );
+        $sqlExist = "select * from $rrw_photos where filename = '$photoname'";
+        $wpdbExtra->query( $sqlExist );
+        if ( 0 == $wpdbExtra->num_rows ) {
+            $msg .= "creating a new record, 
+                    <a href=fix/?task=upload&photoname=$photoname > 
+                    will need to be uploaded</a> $eol";
+            $sqlinsert = "insert inot $rrw_photos set filename = '$filename',
+                        direonp = '$sourcePath'";
+            $cnt = $wpdbExtra->query( $sqlInsert );
+            $msg .= "inserted $cnt records $eol ";
+        } else {
+            $sqlUpdate = "update $rrw_photos set direonp = '$sourcePath'
                             where filename = '$photoname'";
-        $cntUpdate = $wpdbExtra->query( $sqlUpdate );
-        if ( 1 != $cntUpdate )
-            throw new Exception( "$msg $errorBeg 
-                    E#658 record did <strong>not</strong> update $errorEnd" );
-        $msg .= "record updated $eol";
+            $cntUpdate = $wpdbExtra->query( $sqlUpdate );
+            $msg .= "update $cntUpdate records 
+            <a href='/display-one-photo?photoname=$photoname' > $photoname </a>$eol ";
+        }
         return $msg;
-    }
+    } // end functin sourcepath()
 
 
     private static function listing() {
@@ -851,7 +868,7 @@ class freewheeling_fixit {
                     switch ( $name ) {
                         case 'filename':
                         case "keywordfilename":
-                        case "searchname":
+                        case "sourceFilename":
                             $valu = freewheeling_fixit::formatPhotoLink( $valu );
                             break;
                         case 'photographer':
@@ -875,22 +892,22 @@ class freewheeling_fixit {
         return $msg;
     }
 
-    private static function updateRename( $filename, $newname, $sourceFullName ) {
+    private static function updateRename( $filename, $newname, $sourcePath ) {
         global $eol, $errorBeg, $errorEnd;
-        global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords;
+        global $wpdbExtra, $rrw_photos, $rrw_keywords;
         global $photoPath, $thumbPath, $highresPath;
         $msg = "";
 
         $debug = true;
-        if ( $debug )$msg .= "updateRename( $filename, $newname, $sourceFullName ) ";
+        if ( $debug )$msg .= "updateRename( $filename, $newname, $sourcePath ) ";
 
         if ( empty( $filename ) ) {
             $filename = trim( rrwUtil::fetchparameterString( "filename" ) );
             $newname = trim( rrwUtil::fetchparameterString( "new" ) );
-            $sourceFullName = trim( rrwUtil::fetchparameterString( "source" ) );
+            $sourcePath = trim( rrwUtil::fetchparameterString( "source" ) );
         }
-        if ( empty( $sourceFullName && "dale" == substr( $newname, 0, 4 ) ) ) {
-            $sourceFullName = "P:/film-scan/" . substr( $newname, 0, 6 ) . "/IMAGES/$newname.jpg";
+        if ( empty( $sourcePath && "dale" == substr( $newname, 0, 4 ) ) ) {
+            $sourcePath = "P:/film-scan/" . substr( $newname, 0, 6 ) . "/IMAGES/$newname.jpg";
         }
         if ( empty( $newname ) ) {
             $msg .= "<form >
@@ -915,7 +932,7 @@ class freewheeling_fixit {
                     not replaced $errorEnd";
         else {
             $sqlupdate = "update $rrw_photos set filename = '$newname',
-                direOnP = '$sourceFullName' where filename ='$filename' ";
+                direOnP = '$sourcePath' where filename ='$filename' ";
             $rec = $wpdbExtra->query( $sqlupdate );
             $msg .= "$sqlupdate $eol";
         } // ------------------------------------------------  direonp
@@ -938,7 +955,7 @@ class freewheeling_fixit {
                 upload picture file </a> ] ";
         return $msg;
 
-    } // end  updateRename( $filename, $newname, $sourceFullName ) {
+    } // end  updateRename( $filename, $newname, $sourcePath ) {
 
     private static function checkAndRename( $fileFrom, $fileTo ) {
         global $eol;
@@ -959,17 +976,17 @@ class freewheeling_fixit {
         // used to relate the entries in photo datta database to the file location on spoke
         // if file name matchs then update the diterctory field
         global $eol;
-        global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_photographers;
+        global $wpdbExtra, $rrw_photos, $rrw_digipix, $rrw_photographers;
         $msg = "";
         $debug = false;
         try {
             $msg .= SetConstants( "updateDiretoryOnFileMatch" );
             $msg .= direReport( "direonp", "with blank DireOnP" );
             //      return $msg;
-            $sql = "select direonp, sourcefullname, searchname from $rrw_photos 
-            left join $rrw_source on filename=searchname 
-                where searchname is not null and not direonp = sourcefullname 
-                    and sourcestatus ='use' order by searchname";
+            $sql = "select direonp, sourcePath, sourceFilename from $rrw_photos 
+            left join $rrw_digipix on filename=sourceFilename 
+                where sourceFilename is not null and not direonp = sourcePath 
+                    and sourcestatus ='use' order by sourceFilename";
             if ( $debug );
             $msg .= "$sql $eol";
             $recs = $wpdbExtra->get_resultsA( $sql );
@@ -983,13 +1000,13 @@ class freewheeling_fixit {
                 if ( $cntInsert > 500 )
                     break;
                 $direonp = $rec[ "direonp" ];
-                $sourcefullname = $rec[ "sourcefullname" ];
-                $searchname = $rec[ "searchname" ];
-                $sqlins = "update $rrw_photos set direonp = '$sourcefullname'
-                    where filename = '$searchname' ";
+                $sourcePath = $rec[ "sourcePath" ];
+                $sourceFilename = $rec[ "sourceFilename" ];
+                $sqlins = "update $rrw_photos set direonp = '$sourcePath'
+                    where filename = '$sourceFilename' ";
                 $updateCnt = $wpdbExtra->query( $sqlins );
                 if ( $debug )$msg .= "$updateCnt -- $sqlins $eol ";
-                $sqlList[ $searchname ] = $sourcefullname;
+                $sqlList[ $sourceFilename ] = $sourcePath;
 
             }
             $msg .= direReport( "direonp", "with blank DireOnP" ) . "$eol <table> $eol";
@@ -1017,14 +1034,14 @@ class freewheeling_fixit {
 
 
         } catch ( Exception $ex ) {
-            $msg .= "E3494 in direonpOnFileMatch $sourcefullname" . $ex->getMessage();
+            $msg .= "E3494 in direonpOnFileMatch $sourcePath" . $ex->getMessage();
         }
         return $msg;
     } // wns updateDiretoryOnFileMatch
 
     private static function updateDiretoryCloseFileMatch() {
         global $eol;
-        global $wpdbExtra, $rrw_photos, $rrw_source;
+        global $wpdbExtra, $rrw_photos, $rrw_digipix;
         $msg = "";
         // used to relate the entries in photo datta database to the file location on spoke
         // if file name is close (contains) then update the diterctory field
@@ -1039,7 +1056,7 @@ class freewheeling_fixit {
         $photos = array();
         foreach ( $recs as $rec )
             array_push( $photos, $rec[ "Filename" ] );
-        $sqlSource = "select sourceFullName, searchName from $rrw_source 
+        $sqlSource = "select sourcePath, sourceFilename from $rrw_digipix 
                     where sourcestatus = 'use'";
         $recPcs = $wpdbExtra->get_resultsA( $sqlSource );
         $cntrecs = $wpdbExtra->num_rows;
@@ -1053,11 +1070,11 @@ class freewheeling_fixit {
         $testPass = 2; // new file naame is forced to match
         $TestPass = 3; //
         foreach ( $recPcs as $recPC ) {
-            $searchName = $recPC[ "searchName" ];
-            $sourceFullName = $recPC[ "sourceFullName" ];
+            $sourceFilename = $recPC[ "sourceFilename" ];
+            $sourcePath = $recPC[ "sourcePath" ];
 
             for ( $ii = 0; $ii < count( $photos ); $ii++ ) {
-                if ( strpos( $photos[ $ii ], $searchName ) !== false ) {
+                if ( strpos( $photos[ $ii ], $sourceFilename ) !== false ) {
                     // got a match update databse rename files
                     switch ( $testPass ) {
                         case 1:
@@ -1067,28 +1084,28 @@ class freewheeling_fixit {
                             break;
                         case 2:
                             $filename = $photos[ "$ii" ];
-                            $newname = $searchName;
+                            $newname = $sourceFilename;
                             break;
                         case 3:
                             $filename = $photos[ "$ii" ];
                             $pattern = '/\d*_*(.+)_\d*/';
                             $newname = preg_replace( $pattern, '${1}', $filename );
-                            $newname = $searchName;
+                            $newname = $sourceFilename;
                             break;
                         default:
                             throw new Exception( "E#485 iinvalid testpas = $testPass" );
                     }
-                    if ( $newname != $searchName ) {
+                    if ( $newname != $sourceFilename ) {
                         $match = "** adjust ***";
                     } else
                         $match = "";
                     $color = rrwUtil::colorSwap( $color );
-                    $msg .= rrwFormat::CellRow( $color, $sourceFullName, $filename,
-                        $searchName, $newname, $match );
-                    if ( $newname != $searchName )
+                    $msg .= rrwFormat::CellRow( $color, $sourcePath, $filename,
+                        $sourceFilename, $newname, $match );
+                    if ( $newname != $sourceFilename )
                         continue;
 
-                    $msg .= updateRename( $filename, $newname, $sourceFullName );
+                    $msg .= updateRename( $filename, $newname, $sourcePath );
                     $cntInsert++;
                     if ( $cntInsert > 5 )
                         return "$msg </table> - finished one entry";
@@ -1149,7 +1166,7 @@ class freewheeling_fixit {
 
     public static function Do_forceDatabse2matchexif( $rec ) {
         global $eol, $errorBeg, $errorEnd;
-        global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords,
+        global $wpdbExtra, $rrw_photos, $rrw_digipix, $rrw_keywords,
         $rrw_photographers;
         global $photoPath, $thumbPath, $highresPath;
         $msg = "";

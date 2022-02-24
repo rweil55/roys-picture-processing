@@ -11,7 +11,7 @@
  * Text Domain: Roys-picture-processng
  * Domain Path: /translation
  
-  * Version: 1.0.27
+  * Version: 1.0.28
  */
 // disable direct access
 ini_set( "display_errors", true );
@@ -182,7 +182,7 @@ function updateAccessTable( $photoname, $search ) {
 }
 function direReport( $field, $report = "" ) {
     // count the number of items for a particular field
-    global $wpdbExtra, $rrw_photos, $rrw_source;
+    global $wpdbExtra, $rrw_photos;
     global $eol;
     $msg = "";
     $msg .= SetConstants( "direReport" );
@@ -197,7 +197,7 @@ function direReport( $field, $report = "" ) {
 
 function updateRename( $filename, $newname, $sourceFullName ) {
     global $eol;
-    global $wpdbExtra, $rrw_photos, $rrw_source;
+    global $wpdbExtra, $rrw_photos;
     global $photoPath;
     $msg = "";
     //
@@ -233,7 +233,7 @@ function updateRename( $filename, $newname, $sourceFullName ) {
 /*
 function doCopyright( $item ) {
     global $eol;
-    global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_photographer, $rrw_keywords;
+    global $wpdbExtra, $rrw_photos, $rrw_photographer, $rrw_keywords;
     global $photoUrl, $photoPath, $thumbUrl, $thumbPath, $highresUrl, $highresPath;
     $msg = "";
     try {

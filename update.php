@@ -3,7 +3,7 @@
 class freeWheeling_DisplayUpdate {
     static public function DisplayUpdate( $attr ) {
         global $eol, $errorBeg, $errorEnd;
-        global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_photographers, $rrw_keywords;
+        global $wpdbExtra, $rrw_photos, $rrw_photographers, $rrw_keywords;
         global $photoUrl, $photoPath, $thumbUrl, $thumbPath, $highresUrl, $highresPath;
         $msg = "";
         ini_set( "display_errors", true );

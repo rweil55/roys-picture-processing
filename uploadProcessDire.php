@@ -89,11 +89,10 @@ class uploadProcessDire {
 
                 $recs[ 0 ][ "photographer" ] = ""; //cause photographer and copyright
                 $msg .= freeWheeling_DisplayUpdate::compare( "photographer", $photographer, $recs[ 0 ] );
-                $searchFile = "$photoPath/$photoname" . "_cr.jpg";
                 $recs[ 0 ][ "photographer" ] = $photographer;
                 $msg .= freewheeling_fixit::Do_forceDatabse2matchexif( $recs[ 0 ] );
             } // end while
-            
+
             if ( 1 == $cntUploaded ) {
                 $msg .= freeWheeling_DisplayOne::DisplayOne(
                     array( "photoname" => $photoname ) );
