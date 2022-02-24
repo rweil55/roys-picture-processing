@@ -10,7 +10,7 @@ class freeWheeling_DisplayOne {
         global $photoUrl, $photoPath, $thumbUrl, $site_url;
         global $wpdbExtra, $rrw_photos, $rrw_trails, $rrw_photographers,
         $rrw_keywords, $rrw_access;
-        global $eol;
+        global $eol, $errorBeg, $errorEnd;
         $msg = "";
         $debugPath = false;
 
@@ -48,14 +48,17 @@ class freeWheeling_DisplayOne {
             $msg .= ( "\n<!-- sql is $sql -->\n" );
             $recset_query = $wpdbExtra->get_resultsA( $sql );
             if ( 1 != $wpdbExtra->num_rows ) {
-                $msg .= FreewheelingCommon::missingImageMessage( "E#856 
-                        in display a photo, looking for image $photoname.
-                        URL = " . home_url() );
+                $msg .= "E#856 no meta data for image $photoname was found             $errorEnd $sql $eol";
                 return $msg;
             }
             $recset = $recset_query[ 0 ];
             $photoname = $recset[ "filename" ];
             $photographer = $recset[ "photographer" ];
+            $copyright = $recset[ "copyright" ];
+            $PhotoDate = $recset[ "PhotoDate" ];
+            $location = $recset[ "location" ];
+            $people = $recset[ "people" ];
+            $comment = $recset[ "comment" ];
             $direonp = $recset[ "DireOnP" ];
             $trail_name = $recset[ "trail_name" ];
             $uploaddate = $recset[ "uploaddate" ];
@@ -65,11 +68,7 @@ class freeWheeling_DisplayOne {
             $htmlfileref2 = "$thumbUrl/{$photoname}_tmb.jpg";
             $fullfilename2 = "$thumbPath/{$photoname}_tmb.jpg";
             if ( !file_exists( $fullfilename1 ) ) {
-                $msg .= FreewheelingCommon::missingImageMessage( "E#957 
-                        in display a photo, looking for image file $fullfilename1.
-                        URL = " . home_url(), $photoname );
-                $msg .= freewheeling_fixit::filelike( array( "partial" => $photoname ) );
-                return $msg;
+                $msg .= "$errorBeg E#957 Not found was the display image $htmlfileref1 $errorEnd";
             }
             /*  displaywidth is based on screen size 
             $imageinfo = getimagesize( $fullfilename1 );
@@ -81,8 +80,13 @@ class freeWheeling_DisplayOne {
                 $displaywidth = $displaywidth * ( $displayHeight / $maxHeight );
             }
             */
-            $thumbInfo = getimagesize( $fullfilename2 );
-            $thumbsize = $thumbInfo[ 3 ];
+            if ( !file_exists( $fullfilename2 ) ) {
+                $msg .= "$errorBeg E#958 Not found was the thumbnail image $htmlfileref2 $errorEnd";
+                $thumbsize = 200;
+            } else {
+                $thumbInfo = getimagesize( $fullfilename2 );
+                $thumbsize = $thumbInfo[ 3 ];
+            }
             if ( false ) {
                 // let wordpress determine image size
                 $msg .= "<figure class='wp-block-image size-large'><img 
@@ -121,21 +125,21 @@ class freeWheeling_DisplayOne {
             <table><tr><td>
             ";
             if ( $debugPath )$msg .= "***** 4 *****displayOne:photoPath $photoPath <br/>";
+            /*
+                        $sql = "Select * from $rrw_photos 
+                                    where filename = '$photoname' ";
+                        $msg .= "\n<!-- photo == $sql \n-->";
+                        $rec_photo_query = $wpdbExtra->get_resultsA( $sql );
+                        if ( 1 != $wpdbExtra->num_rows )
+                            throw new Exception( "ErrorBeg E#959 not find while looking for trail $eol 
+                                    $eol $sql $eol $eol" );
+                        $rec_photo = $rec_photo_query[ 0 ];
+                        $photographer = $rec_photo[ "photographer" ];
+                        */
 
-            $sql = "Select * from $rrw_photos 
-                        where filename = '$photoname' ";
-            $msg .= "\n<!-- photo == $sql \n-->";
-            $rec_photo_query = $wpdbExtra->get_resultsA( $sql );
-            if ( 1 != $wpdbExtra->num_rows )
-                throw new Exception( "406 not find while looking for trail $eol 
-                        $eol $sql $eol $eol" );
-            $rec_photo = $rec_photo_query[ 0 ];
-            $photographer = $rec_photo["photographer"];
 
-            
-
-             $msg .= "<input type='hidden' name='copyright' id='copyright'
-                value='" . $rec_photo["copyright"] . "' /> \n;";
+            $msg .= "<input type='hidden' name='copyright' id='copyright'
+                value='$copyright' /> \n;";
             $msg .= "<a href='$photoUrl/{$photoname}_cr.jpg'>
                 $photoname</a> ] &nbsp; 
             [ uploaded $uploaddate 
@@ -152,17 +156,19 @@ class freeWheeling_DisplayOne {
             freeWheeling_DisplayOne::listbox2( $wpdbExtra, "$rrw_photographers",
                 "photographer", $photographer, "photographer" ) . $eol;
             $msg .= "\n" . "<strong>Photo Date:</strong>
-                <input type='text' name='photodate' size='20' value=\"" . $rec_photo[ "PhotoDate" ] . "\">" . "\n" . "$eol 
+                <input type='text' name='photodate' size='20' 
+                        value='$PhotoDate'>" . "\n" . "$eol 
                 <strong>upload date:</strong> 
                 <input type='text' name='uploaddate' size='20' 
-        value=\"" . $rec_photo[ "uploaddate" ] . "\">\n" .
-                " <a href='/submission/?photographer=$photographer&inputfile=" . "$photoname&replacephoto=on' >reload image </a> " .
+                        value='$uploaddate'>\n" .
+            " <a href='/submission/?photographer=$photographer&inputfile=" . "$photoname&replacephoto=on' >reload image </a> " .
             "<br>Location: <input type='text' name='location' size='50' 
-        value=\"" . $rec_photo[ "location" ] . "\">" . "\n" .
+                        value='$location'>" . "\n" .
             "<br><strong>People:</strong>
-            <input type='text' name='people' size='50' value=\"" . $rec_photo[ "people" ] . "\">" . "\n" .
+            <input type='text' name='people' size='50' 
+                        value='$people' >" . "\n" .
             "<br><strong>Comments:</strong>
-            <textarea name='comment' rows='5' cols='50' >" . $rec_photo[ "comment" ] . "</textarea>
+            <textarea name='comment' rows='5' cols='50' >'$comment' </textarea>
             </td><td align='left'>
             <img src='$htmlfileref2' alt='small Trail Photo'
                     $thumbsize id='smallImage' />
@@ -207,8 +213,8 @@ class freeWheeling_DisplayOne {
             if ( file_exists( $fullfilename1 ) ) {
                 try {
                     $meta = rrw_exif_read_data( $fullfilename1 );
-                   }  // end try
-                catch (Exception $ex) {
+                } // end try
+                catch ( Exception $ex ) {
                     $msg .= $ex->getMessage() . "$errorBeg  E#668 error loading the exif for '$fullfilename1' $errorEnd";
                 }
                 if ( false !== $meta ) {
@@ -222,7 +228,7 @@ class freeWheeling_DisplayOne {
 
         } catch ( Exception $ex ) {
             print "catch";
-            $msg .= "E#496 DisplayOne " . $ex->getMessage();
+            $msg .= " E#496 DisplayOne " . $ex->getMessage();
         }
         return $msg;
     } // end function
@@ -295,19 +301,18 @@ class freeWheeling_DisplayOne {
             $photographerDisplay = $recset[ "photographer" ] . "</td>\n ";
         }
         $fullname = "$photoPath/$photoname" . "_cr.jpg";
-        $photoSize = getimagesize( $fullname );
-        if ( !is_array( $photoSize ) )
-            $sizeDisplay = " not found $fullname ";
-        else
-            $sizeDisplay = $photoSize[ 0 ] . " x " . $photoSize[ 1 ];
+        if ( file_exists( $fullname ) ) {
+            $photoSize = getimagesize( $fullname );
+            $sizeDisplay = $photoSize[ 3 ];
+        } else
+            $sizeDisplay = "";
         $fullHighRes = "$highresPath/$photoname.jpg";
+        if (file_exists($fullHighRes)) {
         $photoSize = getimagesize( $fullHighRes );
         if ( !is_array( $photoSize ) )
-            $sizeHighres = " not found $fullname ";
-        else
-            $sizeHighres = $photoSize[ 0 ] . " x " . $photoSize[ 1 ];
-
-
+             $sizeHighres = $photoSize[ 3];
+        } else
+            $sizeHighres  ="";
         //  -------------------------------------------------- Now the display
         $msg .= " File is <a href='$photoUrl/{$photoname}_cr.jpg'>$photoname</a>
                 &nbsp; &nbsp; &nbsp; &nbsp; " . $recset[ 'comment' ] . "$eol";

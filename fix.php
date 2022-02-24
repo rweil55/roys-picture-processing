@@ -45,7 +45,6 @@ class freewheeling_fixit {
                 case "copyrightfix":
                     $msg .= freewheeling_fixit::copyrightfix();
                     break;
-
                 case "SourceLocClose":
                     $msg .= freewheeling_fixit::direonpOnFileMatch();
                     $msg .= freewheeling_fixit::updateDiretoryCloseFileMatch();
@@ -187,11 +186,16 @@ class freewheeling_fixit {
         $dirlistRes = self::getFileList( $highresPath );
         $dirlist_cr = self::getFileList( $photoPath );
         $dirlist_cr = self::getFileList( $photoPath );
+        
+        $msg .= "<strong>There is high resolution image, 
+                    but no display (_cr) image </strong><br>";
         foreach ( $dirlistRes as $file => $fileFull ) {
             if ( !array_key_exists( $file, $dirlist_cr ) )
                 $msg .= "$fileFull is not in $photoPath $eol ";
         }
-        foreach ( $dirlist_cr as $file => $fileFull ) {
+     $msg .= "<strong>There isdisplay (_cr) image, 
+                    but no high resolution image </strong><br>";
+           foreach ( $dirlist_cr as $file => $fileFull ) {
             if ( !array_key_exists( $file, $dirlistRes ) )
                 $msg .= "$fileFull is not in $highresPath $eol ";
         }
@@ -204,6 +208,8 @@ class freewheeling_fixit {
         global $highresPath;
         $msg = "";
 
+        $msg .= "<strong>There is meta data in the database, 
+                    but no high resolution image </strong><br>";
         $dirlistRes = self::getFileList( $highresPath );
         $sqlall = "select filename from $rrw_photos";
         $recAlls = $wpdbExtra->get_resultsA( $sqlall );
@@ -217,7 +223,7 @@ class freewheeling_fixit {
                 $cntMissng++;
             }
         }
-        $msg .= "there were $cntMissng highresolution images missng$eol";
+        $msg .= "there were $cntMissng high resolution images missng$eol";
         return $msg;
     }
 
@@ -227,7 +233,9 @@ class freewheeling_fixit {
         global $highresPath;
         $msg = "";
 
-        $dirlistRes = self::getFileList( $highresPath );
+       $msg .= "<strong>There is high resolution image, 
+                    but no meta information in the database </strong><br>";
+         $dirlistRes = self::getFileList( $highresPath );
 
         $sqlall = "select filename from $rrw_photos";
         $recAlls = $wpdbExtra->get_resultsA( $sqlall );
@@ -241,7 +249,7 @@ class freewheeling_fixit {
             $highresTest = str_replace( "$highresPath/", "", $highresTest );
             if ( !array_key_exists( $highresTest, $photolist ) ) {
                 $msg .= "$highresTest is not in the photo table,
-                but we have a high resolotion photo $eol ";
+                but we have a high resolution image $eol ";
                 $cntFound++;
             }
         }
@@ -590,8 +598,11 @@ class freewheeling_fixit {
         global $eol;
         global $wpdbExtra, $rrw_keywords, $rrw_photos;
         $msg = "";
+        
         $submit = rrwUtil::fetchparameterString( "submit" );
         if ( empty( $submit ) ) {
+            if (!isset($old))
+                $old = "";
             $msg .= "<form> 
             Old Keyword:<input type='text' name='old' id = 'old' />,
             New Keyword:<input type='text' name='new' id = 'new' />
@@ -660,12 +671,17 @@ class freewheeling_fixit {
         $msg = "";
 
         $startdate = rrwUtil::fetchparameterString( "startdate" );
+        $startdate = new DateTime ($startdate);
+        $startdate = $startdate->format("Y-m-d");   
         $enddate = rrwUtil::fetchparameterString( "enddate" );
+        $enddate = new DateTime ($enddate);
+        $enddate = $enddate->format("Y-m-d");
+        $update = " DATE_FORMAT(uploaddate, '%Y-%m-%d') ";
         $sql = "select direonp, filename, photostatus from $rrw_photos where 
-    '$startdate' <= uploaddate and uploaddate < '$enddate'"; // missng source
+    '$startdate' <= $update and $update < '$enddate'"; // missng source
         print( "<!-- sql is $sql -->\n" );
         $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
-            "photos uploaded between $startdate and $enddate" );
+            "photos uploaded between $startdate and less than $enddate" );
         return $msg;
     }
     private static function badCopyright() {
