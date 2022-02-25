@@ -2,10 +2,9 @@
 
 class uploadProcessDire {
 
-    public static function upload() {
+    public static function upload( $attr ) {
         global $eol, $errorBeg, $errorEnd;
         global $uploadPath;
-        global $wpdbExtra, $rrw_photos;
         // looks for files in the upload directory 
         //      creates database record if not already there
         //      creates the _cr version with bottom line credit
@@ -19,93 +18,114 @@ class uploadProcessDire {
         try {
             if ( $debug )$msg .= "uploadProcessDire ($uploadPath) $eol";
             include "setConstants.php";
-            $handle = opendir( $uploadPath );
-            if ( !is_resource( $handle ) )
-                throw new Exception( "$errorBeg E#496 failed to 
+
+            $uploadfilename = rrwPara::String( "uploadfilename", $attr );
+            if ( $debug )$msg .= "found $uploadfilename in the calling parameters $eol";
+
+
+            if ( !empty( $uploadfilename ) ) {
+                $msg .= self::ProcessOneFile( $uploadfilename );
+                $cntUploaded = 1;
+            } else {
+                // not a single file request. walk the directory
+                $handle = opendir( $uploadPath );
+                if ( !is_resource( $handle ) )
+                    throw new Exception( "$errorBeg E#496 failed to 
                                     open $uploadPath $errorEnd" );
-            if ( $debug )$msg .= "Entries:$eol";
-            $cnt = 0;
-            $cntUploaded = 0;
-            while ( false !== ( $entry = readdir( $handle ) ) ) {
-                $cnt++;
-                if ( $cnt > 600 )
+                if ( $debug )$msg .= "Entries:$eol";
+                $cnt = 0;
+                $cntUploaded = 0;
+                while ( false !== ( $uploadfilename = readdir( $handle ) ) ) {
+                    $cnt++;
+                    if ( $cnt > 600 )
+                        break;
+                    if ( is_dir( "$uploadPath/$uploadfilename" ) )
+                        continue; // ignore directories
+                    if ( $debug ) $msg .= "found $uploadfilename in the diretory search $eol";
+                    $msg .= self::ProcessOneFile( $uploadfilename );
+                    $cntUploaded++;
                     break;
-                if ( $debug )$msg .= "$entry, ";
-                $sourceFile = "$uploadPath/$entry"; // in uplosd dire
-                if ( is_dir( $sourceFile ) )
-                    continue; // ignore directories
-                // ------new ----------------------------  validate filename
+                } // end while
 
-                $mime_type = mime_content_type( $sourceFile );
-                switch ( $mime_type ) {
-                    case 'image/jpeg':
-                        //    case 'image/png':
-                        //    case 'image/gif':
-                        break; // is good
-                    default:
-                        throw new RuntimeException( "file '$sourceFile' 
-                        minetype is $mime_type, 
-                        it should .jpg, " /*.png or .gif"*/ );
-                }
-                $photoname = substr( $entry, 0, strlen( $entry ) - 4 );
-                if ( $debug )$msg .= "photoname just aftercreate $photoname $eol";
-                $pregResults = preg_match( "/[-a-zA-z0-9 _]*/",
-                    $photoname, $matchs );
-                if ( 1 != count( $matchs ) )
-                    throw new RuntimeException( "file name can consist of only
-                letters, numbers, and spaces" );
-                $cntUploaded++;
-                // --------------------------- deal with database entry
-                if ( $debug )$msg .= "photoname just matchs $photoname $eol";
-                $sqlRec = "select * from $rrw_photos 
-                        where filename = '$photoname'";
-                $recs = $wpdbExtra->get_resultsA( $sqlRec );
-                if ( 1 == $wpdbExtra->num_rows ) {
-                    $photographer = $recs[ 0 ][ "photographer" ];
-                    $sqldate = "update $rrw_photos set uploaddate = now() 
-                                where filename ='$photoname' ";
-                    $cnt = $wpdbExtra->query( $sqldate );
-                } else {
-                    $insertData = array( "filename" => $photoname,
-                        "uploaddate" => date( "Y-m-d H:i" ) );
-                    $wpdbExtra->insert( $rrw_photos, $insertData );
-                    $photographer = ""; // record not there 
-                    $sqlRec = "select * from $rrw_photos 
-                        where filename = '$photoname'";
-                    $recs = $wpdbExtra->get_resultsA( $sqlRec );
-                    $recOld = $rec[ 0 ];
-                }
-                if ( false ) {
-                    // debug the exif routineand data
-                    foreach ( array( "COMPUTED", "ANY_TAG", "IFDO", "COMMENT", "EXIF" ) as $section ) {
-                        $exif = rrw_exif_read_data( $sourceFile, $section );
-                        $msg .= rrwUtil::print_r( $exif, true, "Section $section" );
-                    }
-                    $exif = rrw_exif_read_data( $sourceFile );
-                    $msg .= rrwUtil::print_r( $exif, true, "no section " );
-                }
-
-                $msg .= self::MakeImakeImages( $sourceFile, $photographer );
-
-                $recs[ 0 ][ "photographer" ] = ""; //cause photographer and copyright
-                $msg .= freeWheeling_DisplayUpdate::compare( "photographer", $photographer, $recs[ 0 ] );
-                $recs[ 0 ][ "photographer" ] = $photographer;
-                $msg .= freewheeling_fixit::Do_forceDatabse2matchexif( $recs[ 0 ] );
-            } // end while
-
+            } // end  if (! empty($uploadfilename))
             if ( 1 == $cntUploaded ) {
+                $photoname = str_replace (".jpg", "", $uploadfilename);
+                if ( $debug )$msg .= "DisplayOne( array( \"photoname\" => $photoname ) )";
                 $msg .= freeWheeling_DisplayOne::DisplayOne(
                     array( "photoname" => $photoname ) );
             } else {
-                $msg .= "\n\nuploaded $cntUploaded files in " .
-                rrwUtil::deltaTimer( "uploading files" ) . "\n\n";
+                $msg .= "$eol uploaded $cntUploaded files $eol";
             }
         } // end try
         catch ( Exception $ex ) {
             $msg .= $errorBeg . $ex->getMessage() . $errorEnd;
         }
         return $msg;
-    } // end function uploadProcessDire
+    } // end function uploadProcessDire::upload
+
+    private static function processOneFile( $entry ) {
+        global $eol, $errorBeg, $errorEnd;
+        global $uploadPath;
+        global $wpdbExtra, $rrw_photos;
+        $msg = "";
+        $debug = false;
+
+        if ( $debug )$msg .= "$entry, ";
+        $sourceFile = "$uploadPath/$entry"; // in uplosd dire
+        // ------new ----------------------------  validate filename
+
+        $mime_type = mime_content_type( $sourceFile );
+        switch ( $mime_type ) {
+            case 'image/jpeg':
+                //    case 'image/png':
+                //    case 'image/gif':
+                break; // is good
+            default:
+                throw new RuntimeException( "file '$sourceFile' 
+                        minetype is $mime_type, 
+                        it should .jpg, " /*.png or .gif"*/ );
+        }
+        $photoname = substr( $entry, 0, strlen( $entry ) - 4 );
+        if ( $debug )$msg .= "photoname just aftercreate $photoname $eol";
+        $pregResults = preg_match( "/[-a-zA-z0-9 _]*/",
+            $photoname, $matchs );
+        if ( 1 != count( $matchs ) )
+            throw new RuntimeException( "file name can consist of only
+                letters, numbers, and spaces" );
+        // --------------------------- deal with database entry
+        if ( $debug )$msg .= "photoname just matchs $photoname $eol";
+        $sqlRec = "select * from $rrw_photos 
+                        where filename = '$photoname'";
+        $recs = $wpdbExtra->get_resultsA( $sqlRec );
+        if ( 1 == $wpdbExtra->num_rows ) {
+            // have meta data
+            $sqldate = "update $rrw_photos set uploaddate = now() 
+                                where filename ='$photoname' ";
+            $cnt = $wpdbExtra->query( $sqldate );
+        } else {
+            // no meta data
+            $insertData = array(
+                "photoname" => $photoname,
+                "filename" => $photoname,
+                "highresfilename => $entry",
+                "uploaddate" => date( "Y-m-d H:i" ),
+                /* all others defalt to blank */
+            );
+            $wpdbExtra->insert( $rrw_photos, $insertData );
+        }
+        
+        $sqlRec = "select * from $rrw_photos 
+                        where filename = '$photoname'";
+        $recs = $wpdbExtra->get_resultsA( $sqlRec );
+        $recOld = $recs[ 0 ];
+        $photographer = $recOld["photographer"];
+        
+        $mdg .= self::MakeImakeImages( $sourceFile, $photographer ) ;
+
+        // meta date exists make it consistant with the EXIF
+        $msg .= freewheeling_fixit::Do_forceDatabse2matchexif( $recOld );
+        return $msg;
+    } // end function processOneFile
 
 
     private static function MakeImakeImages( $sourceFile, $photographer ) {
@@ -141,19 +161,7 @@ class uploadProcessDire {
                 $msg .= "fullfileThumb : $fullfileThumb $eol";
                 $msg .= "fullFilePhoto : $fullFilePhoto $eol";
             }
-            if ( file_exists( $FullfileHighRes ) ) { // check for existing
-                $replacephoto = rrwUtil::fetchparameterString( "replacephoto" );
-                if ( 'on' == $replacephoto ) {
-                    $msg .= "Per your request existing photo will be replaced $eol";
-                    unlink( $FullfileHighRes );
-                } else {
-                    $dateMod = filemtime( $FullfileHighRes );
-                    $datemod = date( "Y-M-d", $dateMod );
-                    throw new Exception( "$errorBeg $eol E#814 $FullfileHighRes 
-                    was uploaded previously on $dateMod. 
-                    You must check the box to allow the replacement $errorEnd" );
-                }
-            }
+
             //$msg .= "rename( $sourceFile, $FullfileHighRes )";
             if ( !rename( $sourceFile, $FullfileHighRes ) ) {
                 throw new Exception( " $errorBeg $msg E#813 while attempting 

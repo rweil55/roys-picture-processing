@@ -1,6 +1,10 @@
 <?php
 
 class rrwPicSubmission {
+    // presents a photographer dropdown, a choose file box, replace checkbox
+    // rejects if no replace and exiting meta data
+    // moves the chosen file to the upload folder
+    //
     public static function showForm( $attr ) {
         global $eol, $errorBeg, $errorEnd;
         $msg = "";
@@ -19,11 +23,13 @@ class rrwPicSubmission {
         global $wpdbExtra, $rrw_photographers, $rrw_photos;
         global $uploadPath;
         $msg = "";
+        $debug = false;
 
         try {
             $debugsubmit = false;
             if ( $debugsubmit )$msg .= rrwUtil::print_r( $_FILES, true, "Files" );
             $photographer = rrwUtil::fetchparameterString( "photographer" );
+            $replacephoto = rrwPara::String("replacephoto");
             if ( empty( $photographer ) )
                 throw new RuntimeException( 'you must selct a photographer.' );
 
@@ -74,40 +80,75 @@ class rrwPicSubmission {
             if ( 1 != count( $matchs ) )
                 throw new RuntimeException( "file name can consist of only
                 letters, numbers, and spaces" );
-            $DataFilename = $matchs[ 0 ];
-            $newfile = "$uploadPath/$DataFilename.$ext";
-            if ( !move_uploaded_file(
-                    $_FILES[ 'inputfile' ][ 'tmp_name' ], $newfile ) ) {
-                throw new RuntimeException( 'Failed to move uploaded file.' );
+            $photoname = $matchs[ 0 ];
+            $HighResfilename = "$photoname.$ext";
+            $FullfileHighRes = "$uploadPath/$HighResfilename";
+
+            if ( false !== strpos( $HighResfilename, "_cr.jpg" ) ) {
+                $msg .= "$errorBeg _cr.jpg not allowed.
+                            $errorEnd select the high resolution verion " ;
+                $msg .= freewheeling_fixit::filelike(
+                    array( "partial" => $photoname ) );
+                return $msg;
+
             }
-            // ---- file to be created in upload, now create database record
-            $sqlExisting = "select * from $rrw_photos 
-                        where filename = '$DataFilename'";
-            $recs = $wpdbExtra->get_resultsA( $sqlExisting );
-            if ( 0 == $wpdbExtra->num_rows ) {
+
+            // see if metat data exists
+            $sqlexists = "select photographer from $rrw_photos
+                        where photoname = '$photoname' ";
+            $msg .= "check for meta  $sqlexists";
+            $recs = $wpdbExtra->get_resultsA( $sqlexists );
+            $msg .= "$sqlexists found " . $wpdbExtra->num_rows . " rows of data";
+            if ( 1 == $wpdbExtra->num_rows ) {
+                // have meta date, update it
+                if ( 'on' == $replacephoto ) {
+                    $msg .= "Per your request existing photo will be replaced $eol";
+                } else {
+                    $dateMod = filemtime( $FullfileHighRes );
+                    $datemod = date( "Y-M-d", $dateMod );
+                    $msg .= "$errorBeg $eol E#814 $$HighResfilename 
+                    was uploaded previously on $dateMod. 
+                    You must check the box to allow the replacement $errorEnd" ;
+                    return $msg;
+                }
+                $updateData[ "uploaddate" ] = date( "Y-m-d" );
+                $updateData[ "HighResfilename" ] = $HighResfilename;
+                $filephotographer = $recs[ 0 ][ "photographer" ];
+                if ( $filephotographer != $photographer ) {
+                    $updateData[ "photographer" ] = $photographer;
+                    $msg .= rrwUtil::InsertIntoHistory( $photoname, "
+                                        new photograper photographer" );
+                }
+                $cntchaged = $wpdbExtra->update( $rrw_photos, $updateData,
+                    array( "photoname" => $photoname ) );
+                if ( 1 != $cntchaged )
+                    $msg .= "$errorBeg E#686 meta data did not update 
+                                $errorEnd";
+            } else {
+                // no meta data
                 $Insert = array(
                     "photographer" => $photographer,
-                    "filename" => $DataFilename,
+                    "filename" => $photoname,
+                    "photoname" => $photoname,
                     "uploaddate" => date( "Y-m-d" ),
+                    "HighResfilename" => $HighResfilename,
                 );
                 $cntchaged = $wpdbExtra->insert( $rrw_photos, $Insert );
-                $msg .= rrwUtil::InsertIntoHistory( $DataFilename, "
+                $msg .= rrwUtil::InsertIntoHistory( $photoname, "
                                         new photograper photographer" );
-            } else {
-                $update = array( "uploaddate" => date( "Y-m-d" ) );
-                $photographerOld = $recs[ 0 ][ "photographer" ];
-                if ( $photographer != $photographerOld ) {
-                    $update[ "photographer" ] = $photographer;
-                    $cnt = $wpdbExtra->update( $rrw_photos, $update, array( "filename = '$DataFilename' " ) );
-                    $msg .= rrwUtil::InsertIntoHistory( $DataFilename, "
-                        photograper $photographerOld -> $photographer" );
-                }
             }
-            $msg .= rrwUtil::InsertIntoHistory( $DataFilename, "uploaded " );
-            $msg .= "File was uploaded successfully to $newfile $eol";
-            if ( $debugsubmit )$msg .= "lets process upload dire$eol";
-            $msg .= uploadProcessDire::upload();
+            // meta data now set, move the filw
+            if ( !move_uploaded_file(
+                    $_FILES[ 'inputfile' ][ 'tmp_name' ], $FullfileHighRes ) ) {
+                throw new RuntimeException( 'Failed to move uploaded file.' );
+            }
 
+            $msg .= rrwUtil::InsertIntoHistory( $photoname, "uploaded " );
+            $msg .= "File was uploaded successfully to $FullfileHighRes $eol";
+            if ( $debugsubmit )$msg .= "lets process upload dire$eol";
+            $attr = array("uploadfilename"=>$HighResfilename);
+            if ( $debug )$msg .= rrwUtil::print_r($attr, true, "parameters to upload");
+            $msg .= uploadProcessDire::upload($attr);
         } catch ( RuntimeException $e ) {
             $msg .= $errorBeg . $e->getMessage() . $errorEnd;
         }
@@ -121,6 +162,10 @@ class rrwPicSubmission {
         $msg = "";
 
         $photographer = rrwUtil::fetchparameterString( "photographer" );
+        $ip = $_SERVER[ 'REMOTE_ADDR' ];
+        $msg .= "IP address == $ip $eol";
+        if ( empty( $photographer ) && ( "72.95.243.124" == $ip ) )
+            $photographer = "Mary Shaw";
         if ( empty( $photographer ) ) {
             if ( array_key_exists( "photographer", $_COOKIE ) &&
                 !empty( $_COOKIE[ "photographer" ] ) )
@@ -128,19 +173,11 @@ class rrwPicSubmission {
         }
         $_COOKIE[ "photographer" ] = $photographer;
         $msg .= "<form  method='post' enctype=\"multipart/form-data\" > ";
-        $sqltaker = "select photographer from $rrw_photographers
-                    order by photographer";
-        $recs = $wpdbExtra->get_resultsA( $sqltaker );
-        $msg .= "<select name='photographer' id='photographer' 
-                    onchange='if (this.selectedIndex) submit();'' >\n
-                    <option value=-1> Select the photographer</option>";
-        foreach ( $recs as $rec ) {
-            $name = $rec[ "photographer" ];
-            $msg .= "<option value='$name' ";
-            if ( $photographer == $name )
-                $msg .= "selected='selected' ";
-            $msg .= ">$name</option>\n";
-        }
+
+        $msg .= "<strong>Photogrpher:</strong>" .
+        freeWheeling_DisplayOne::listbox2( $wpdbExtra, "$rrw_photographers",
+            "photographer", $photographer, "photographer" );
+
         $msg .= "</select> if not in the list  
                 <a href='display-photographers/?action=new' >
                 Add a new photographer</a> $eol$eol";

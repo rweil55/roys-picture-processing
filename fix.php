@@ -739,6 +739,10 @@ class freewheeling_fixit {
         $msg = "";
 
         $partial = rrwUtil::fetchparameterString( "partial", $attr );
+        $highresfilename = "$partial.jpg";
+        if (file_exists($highresfilename)) {
+            $msg .= "<img src='$highresfilename' width='300px' />$eol";
+        }
         $msg .= "<form method='get' action='/fix/'>
             <input type='text' id='partial' name='partial' value='$partial' />
             <input type='hidden' id='task' name='task' value='filelike' />
@@ -1300,8 +1304,8 @@ class freewheeling_fixit {
             }
             $sofar = "Do_forceDatabse2matchexif is done";
         } catch ( Exception $ex ) {
-            $msg .= "$msg E#440 in Do_forceDatabse2matchexif:$sofar" . 
-                        $ex->getMessage();
+            $msg .= "$msg E#440 in Do_forceDatabse2matchexif:$sofar: " . 
+                        $ex->getMessage() . $eol ;
         }
         return $msg;
     } // end function Do_forceDatabse2matchexif

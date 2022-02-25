@@ -141,12 +141,12 @@ class freeWheeling_DisplayOne {
             $msg .= "<input type='hidden' name='copyright' id='copyright'
                 value='$copyright' /> \n";
             $msg .= "<strong>Trail:</strong>" .
-            freeWheeling_DisplayOne::listbox2( $wpdbExtra, "$rrw_trails",
+            self::listbox2( $wpdbExtra, "$rrw_trails",
                 "trailName", $trail_name, "trailName" ) . " &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 
             [ <a href='/fix?task=deletephoto&del2=$photoname&del3=$photoname'>
             Delete photo ]</a> $eol";
             $msg .= "<strong>Photogrpher:</strong>" .
-            freeWheeling_DisplayOne::listbox2( $wpdbExtra, "$rrw_photographers",
+            self::listbox2( $wpdbExtra, "$rrw_photographers",
                 "photographer", $photographer, "photographer" ) . $eol;
             $msg .= "\n" . "<strong>Photo Date:</strong>
                 <input type='text' name='photodate' size='20' 
@@ -353,12 +353,12 @@ class freeWheeling_DisplayOne {
 
     } // end display table
 
-    private static function listbox2( $db, $table, $field, $oldvalue, $sortField ) {
+    public static function listbox2( $db, $table, $field, $oldvalue, $sortField ) {
 
         global $wpdbExtra;
         $msg = "";
         $msg .= "\n\n<select name='$field'>
-        <option value=''>&nbsp;</option>\n";
+        <option value='' disabled >Select the $field</option>\n";
         $sql = "select $field from $table order by $sortField ";
         $recset_query = $wpdbExtra->get_resultsA( $sql );
         foreach ( $recset_query as $recset ) {
