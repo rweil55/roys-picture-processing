@@ -87,6 +87,24 @@ h3 {
     border-width:1px;
     padding: 3px;
 }
+.rrwDinoGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180pt, 1fr));
+    grid-template-rows: masonry;
+    grid-column-gap: 2px;
+    grid-row-gap: 1px;
+    padding: 0;
+}
+.rrwDinoItem {
+    padding: 5px;
+    margin: 0;
+    white-space: nowrap;
+    list-style-type: none;
+    text-overflow: clip;
+    background-color: white;
+    grid-column-gap: 1px;
+}
+
 .box {
     display: flex;
     flex-wrap: wrap;

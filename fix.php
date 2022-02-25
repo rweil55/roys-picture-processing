@@ -23,7 +23,7 @@ class freewheeling_fixit {
                     return $msg;
                 default:
                     break;
-                case "exif":
+                case "compareexif":
                     $msg .= self::displayExif( $attr );
                     return $msg;
             }
@@ -61,6 +61,8 @@ class freewheeling_fixit {
                 case "forcedatabase":
                     $msg .= freewheeling_fixit::forceDatabse2matchexif();
                     break;
+                case "forceOneExif":
+                    $msg .= self::forceOneExif();
                 case "extrakeyword":
                     $msg .= freewheeling_fixit::extraKeyword();
                     break;
@@ -76,11 +78,11 @@ class freewheeling_fixit {
                 case "photomissing":
                     $msg .= self::photomissing();
                     break;
-                case "sourcepush":
-                    $msg .= freewheeling_fixit::sourcePush();
-                    break;
                 case "SourceLoc":
                     $msg .= freewheeling_fixit::direonpOnFileMatch();
+                    break;
+                case "sourcepush":
+                    $msg .= freewheeling_fixit::sourcePush();
                     break;
                 case "upload":
                     $msg .= self::upload();
@@ -110,7 +112,8 @@ class freewheeling_fixit {
        <a href='/admin#delete' > delete photo - See admin </a>$eol 
        <a href='/fix/?task=duplicatephoto' > set duplicate photo flag </a>$eol 
        <a href='/fix/?task=exifmissing' > photo with no exif data </a>$eol 
-       <a href='/fix/?task=forcedatabase' > force database to match exif </a>$eol 
+       <a href='/fix/?task=forcedatabase' > force All database to match exif </a>$eol 
+       <a href='/fix/?task=forceOneExif' > force One database to match exif </a>$eol 
        <a href='/fix/?task=rename' > rename a photo </a>$eol 
    <strong>File consistancy</strong>$eol
       <a href='/fix/?task=highresmissing' > high resolution image
@@ -480,7 +483,7 @@ class freewheeling_fixit {
         $eol [ You now need to run 
         c:\_e\php sub.php &nbsp; in a command window ] 
                 follwowed by  [ <a href='/upload' target='admin'' >upload /</a> ]
-                [ <a href='fix?task=exif'> copyright</a> $eol";
+                [ <a href='fix?task=compareexif'> copyright</a> $eol";
 
         foreach ( $sqllist as $sql ) {
             $cnt = $wpdbExtra->query( $sql );
@@ -701,7 +704,7 @@ class freewheeling_fixit {
                         and photostatus = 'use' ";
         $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
             "photos copyright does not start with 'copyright'" );
-        $msg .= "Run <a href='/fix/?task=exif' target='admin'>update something</a> $eol";
+        $msg .= "Run <a href='/fix/?task=compareexif' target='admin'>update something</a> $eol";
         return $msg;
 
     }
@@ -760,6 +763,7 @@ class freewheeling_fixit {
 
             $msg .= "<table>\n";
             $color = rrwUtil::colorswap();
+            $display = "";
             foreach ( $recs as $rec ) {
                 $color = rrwUtil::colorswap( $color );
 
@@ -777,11 +781,19 @@ class freewheeling_fixit {
                     $first = "$photoname";
                 $msg .= rrwFormat::CellRow( $color, $first, $aspect,
                     $direonp, $link );
+                $imgFile = "http://127.0.0.1" . substr( $direonp, 2 ) . 
+                    "/$photoname";
+                $display .= "<div class='rrwDinoItem'>
+                        <a href=''><img src='$imgFile' width='300' /></a><br />
+                        $direonp<br />
+                        $photoname - $aspect<br />
+                        </div>";
             }
-
-
             $msg .= "</table>\n";
         }
+        $msg .= "<div class='rrwDinoGrid' > 
+        " . $display . "
+        </div>";
         return $msg;
     }
 
@@ -804,11 +816,17 @@ class freewheeling_fixit {
             $sqlinsert = "insert inot $rrw_photos set filename = '$filename',
                         direonp = '$sourcePath'";
             $cnt = $wpdbExtra->query( $sqlInsert );
+            if ( 0 == $cnt )
+                $msg .= "$errorBeg E#674 file failed to insert $errorEnd
+                            $sqlinsert $eol";
             $msg .= "inserted $cnt records $eol ";
         } else {
             $sqlUpdate = "update $rrw_photos set direonp = '$sourcePath'
                             where filename = '$photoname'";
             $cntUpdate = $wpdbExtra->query( $sqlUpdate );
+            if ( 0 == $cntUpdate )
+                $msg .= "$errorBeg E#683 file failed to update $errorEnd
+                            $sqlUpdate $eol";
             $msg .= "update $cntUpdate records 
             <a href='/display-one-photo?photoname=$photoname' > $photoname </a>$eol ";
         }
@@ -820,11 +838,11 @@ class freewheeling_fixit {
         global $eol;
         global $rrw_photos;
         $msg = "";
-        
+
         $sqlWhere = rrwUtil::fetchparameterString( "where" );
         $sqlWhere = str_replace( "xxy", "'", $sqlWhere );
-        $sqlWhere = htmlspecialchars_decode ($sqlWhere);
-        
+        $sqlWhere = htmlspecialchars_decode( $sqlWhere );
+
         $description = rrwUtil::fetchparameterString( "description" );
         //  item is  trail_name, direonp
         $sql = "select filename, trail_name, photographer, photostatus, 
@@ -1142,6 +1160,19 @@ class freewheeling_fixit {
         return $msg;
     } // end function updateDiretoryCloseFileMatch() 
 
+    private static function forceOneExif() {
+        global $eol, $errorBeg, $errorEnd;
+        global $wpdpExtra, $rrw_source;
+
+        $photoname = $rrwPara::String( "photoname" );
+        $sql = "select * from $rrw_photo where filename = '$photoname'";
+        $recs = $wpdpExtra->get_resultsA( $sql );
+        if ( 1 != $wpdpExtra->num_recs )
+            throw new Exception( "$errorBeg E#674 wrong number of records found, or not found $errorEnd $sql $eol" );
+        $msg .= Do_forceDatabse2matchexif( $recs[ 0 ] );
+        return $msg;
+    }
+
     private static function forceDatabse2matchexif() {
         global $eol, $errorBeg, $errorEnd;
         $msg = "";
@@ -1174,6 +1205,7 @@ class freewheeling_fixit {
         global $photoPath, $thumbPath, $highresPath;
         $msg = "";
         $debugForce = false;
+        $sofar = "Do_forceDatabse2matchexif entry";
         try {
             $photoname = $rec[ "filename" ];
             $databaseCopyright = $rec[ "copyright" ];
@@ -1199,6 +1231,7 @@ class freewheeling_fixit {
                 throw new Exception( "$errorBeg #854 Fetch of exif 
                                 from $fullFile failed $errorEnd" );
             if ( $debugForce )$msg .= rrwUtil::print_r( $fileExif, true, "$fullFile exif " );
+            $sofar = "exif rread, go datetime";
             //  --------------------------------------------- datetime
             $FileDateTime = self::getPhotoDateTime( $fileExif );
             if ( empty( $FileDateTime ) && empty( $datebasePhotoDate ) )
@@ -1212,6 +1245,7 @@ class freewheeling_fixit {
                     $sqlUpdate[ "PhotoDate" ] = $FileDateTime;
             }
             // ---------------------------- ------------------ copyright
+            $sofar = "go fo copyright";
             if ( array_key_exists( "Copyright", $fileExif ) )
                 $fileCopyRight = $fileExif[ "Copyright" ];
             else
@@ -1226,6 +1260,7 @@ class freewheeling_fixit {
                 $sqlUpdate[ "Copyright" ] = $fileCopyRight;
 
             // --------------------------------- image height, image width
+            $sofar = "go for height, width";
             $imageheight = $fileExif[ "COMPUTED" ][ "Height" ];
             $imagewidth = $fileExif[ "COMPUTED" ][ "Width" ];
             if ( $databaseHeight != $imageheight )
@@ -1234,6 +1269,7 @@ class freewheeling_fixit {
                 $sqlUpdate[ "width" ] = $imagewidth;
             // -------------------------------------------- keywodes
             // more code needed here to get the file tags
+            $sofar = "keywrods";
             if ( array_key_exists( "XPKeywords", $fileExif ) )
                 $fileKeywords = $fileExif[ "XPKeywords" ];
             else
@@ -1254,6 +1290,7 @@ class freewheeling_fixit {
 
             //  -------------------------------------------- photographer
             //  exif has no place for photographer
+            $sofar = "phtographer";
 
             if ( count( $sqlUpdate ) > 0 ) { // now update the database
                 $answer = $wpdbExtra->update( $rrw_photos, $sqlUpdate,
@@ -1261,11 +1298,13 @@ class freewheeling_fixit {
                 if ( $debugForce )$msg .= "had " . count( $sqlUpdate ) .
                 " to be updated in $answer record $eol";
             }
+            $sofar = "Do_forceDatabse2matchexif is done";
         } catch ( Exception $ex ) {
-            $msg .= "$msg E#440 in Do_forceDatabse2matchexif " . $ex->getMessage();
+            $msg .= "$msg E#440 in Do_forceDatabse2matchexif:$sofar" . 
+                        $ex->getMessage();
         }
         return $msg;
-    } // end function exif
+    } // end function Do_forceDatabse2matchexif
 
     private static function getPhotoDateTime( $fileExif ) {
         global $eol;

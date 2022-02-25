@@ -16,11 +16,12 @@ class fixTaskList {
        <a href='/fix/?task=exifmissing' > photo with no exif data </a>$eol 
        <a href='/fix/?task=forcedatabase' > force database to match exif </a>$eol 
        <a href='/fix/?task=rename' > rename a photo </a>$eol 
-   <strong>File consistancy</strong>$eol
+<strong>File consistancy</strong>$eol
       <a href='/fix/?task=highresmissing' > high resolution image
                                             missing </a>$eol 
       <a href='/fix/?task=photomissing' > photo information missing</a>$eol 
       <a href='/fix/?task=filesmissing' > highres missng _cr, _tmb </a>$eol 
+      <a href='/fix/?task=compareexif' > compare highres and _cr exif data </a>$eol 
        
    <strong>Copyright</strong>$eol
      <a href='/fix/?task=badcopyright' > copyright not begining with 
