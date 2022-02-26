@@ -168,7 +168,7 @@ To Modify/Merge <a href='/fix?task=keywordform' target='modify'>Keywords</a>
     <input type='submit' value='Delete the photo from database' >
 </form>
 <form method='post' action='/fix' >
-    rename photo <input type='text' name='filename' size='40' value='$photo' />
+     rename photo <input type='text' name='filename' size='40' value='$photo' />
     <input type='text' name='new' size='40' value='$photo' />
     <input type='submit' value='rename dataase/files' />
     <input type='hidden' name='task' value='rename' />

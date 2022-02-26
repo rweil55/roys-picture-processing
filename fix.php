@@ -24,13 +24,13 @@ class freewheeling_fixit {
         $msg = "";
 
         try {
-             $msg.= "<!-- before allow -->\n";
-             if (rrwUtil::notAllowedToEdit( "fix things" ))
-                 throw new Exception("$msg E#694 not allowed");
-             $msg.= "<!-- before set constatnts -->\n";
+            $msg .= "<!-- before allow -->\n";
+            if ( rrwUtil::notAllowedToEdit( "fix things" ) )
+                throw new Exception( "$msg E#694 not allowed" );
+            $msg .= "<!-- before set constatnts -->\n";
             $msg .= SetConstants( "updateDiretoryOnFileMatch" );
             $task = rrwUtil::fetchparameterString( "task" );
-            $msg.= "<!-- task == $task -->\n";
+            $msg .= "<!-- task == $task -->\n";
             switch ( $task ) { // those tasks which do not reqire a line in
                 case "listing":
                     $msg .= freewheeling_fixit::listing();
@@ -225,7 +225,7 @@ class freewheeling_fixit {
         foreach ( $dirlist_cr as $file => $fileFull ) {
             if ( !array_key_exists( $file, $dirlistRes ) ) {
                 $msg .= "$fileFull is not in $highresPath ";
-             $msg .= self::addcreate_searchlink( $file, $file, "$photoPath/$fileFull" );
+                $msg .= self::addcreate_searchlink( $file, $file, "$photoPath/$fileFull" );
             }
         }
         return $msg;
@@ -810,8 +810,15 @@ class freewheeling_fixit {
         if ( file_exists( $FullFilwname ) ) {
             $imageSize = getimagesize( $FullFilwname );
             $msg .= "<img src='$highresUrl/$highresfilename' width='300px' /> &nbsp; Current high reslution image" . $imageSize[ 3 ] . $eol .
-                $photoname . "$eol$eol";
+            $photoname;
+
         }
+        foreach ( array( "_cr", "_tmb", "-s.", "-w." ) as $check ) {
+            if ( strpos( $photoname, $check ) !== false ) {
+                $newphotoname = str_replace( $check, "", $photoname );
+                $msg .= " &nb<a href='/fix/?task=rename&filename=$photoname&newname=$newphotoname' target='check' >becomes  $newphotoname </a> ";
+            }
+        } // end foreach check
         $msg .= "<form method='get' action='/fix/'>
         <input type='hidden' id='photoname' name='photoname' value='$photoname' />
             <input type='text' id='partial' name='partial' value='$partial' />
@@ -847,8 +854,8 @@ class freewheeling_fixit {
                     continue;
                 $direonp = $rec[ "sourcepath" ];
                 $aspect = $rec[ "sourceaspect" ];
-                $link = " [ <a href='/fix/?task=sourcepush&photoname=$photoname" .
-                "&sourcepath=$direonp' > update sourcename</a> ] ";
+                $link = " [ <a href='/fix/?task=sourcepush&photoname=$photoname"
+                    . "&sourcepath=$direonp' > update sourcename</a> ] ";
                 if ( strncmp( "d:", $direonp, 2 ) == 0 )
                     $first = str_replace( "/", "&nbsp; / &nbsp;", $direonp ) .
                 "&nbsp; " . $photoname;
@@ -989,37 +996,33 @@ class freewheeling_fixit {
         return $msg;
     }
 
-    private static function updateRename( $filename, $newname, $sourcePath ) {
+    private static function updateRename( $filename, $newname ) {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_photos, $rrw_keywords;
         global $photoPath, $thumbPath, $highresPath;
         $msg = "";
 
         $debug = true;
-        if ( $debug )$msg .= "updateRename( $filename, $newname, $sourcePath ) ";
+        if ( $debug )$msg .= "updateRename( $filename, $newname ) ";
 
         if ( empty( $filename ) ) {
             $filename = trim( rrwUtil::fetchparameterString( "filename" ) );
-            $newname = trim( rrwUtil::fetchparameterString( "new" ) );
-            $sourcePath = trim( rrwUtil::fetchparameterString( "source" ) );
-        }
-        if ( empty( $sourcePath && "dale" == substr( $newname, 0, 4 ) ) ) {
-            $sourcePath = "P:/film-scan/" . substr( $newname, 0, 6 ) . "/IMAGES/$newname.jpg";
+            $newname = trim( rrwUtil::fetchparameterString( "newname" ) );
         }
         if ( empty( $newname ) ) {
             $msg .= "<form >
         <input type='text' name='filename' diabled value='$filename' />
-        <input type='text' name='new' value='$filename' />
+        <input type='text' name='newname' value='$filename' />
         <input type='submit' value='rename dataase/files' />
         <input type='hidden' name='task' value='rename' />
         </form>";
             return $msg;
         } //  ---------------------------------------------- move three files
-        $msg .= freewheeling_fixit::checkAndRename( "$photoPath/${filename}_cr.jpg",
+        $msg .= self::checkAndRename( "$photoPath/${filename}_cr.jpg",
             "$photoPath/{$newname}_cr.jpg" );
-        $msg .= freewheeling_fixit::checkAndRename( "$thumbPath/{$filename}_tmb.jpg",
+        $msg .= self::checkAndRename( "$thumbPath/{$filename}_tmb.jpg",
             "$thumbPath/{$newname}_tmb.jpg" );
-        $msg .= freewheeling_fixit::checkAndRename( "$highresPath/{$filename}.jpg",
+        $msg .= self::checkAndRename( "$highresPath/{$filename}.jpg",
             "$<strong>thumbPath</strong>/{$newname}.jpg" );
         //  ------------------------------------------------- things in rrw_photos
         $sqlExist = "select filename from $rrw_photos where filename = '$newname'";
@@ -1029,30 +1032,19 @@ class freewheeling_fixit {
                     not replaced $errorEnd";
         else {
             $sqlupdate = "update $rrw_photos set filename = '$newname',
-                direOnP = '$sourcePath' where filename ='$filename' ";
+                where filename ='$filename' ";
+            $rec = $wpdbExtra->query( $sqlupdate );
+            $sqlupdate = "update $rrw_leywords set ketwordfilename = '$newname',
+                where kwywordfilename ='$filename' ";
             $rec = $wpdbExtra->query( $sqlupdate );
             $msg .= "$sqlupdate $eol";
         } // ------------------------------------------------  direonp
         $sqldireonp = "update $rrw_photos set direonp =
                 replace(direonp, '$filename', '$newname') where filename = '$newname'";
         $rec = $wpdbExtra->query( $sqldireonp );
-        /// --------------------------------------------------- cause to be fetched
-        $sqlDate = "update $rrw_photos set uploaddate = '1990-01-01' 
-                    where filename = '$newname'";
-        $msg .= "$sqlDate $eol";
-        $rec = $wpdbExtra->query( $sqlDate );
-        // --------------------------------------------------------- keywords
-        $sqlupdate = "update $rrw_keywords set keywordfilename = '$newname'
-                        where keywordfilename ='$filename' ";
-        $rec = $wpdbExtra->query( $sqlupdate );
-        $msg .= "$sqlupdate $eol";
-        $msg .= " [ <a href='/display-one-photo?photoname=$newname' 
-                    target='one'>$newname</a> ]
-        [ <a href='http://127.0.0.1/pict/sub.php?direname=' target='submit' >
-                upload picture file </a> ] ";
         return $msg;
 
-    } // end  updateRename( $filename, $newname, $sourcePath ) {
+    } // end  updateRename( $filename, $newname ) {
 
     private static function checkAndRename( $fileFrom, $fileTo ) {
         global $eol;
@@ -1202,7 +1194,7 @@ class freewheeling_fixit {
                     if ( $newname != $sourceFilename )
                         continue;
 
-                    $msg .= updateRename( $filename, $newname, $sourcePath );
+                    $msg .= self::updateRename( $filename, $newname );
                     $cntInsert++;
                     if ( $cntInsert > 5 )
                         return "$msg </table> - finished one entry";

@@ -11,7 +11,7 @@
  * Text Domain: Roys-picture-processng
  * Domain Path: /translation
  
-  * Version: 2.0.36
+  * Version: 2.0.37
  */
 // disable direct access
 ini_set( "display_errors", true );
@@ -198,41 +198,7 @@ function direReport( $field, $report = "" ) {
     return $msg;
 }
 
-function updateRename( $filename, $newname, $sourceFullName ) {
-    global $eol;
-    global $wpdbExtra, $rrw_photos;
-    global $photoPath;
-    $msg = "";
-    //
-    if ( empty( $filename ) ) {
-        $filename = rrwUtil::fetchparameterString( "filename" );
-        $newname = rrwUtil::fetchparameterString( "new" );
-        $sourceFullName = rrwUtil::fetchparameterString( "source" );
-    }
-    if ( empty( $sourceFullName && "dale" == substr( $newname, 0, 4 ) ) ) {
-        $sourceFullName = "P:/film-scan/" . substr( $newname, 0, 6 ) . "/IMAGES/$newname";
-    }
-    if ( empty( $newname ) ) {
-        $msg .= "<form >
-        <input type='text' name='filename' diabled value='$filename' />
-        <input type='text' name='new' value='$filename' />
-        <input type='submit' value='rename dataase/files' />
-        <input type='hidden' name='task' value='rename' />
-        </form>";
-        return $msg;
-    }
-    $msg .= "updateRename( $filename, $newname, $sourceFullName )";
-    rename( "$photoPath/${filename}_cr.jpg", "$photoPath/{$newname}_cr.jpg" );
-    rename( "$photoPath/thumbs/{$filename}_tmb.jpg",
-        "$photoPath/thumbs/{$newname}_tmb.jpg" );
-    $sqlupdate = "update $rrw_photos set filename = '$newname',
-                direOnP = '$sourceFullName' where filename ='$filename' ";
-    $wpdbExtra->query( $sqlupdate );
-    $msg .= "$sqlupdate $eol";
-    $msg .= "<a href='http://127.0.0.1/pict/sub.php?direname=' target='submit' >
-                upload picture file </a> $eol ";
-    return $msg;
-}
+
 /*
 function doCopyright( $item ) {
     global $eol;

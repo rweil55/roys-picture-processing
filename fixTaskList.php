@@ -15,7 +15,7 @@ class fixTaskList {
        <a href='/fix/?task=duplicatephoto' > set duplicate photo flag </a>$eol 
        <a href='/fix/?task=exifmissing' > photo with no exif data </a>$eol 
        <a href='/fix/?task=forcedatabase' > force database to match exif </a>$eol 
-       <a href='/fix/?task=rename' > rename a photo </a>$eol 
+       <a href='/fix/?task=' >  a photo </a>$eol 
 <strong>File consistancy</strong>$eol
       <a href='/fix/?task=highresmissing' > high resolution image
                                             missing </a>$eol 
