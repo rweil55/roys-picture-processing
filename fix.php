@@ -1,3 +1,13 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+function gimmeFile(filename){
+    
+    alert (filename);
+     $.get(filename, function(data, status){
+    alert("Data: " + data + "\nStatus: " + status);
+  });
+}
+</script>
 <?php
 
 //require_once "rrw_util_inc.php";
@@ -14,9 +24,13 @@ class freewheeling_fixit {
         $msg = "";
 
         try {
-            $msg .= rrwUtil::allowedToEdit( "fix things" );
+             $msg.= "<!-- before allow -->\n";
+             if (rrwUtil::notAllowedToEdit( "fix things" ))
+                 throw new Exception("$msg E#694 not allowed");
+             $msg.= "<!-- before set constatnts -->\n";
             $msg .= SetConstants( "updateDiretoryOnFileMatch" );
             $task = rrwUtil::fetchparameterString( "task" );
+            $msg.= "<!-- task == $task -->\n";
             switch ( $task ) { // those tasks which do not reqire a line in
                 case "listing":
                     $msg .= freewheeling_fixit::listing();
@@ -44,10 +58,6 @@ class freewheeling_fixit {
                     break;
                 case "copyrightfix":
                     $msg .= freewheeling_fixit::copyrightfix();
-                    break;
-                case "SourceLocClose":
-                    $msg .= freewheeling_fixit::direonpOnFileMatch();
-                    $msg .= freewheeling_fixit::updateDiretoryCloseFileMatch();
                     break;
                 case "deletephoto":
                     $msg .= freewheeling_fixit::deletePhoto();
@@ -78,8 +88,18 @@ class freewheeling_fixit {
                 case "photomissing":
                     $msg .= self::photomissing();
                     break;
+                case "reload":
+                    $msg .= self::reload( $attr );
+                    break;
+                case "rename":
+                    $msg .= freewheeling_fixit::updateRename( "", "", "" );
+                    break;
                 case "SourceLoc":
                     $msg .= freewheeling_fixit::direonpOnFileMatch();
+                    break;
+                case "SourceLocClose":
+                    $msg .= freewheeling_fixit::direonpOnFileMatch();
+                    $msg .= freewheeling_fixit::updateDiretoryCloseFileMatch();
                     break;
                 case "sourcepush":
                     $msg .= freewheeling_fixit::sourcePush();
@@ -93,9 +113,6 @@ class freewheeling_fixit {
                 case "keywordform":
                     $msg .= freewheeling_fixit::keywordForm();
                     break;
-                case "rename":
-                    $msg .= freewheeling_fixit::updateRename( "", "", "" );
-                    break;
                 case "removecreditline":
                     $msg .= freewheeling_fixit::removeCreditline();
                     break;
@@ -103,7 +120,7 @@ class freewheeling_fixit {
                     $msg .= freewheeling_fixit::test();
                     break;
                 default:
-                    $msg .= "
+                    $msg .= "task=$task$eol
        <a href='/fix/?task=add' >upload photos from the source table</a>$eol 
        <a href='/fix/?task=addlist' >list available photos from the source      
                                         table</a>$eol 
@@ -195,15 +212,21 @@ class freewheeling_fixit {
 
         $msg .= "<strong>There is high resolution image, 
                     but no display (_cr) image </strong><br>";
+        $cntFound = 0;
         foreach ( $dirlistRes as $file => $fileFull ) {
-            if ( !array_key_exists( $file, $dirlist_cr ) )
-                $msg .= "$fileFull is not in $photoPath $eol ";
+            if ( !array_key_exists( $file, $dirlist_cr ) ) {
+                $msg .= "$fileFull is not in $photoPath ";
+                $msg .= self::addcreate_searchlink( $photoPath, $file, $fileFull );
+                $cntFound++;
+            }
         }
-        $msg .= "<strong>There isdisplay (_cr) image, 
+        $msg .= "<strong>There are $cntFound isdisplay (_cr) image, 
                     but no high resolution image </strong><br>";
         foreach ( $dirlist_cr as $file => $fileFull ) {
-            if ( !array_key_exists( $file, $dirlistRes ) )
-                $msg .= "$fileFull is not in $highresPath $eol ";
+            if ( !array_key_exists( $file, $dirlistRes ) ) {
+                $msg .= "$fileFull is not in $highresPath ";
+             $msg .= self::addcreate_searchlink( $file, $file, "$photoPath/$fileFull" );
+            }
         }
         return $msg;
     }
@@ -250,12 +273,14 @@ class freewheeling_fixit {
             $photolist[ $rec[ "filename" ] ] = 1;
         }
         $cntFound = 0;
-        foreach ( $dirlistRes as $highres ) {
+        foreach ( $dirlistRes as $highres => $fullfilename ) {
             $highresTest = str_replace( ".jpg", "", $highres );
             $highresTest = str_replace( "$highresPath/", "", $highresTest );
             if ( !array_key_exists( $highresTest, $photolist ) ) {
                 $msg .= "$highresTest is not in the photo table,
-                but we have a high resolution image $eol ";
+                but we have a high resolution image ";
+                $msg .= self::addcreate_searchlink( $highres, $highresTest,
+                    $fullfilename );
                 $cntFound++;
             }
         }
@@ -263,8 +288,43 @@ class freewheeling_fixit {
         return $msg;
     }
 
-    private static function upload() {
-        return "not yet imlmented";
+    private static function addcreate_searchlink( $highres, $partial, $fullfilename ) {
+        global $eol, $errorBeg, $errorEnd;
+        $msg = "";
+        if ( strpos( $highres, "_cr" ) !== false ||
+            strpos( $highres, "_tmb" ) !== false ||
+            strpos( $highres, "-s." ) !== false ||
+            strpos( $highres, "-w." ) !== false )
+            $msg .= "
+                <a href='/fix/?
+                    task=filelike&photoname=$partial&partial=$partial' 
+                    target='create' > search for high res</a> $eol ";
+        else
+            $msg .= "                   
+                <a href='/fix/?task=reload&fullfilename=$fullfilename' 
+                    target='create' > create meta</a> $eol ";
+        return $msg;
+    }
+    private static function reload( $attr ) {
+        // given a fullfilename, move file to the upload directoy and reload it
+        global $eol, $errorBeg, $errorEnd;
+        global $uploadPath;
+        $msg = "";
+        $debug = false;
+
+        $fullFilename = rrwPara::String( "fullfilename" );
+        if ( empty( $fullFilename ) )
+            throw new Exception( "$msg $errorBeg E#669 missing filename $errorEnd" );
+        $iislash = strrpos( $fullFilename, "/" );
+        $filename = substr( $fullFilename, $iislash + 1 );
+        $HighResfilename = "$uploadPath/$filename";
+        // move the file
+        $answer = rename( $fullFilename, $HighResfilename );
+        if ( $debug )$msg .= "lets process upload dire$eol";
+        $attr = array( "uploadfilename" => $filename );
+        if ( $debug )$msg .= rrwUtil::print_r( $attr, true, "parameters to upload" );
+        $msg .= uploadProcessDire::upload( $attr );
+        return $msg;
     }
 
     public static function Author2Copyright( $attr ) {
@@ -736,14 +796,24 @@ class freewheeling_fixit {
     public static function fileLike( $attr ) {
         global $eol;
         global $wpdbExtra, $rrw_digipix;
+        global $highresUrl, $highresPath;
         $msg = "";
 
         $partial = rrwUtil::fetchparameterString( "partial", $attr );
-        $highresfilename = "$partial.jpg";
-        if (file_exists($highresfilename)) {
-            $msg .= "<img src='$highresfilename' width='300px' />$eol";
+        $photoname = rrwPara::String( "photoname" );
+        if ( empty( $photoname ) )
+            $highresfilename = "$partial.jpg";
+        else
+            $highresfilename = "$photoname.jpg";
+        $highresfilename = str_replace( "._cr", "", $highresfilename );
+        $FullFilwname = "$highresPath/$highresfilename";
+        if ( file_exists( $FullFilwname ) ) {
+            $imageSize = getimagesize( $FullFilwname );
+            $msg .= "<img src='$highresUrl/$highresfilename' width='300px' /> &nbsp; Current high reslution image" . $imageSize[ 3 ] . $eol .
+                $photoname . "$eol$eol";
         }
         $msg .= "<form method='get' action='/fix/'>
+        <input type='hidden' id='photoname' name='photoname' value='$photoname' />
             <input type='text' id='partial' name='partial' value='$partial' />
             <input type='hidden' id='task' name='task' value='filelike' />
             <input type='submit' value='go find' />
@@ -772,21 +842,22 @@ class freewheeling_fixit {
                 $color = rrwUtil::colorswap( $color );
 
                 $photoname = $rec[ "sourcefilename" ];
+                $ext = substr( $photoname, -3 );
+                if ( "PCD" == $ext )
+                    continue;
                 $direonp = $rec[ "sourcepath" ];
                 $aspect = $rec[ "sourceaspect" ];
                 $link = " [ <a href='/fix/?task=sourcepush&photoname=$photoname" .
                 "&sourcepath=$direonp' > update sourcename</a> ] ";
-                $link .= " [ <a href='/fix/?task=upload&photoname=$photoname" .
-                "&source=$direonp' > upload and process</a> ] ";
                 if ( strncmp( "d:", $direonp, 2 ) == 0 )
-                    $first = "<a href='http://127.0.0.1/" . substr( $direonp, 3 ) . "/$photoname' 
-                target='showimage' >$photoname</a>";
+                    $first = str_replace( "/", "&nbsp; / &nbsp;", $direonp ) .
+                "&nbsp; " . $photoname;
                 else
                     $first = "$photoname";
                 $msg .= rrwFormat::CellRow( $color, $first, $aspect,
                     $direonp, $link );
-                $imgFile = "http://127.0.0.1" . substr( $direonp, 2 ) . 
-                    "/$photoname";
+                $imgFile = "http://127.0.0.1" . substr( $direonp, 2 ) .
+                "/$photoname";
                 $display .= "<div class='rrwDinoItem'>
                         <a href=''><img src='$imgFile' width='300' /></a><br />
                         $direonp<br />
@@ -795,9 +866,10 @@ class freewheeling_fixit {
             }
             $msg .= "</table>\n";
         }
-        $msg .= "<div class='rrwDinoGrid' > 
-        " . $display . "
-        </div>";
+        $msg .= "<strong> ------------ available images ------ </strong$eol
+        <div class='rrwDinoGrid' >" . $display . "</div>";
+        $msg .= "<strong> ------------  to update ------ </strong$eol";
+        $msg .= rrwPicSubmission::displayform(); //uses photographer, photoname
         return $msg;
     }
 
@@ -1304,8 +1376,8 @@ class freewheeling_fixit {
             }
             $sofar = "Do_forceDatabse2matchexif is done";
         } catch ( Exception $ex ) {
-            $msg .= "$msg E#440 in Do_forceDatabse2matchexif:$sofar: " . 
-                        $ex->getMessage() . $eol ;
+            $msg .= "$msg E#440 in Do_forceDatabse2matchexif:$sofar: " .
+            $ex->getMessage() . $eol;
         }
         return $msg;
     } // end function Do_forceDatabse2matchexif
@@ -1349,7 +1421,7 @@ class freewheeling_fixit {
             return $picFormated;
         } // end try
         catch ( Exception $ex ) {
-            print $ex->getMessage() . "$errorBeg  E#673 somewher in 
+            print $ex->getMessage() . "$errorBeg  E#673 somewhere in 
                 getPhotoDateTime with a datekey of $datekey $errorEnd";
             return "";
         }

@@ -7,7 +7,7 @@ class freeWheeling_DisplayOne {
     public static function DisplayOne( $attr ) {
         // display full size and thumbnail and the meta data infomaion
         ini_set( "display_errors", true );
-        global $photoUrl, $photoPath, $thumbUrl, $site_url;
+        global $photoUrl, $photoPath, $highresPath, $thumbUrl, $site_url;
         global $wpdbExtra, $rrw_photos, $rrw_trails, $rrw_photographers,
         $rrw_keywords, $rrw_access;
         global $eol, $errorBeg, $errorEnd;
@@ -62,6 +62,7 @@ class freeWheeling_DisplayOne {
             $direonp = $recset[ "DireOnP" ];
             $trail_name = $recset[ "trail_name" ];
             $uploaddate = $recset[ "uploaddate" ];
+            $highresfilename = $recset[ "highresfilename" ];
             if ( $debugPath )$msg .= "**** 5 ******displayOne:photoUrl $photoPath <br/>";
             $htmlfileref1 = "$photoUrl/{$photoname}_cr.jpg";
             $fullfilename1 = "$photoPath/{$photoname}_cr.jpg";
@@ -142,9 +143,7 @@ class freeWheeling_DisplayOne {
                 value='$copyright' /> \n";
             $msg .= "<strong>Trail:</strong>" .
             self::listbox2( $wpdbExtra, "$rrw_trails",
-                "trailName", $trail_name, "trailName" ) . " &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 
-            [ <a href='/fix?task=deletephoto&del2=$photoname&del3=$photoname'>
-            Delete photo ]</a> $eol";
+                "trailName", $trail_name, "trailName" ) . " $eol";
             $msg .= "<strong>Photogrpher:</strong>" .
             self::listbox2( $wpdbExtra, "$rrw_photographers",
                 "photographer", $photographer, "photographer" ) . $eol;
@@ -153,9 +152,20 @@ class freeWheeling_DisplayOne {
                         value='$PhotoDate'>" . "\n" . "$eol 
                 <strong>upload date:</strong> 
                 <input type='text' name='uploaddate' size='20' 
-                        value='$uploaddate'>\n" .
-            " <a href='/submission/?photographer=$photographer&inputfile=" . "$photoname&replacephoto=on' >reload image </a> " .
-            "<br>Location: <input type='text' name='location' size='50' 
+                        value='$uploaddate'>
+                &nbsp; &nbsp; &nbsp; &nbsp; ";
+            if ( false === strpos( $photoname, "_cr" ) ) {
+                $msg .= "[ <a href='/fix/?task=reload&" .
+                "fullfilename=$highresPath/$highresfilename' >
+                    reload image </a> ] ";
+            }
+            $msg .= "
+             [ <a href='/fix/?task=filelike&partial=$photoname&photoname=$photoname' >
+                    search High resolution</a> ] 
+            &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 
+            [ <a href='/fix?task=deletephoto&del2=$photoname&del3=$photoname'>
+            Delete photo ]</a> ] 
+           <br>Location: <input type='text' name='location' size='50' 
                         value='$location'>" . "\n" .
             "<br><strong>People:</strong>
             <input type='text' name='people' size='50' 
@@ -171,7 +181,7 @@ class freeWheeling_DisplayOne {
             <strong>Source Directory:</strong>";
             if ( empty( $dironp ) ) {
                 $msg .= "Search: 
-                <a href='/fix/?task=filelike&partial=$photoname' >$photoname</a>";
+                <a href='/fix/?task=filelike&partial=$photoname&photoname=$photoname' >$photoname</a>";
             } else {
                 $msg .= $direonp;
             }
@@ -293,21 +303,21 @@ class freeWheeling_DisplayOne {
         } else {
             $photographerDisplay = $recset[ "photographer" ] . "</td>\n ";
         }
-        
+
         $fullname = "$photoPath/$photoname" . "_cr.jpg";
         if ( file_exists( $fullname ) ) {
             $photoSize = getimagesize( $fullname );
             $sizeDisplay = $photoSize[ 3 ];
         } else
             $sizeDisplay = "";
-        
+
         $fullHighRes = "$highresPath/$photoname.jpg";
         if ( file_exists( $fullHighRes ) ) {
             $photoSize = getimagesize( $fullHighRes );
             $sizeHighres = $photoSize[ 3 ];
         } else
             $sizeHighres = "";
-        
+
         $fullThumb = "$thumbPath/$photoname" . "_tmb.jpg";
         if ( file_exists( $fullThumb ) ) {
             $photoSize = getimagesize( $fullThumb );

@@ -107,7 +107,7 @@ class uploadProcessDire {
             $insertData = array(
                 "photoname" => $photoname,
                 "filename" => $photoname,
-                "highresfilename => $entry",
+                "highresfilename" => $entry,
                 "uploaddate" => date( "Y-m-d H:i" ),
                 /* all others defalt to blank */
             );
@@ -120,7 +120,7 @@ class uploadProcessDire {
         $recOld = $recs[ 0 ];
         $photographer = $recOld["photographer"];
         
-        $mdg .= self::MakeImakeImages( $sourceFile, $photographer ) ;
+        $msg .= self::MakeImakeImages( $sourceFile, $photographer ) ;
 
         // meta date exists make it consistant with the EXIF
         $msg .= freewheeling_fixit::Do_forceDatabse2matchexif( $recOld );

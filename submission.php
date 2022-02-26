@@ -156,14 +156,14 @@ class rrwPicSubmission {
     }
 
 
-    private static function displayform() {
+    public static function displayform() {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_photographers;
         $msg = "";
 
         $photographer = rrwUtil::fetchparameterString( "photographer" );
         $ip = $_SERVER[ 'REMOTE_ADDR' ];
-        $msg .= "IP address == $ip $eol";
+        if (false) $msg .= "IP address == $ip $eol";
         if ( empty( $photographer ) && ( "72.95.243.124" == $ip ) )
             $photographer = "Mary Shaw";
         if ( empty( $photographer ) ) {
@@ -172,7 +172,7 @@ class rrwPicSubmission {
                 $photographer = $_COOKIE[ "photographer" ];
         }
         $_COOKIE[ "photographer" ] = $photographer;
-        $msg .= "<form  method='post' enctype=\"multipart/form-data\" > ";
+        $msg .= "<form  method='post' action='/submission/' enctype=\"multipart/form-data\" > ";
 
         $msg .= "<strong>Photogrpher:</strong>" .
         freeWheeling_DisplayOne::listbox2( $wpdbExtra, "$rrw_photographers",
@@ -190,9 +190,8 @@ class rrwPicSubmission {
 
         $msg .= "<input type='submit' name='submit' id='submit'
         value='Upload the picture, Display it so I can select the keywords' /> $eol
-        </form> $eol;";
-        $msg .= "not yet";
-        return $msg;
+        </form> $eol";
+          return $msg;
     } // end function
 } // end class
 ?>

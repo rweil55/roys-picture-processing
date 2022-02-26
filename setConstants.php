@@ -37,7 +37,7 @@ try {
     $siteUrl = get_site_url();
     $photoUrl = "$siteUrl/photos";
     $thumbUrl = "$photoUrl/thumbs";
-    $highresUrl = "$photoUrl/high_resolutiom";
+    $highresUrl = "$photoUrl/high_resolution";
     $rejectUrl  = "$photoUrl/reject";
 
     $photoPath = ABSPATH . "photos";

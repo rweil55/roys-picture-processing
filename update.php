@@ -91,35 +91,43 @@ class freeWheeling_DisplayUpdate {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_photos, $rrw_photographers, $rrw_keywords;
         $msg = "";
-        $dubigCompare = false;
-        if ( $dubigCompare )$msg .= " compare( $itemName, $newValue -> ";
-        $oldValue = $rec[ $itemName ];
-        if ( $dubigCompare )$msg .= " $oldValue $eol";
-        if ( $newValue == $oldValue )
-            return $msg; // no update neeeded
-        $photoname = $rec[ "filename" ];
-        $update = array( $itemName => $newValue );
-        $key = array( "filename" => $photoname );
-        $cnt = $wpdbExtra->update( $rrw_photos, $update, $key );
-        $hisCom = "$itemName -- oldValue=> $newValue";
-        $msg .= rrwUtil::InsertIntoHistory( $photoname, $hisCom );
-        // rrw_photo has one field updated, deal with the related.
-        if ( "copyright" == $itemName ) {
-            pushToImage( $photoname, "copyright", $newValue );
-        } elseif ( "photoKeyword" == $itemName ) {
-            $msg .= keywordHandling::remove( $photoname ); // remove all keywords
-            $msg .= keywordHandling::insertList( $photoname, $newValue );
-            //       $msg .= ( $photoname, "Keywords", $newValue );
-        } elseif ( "photodate" == $itemName ) {
-            $msg .= "$errorBeg E#701 date inside photo not updated $errorEnd";
-        } elseif ( "photographer" == $itemName ) {
-            $sqlCopy = "select copyrightDefault from $rrw_photographers
+
+        try {
+            ini_set( "display_errors", true );
+            error_reporting( E_ALL | E_STRICT );
+            $dubigCompare = false;
+            if ( $dubigCompare )$msg .= " compare( $itemName, $newValue -> ";
+            $oldValue = $rec[ $itemName ];
+            if ( $dubigCompare )$msg .= " $oldValue $eol";
+            if ( $newValue == $oldValue )
+                return $msg; // no update neeeded
+            $photoname = $rec[ "filename" ];
+            $update = array( $itemName => $newValue );
+            $key = array( "filename" => $photoname );
+            $cnt = $wpdbExtra->update( $rrw_photos, $update, $key );
+            $hisCom = "$itemName -- oldValue=> $newValue";
+            $msg .= rrwUtil::InsertIntoHistory( $photoname, $hisCom );
+            // rrw_photo has one field updated, deal with the related.
+            if ( "copyright" == $itemName ) {
+                $msg .= pushToImage( $photoname, "copyright", $newValue );
+            } elseif ( "photoKeyword" == $itemName ) {
+                $msg .= keywordHandling::remove( $photoname ); // remove all keywords
+                $msg .= keywordHandling::insertList( $photoname, $newValue );
+                //       $msg .= ( $photoname, "Keywords", $newValue );
+            } elseif ( "photodate" == $itemName ) {
+                $msg .= "$errorBeg E#701 date inside photo not updated $errorEnd";
+            } elseif ( "photographer" == $itemName ) {
+                $sqlCopy = "select copyrightDefault from $rrw_photographers
                 where photographer = '$newValue' ";
-            $newcopyright = $wpdbExtra->get_var( $sqlCopy );
-            $rec[ "copyright" ] = "forces update";
-            $msg .= self::compare( "copyright", $newcopyright, $rec );
-        } else
-            $msg .= ""; // no specail shove to image
+                $newcopyright = $wpdbExtra->get_var( $sqlCopy );
+                $rec[ "copyright" ] = "forces update";
+                $msg .= self::compare( "copyright", $newcopyright, $rec );
+            } else
+                $msg .= ""; // no specail shove to image
+        } // end try
+        catch ( Exception $ex ) {
+            $msg .= $ex->getMessage() . "$errorBeg  E#469 update:compare:itenname $itemName, newvalue $newValue  $errorEnd";
+        }
         return $msg;
     } // end   function compare
 } // end class freeWheeling_DisplayUpdate

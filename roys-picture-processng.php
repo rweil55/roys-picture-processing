@@ -11,7 +11,7 @@
  * Text Domain: Roys-picture-processng
  * Domain Path: /translation
  
-  * Version: 2.0.34
+  * Version: 2.0.36
  */
 // disable direct access
 ini_set( "display_errors", true );
@@ -152,6 +152,7 @@ class FreewheelingCommon {
 function SetConstants( $whocalled ) {
     include "setConstants.php";
 }
+
 function rrw_getAccessID() {
     $current_user = wp_get_current_user();
     if ( !( $current_user instanceof WP_User ) )
@@ -164,6 +165,7 @@ function rrw_getAccessID() {
     $id .= "-" . rrwUtil::fetchparameterString( "USERNAME" );
     return $id;
 }
+
 function updateAccessTable( $photoname, $search ) {
     global $wpdbExtra, $rrw_access;
     global $picrureCookieName;
@@ -180,6 +182,7 @@ function updateAccessTable( $photoname, $search ) {
     $answer = $wpdbExtra->insert( $rrw_access, $update );
     return $msg;
 }
+
 function direReport( $field, $report = "" ) {
     // count the number of items for a particular field
     global $wpdbExtra, $rrw_photos;
@@ -369,112 +372,122 @@ function readexifItem( $filename, $item, & $msg ) {
         return $exif[ $tem ];
     return "&lt;Missing&gt;";
 }
+
 function pushToImage( $filename, $item, $value ) {
-    global $eol;
+    global $eol, $errorBeg, $errorEnd;
     global $photoPath;
     $msg = "";
     $debugExif = false;
-    if ( false === strpos( $filename, "home" ) )
-        $filename = "$photoPath/$filename" . "_cr.jpg";
-    ini_set( 'memory_limit', '32M' );
-    if ( $debugExif )$msg .= "( $filename, $item, $value ) $eol";
-    $tmpfname = str_replace( "jpg", "_copyright.jpg", $filename );
-    if ( $debugExif )$msg .= "tempfile is $tmpfname $eol";
-    $contents = file_get_contents( $filename );
-    //   return $msg;
-    $data = new PelDataWindow( $contents );
-    if ( $debugExif )$msg .= " new PelDataWindow worked  $eol";
-    //    return $msg;
-    $jpeg = $fileInMemory = new PelJpeg();
-    if ( $debugExif )$msg .= " new PelJpeg() worked  $eol";
-    //    return $msg;
-    $jpeg->load( $data );
-    if ( $debugExif )$msg .= "load worked  $eol";
-    //  return $msg;
-    $exif = $jpeg->getExif(); // get the desired data
-    if ( $debugExif )$msg .= "exif isloaded $eol";
-    //  return $msg;
-    if ( $exif == null ) {
-        if ( $debugExif )$msg .= println( 'No APP1 section found, added new.' );
-        $exif = new PelExif(); // create on
-        $jpeg->setExif( $exif ); // insert it into the memory version
-        /* We then create an empty TIFF structure in the APP1 section. */
-        $tiff = new PelTiff();
-        $exif->setTiff( $tiff );
-    } else {
-        if ( $debugExif )$msg .= println( 'Found existing APP1 section.' );
-        $tiff = $exif->getTiff();
-    }
-    /*
-     * TIFF data has a tree structure much like a file system. There is a
-     * root IFD (Image File Directory) which contains a number of entries
-     * and maybe a link to the next IFD. The IFDs are chained together
-     * like this, but some of them can also contain what is known as
-     * sub-IFDs. For our purpose we only need the first IFD, for this is
-     * where the image description should be stored.
-     */
-    $ifd0 = $tiff->getIfd();
-    if ( $ifd0 == null ) {
-        if ( $debugExif )$msg .= println( 'No IFD found, adding new.' );
-        $ifd0 = new PelIfd( PelIfd::IFD0 );
-        $tiff->setIfd( $ifd0 );
-    }
-    if ( $debugExif )$msg .= "That compleates setup, get/adjust the data $eol ";
-    $tag = convertText2EeixID( $item ); // item name into tag integer
-    $textThing = $ifd0->getEntry( $tag );
-    if ( is_null( $textThing ) ) {
-        $msg .= "tag did not exist, creae a new one $eol";
-        $type = findTagtype( $tag );
-        if ( $debugExif )$msg .= println( "Adding new I$tag of type $type with value $value" );
-        switch ( $type ) {
-            case "copyright":
-                $textThing = new PelEntryCopyright( $value );
-                break;
-            case "ascii":
-                $textThing = new PelEntryAscii( $tag, value );
-                break;
-            case "byte":
-                $textThing = new PelEntryByte( $tag, $value );
-                break;
-            default:
-                throw new Exception( "E#488 Unknown findtagtype for $tag" );
-                break;
+    try {
+        if ( false === strpos( $filename, "home" ) )
+            $filename = "$photoPath/$filename" . "_cr.jpg";
+        ini_set( 'memory_limit', '32M' );
+        if ( $debugExif )$msg .= "( $filename, $item, $value ) $eol";
+        $tmpfname = str_replace( "jpg", "_copyright.jpg", $filename );
+        if ( $debugExif )$msg .= "tempfile is $tmpfname $eol";
+        $contents = file_get_contents( $filename );
+       if ( $debugExif )$msg .= " got contents of $filename $eol";
+        $ss = strlen($contents);
+       if ( $debugExif )$msg .= " contents size is $ss $eol";
+        //   return $msg;
+        $data = new PelDataWindow( $contents );
+        if ( $debugExif )$msg .= " new PelDataWindow worked  $eol";
+        //    return $msg;
+        $jpeg = $fileInMemory = new PelJpeg();
+        if ( $debugExif )$msg .= " new PelJpeg() worked  $eol";
+        //    return $msg;
+        $jpeg->load( $data );
+        if ( $debugExif )$msg .= "load worked  $eol";
+        //  return $msg;
+        $exif = $jpeg->getExif(); // get the desired data
+        if ( $debugExif )$msg .= "exif isloaded $eol";
+        //  return $msg;
+        if ( $exif == null ) {
+            if ( $debugExif )$msg .= println( 'No APP1 section found, added new.' );
+            $exif = new PelExif(); // create on
+            $jpeg->setExif( $exif ); // insert it into the memory version
+            /* We then create an empty TIFF structure in the APP1 section. */
+            $tiff = new PelTiff();
+            $exif->setTiff( $tiff );
+        } else {
+            if ( $debugExif )$msg .= println( 'Found existing APP1 section.' );
+            $tiff = $exif->getTiff();
         }
-        $ifd0->addEntry( $textThing );
-        $textValue = "NULL";
-    } else {
-        $textValue = $textThing->getValue();
-        if ( $debugExif )$msg .= rrwUtil::print_r( $textValue, true, "found old value of $item" );
-        $textThing->setValue( $value );
-        if ( $debugExif )$msg .= "setting new value -- $value $eol";
-    }
-    if ( $debugExif )$msg .= println( "Writing file $tmpfname" );
-    $fileInMemory->saveFile( $tmpfname );
-    $sizeOld = filesize( $filename );
-    $sizeNew = filesize( $tmpfname );
-    $msg .= dumpMeta( $filename, $tmpfname );
-    if ( abs( $sizeOld - $sizeNew ) < 500 ) {
-        unlink( $filename );
-        rename( $tmpfname, $filename );
-    } else {
-        if ( true ) {
+        /*
+         * TIFF data has a tree structure much like a file system. There is a
+         * root IFD (Image File Directory) which contains a number of entries
+         * and maybe a link to the next IFD. The IFDs are chained together
+         * like this, but some of them can also contain what is known as
+         * sub-IFDs. For our purpose we only need the first IFD, for this is
+         * where the image description should be stored.
+         */
+        $ifd0 = $tiff->getIfd();
+        if ( $ifd0 == null ) {
+            if ( $debugExif )$msg .= println( 'No IFD found, adding new.' );
+            $ifd0 = new PelIfd( PelIfd::IFD0 );
+            $tiff->setIfd( $ifd0 );
+        }
+        if ( $debugExif )$msg .= "That compleates setup, get/adjust the data $eol ";
+        $tag = convertText2EeixID( $item ); // item name into tag integer
+        $textThing = $ifd0->getEntry( $tag );
+        if ( is_null( $textThing ) ) {
+            $msg .= "tag did not exist, creae a new one $eol";
+            $type = findTagtype( $tag );
+            if ( $debugExif )$msg .= println( "Adding new I$tag of type $type with value $value" );
+            switch ( $type ) {
+                case "copyright":
+                    $textThing = new PelEntryCopyright( $value );
+                    break;
+                case "ascii":
+                    $textThing = new PelEntryAscii( $tag, value );
+                    break;
+                case "byte":
+                    $textThing = new PelEntryByte( $tag, $value );
+                    break;
+                default:
+                    throw new Exception( "E#488 Unknown findtagtype for $tag" );
+                    break;
+            }
+            $ifd0->addEntry( $textThing );
+            $textValue = "NULL";
+        } else {
+            $textValue = $textThing->getValue();
+            if ( $debugExif )$msg .= rrwUtil::print_r( $textValue, true, "found old value of $item" );
+            $textThing->setValue( $value );
+            if ( $debugExif )$msg .= "setting new value -- $value $eol";
+        }
+        if ( $debugExif )$msg .= println( "Writing file $tmpfname" );
+        $fileInMemory->saveFile( $tmpfname );
+        $sizeOld = filesize( $filename );
+        $sizeNew = filesize( $tmpfname );
+        $msg .= dumpMeta( $filename, $tmpfname );
+        if ( abs( $sizeOld - $sizeNew ) < 500 ) {
             unlink( $filename );
             rename( $tmpfname, $filename );
-        }
-        throw new Exception( " $msg E#461 old size is $sizeOld, new size is $sizeNew,
+        } else {
+            if ( true ) {
+                unlink( $filename );
+                rename( $tmpfname, $filename );
+            }
+            throw new Exception( " $msg E#461 old size is $sizeOld, new size is $sizeNew,
                 difference is more than 500 please check$eol file not written $eol" );
+        }
+        $ii = strrpos( $filename, "/" );
+        $basename = substr( $filename, $ii );
+        $itemname = str_replace( ".jpg", "", $basename );
+        $itemname = str_replace( "_cr", "", $itemname );
+        $itemname = str_replace( "_tmb", "", $itemname );
+        // copyright and comment may be stored as an arrray
+        $oldValue = rrwUtil::print_r( $textValue, true, "old value" );
+        $comment = "$basename -- $oldValue -> $value";
+        $msg .= rrwUtil::InsertIntoHistory( $itemname, $comment );
+    } // end try
+    catch ( Exception $ex ) {
+        $msg .= "$errorBeg E#963 in pushtoimage: " . $ex->getMessage() . $errorEnd;
     }
-    $ii = strrpos( $filename, "/" );
-    $basename = substr( $filename, $ii );
-    $itemname = str_replace( ".jpg", "", $basename );
-    $itemname = str_replace( "_cr", "", $itemname );
-    $itemname = str_replace( "_tmb", "", $itemname );
-    // copyright and comment may be stored as an arrray
-    $oldValue = rrwUtil::print_r( $textValue, true, "old value" );
-    $comment = "$basename -- $oldValue -> $value";
-    $msg .= rrwUtil::InsertIntoHistory( $itemname, $comment );
     return $msg;
 }
+
 function testperl() {
     global $gallery, $eol;
     ini_set( 'display_errors', 1 );
@@ -492,6 +505,7 @@ function testperl() {
     $msg .= "$eol perhaps";
     return $msg;
 }
+
 function writea5( $attr ) {
     ini_set( "display_errors", true );
     global $gallery, $eol;
@@ -551,6 +565,7 @@ function println( $fmt, $value = "" ) {
         $fmt = sprintf( $fmt, $value );
     return "$fmt $eol";
 }
+
 function rrwPHPel( $argv ) {
     /*
      * Store the name of the script in $prog and remove this first part of
@@ -673,31 +688,31 @@ function rrwPHPel( $argv ) {
                 $tiff = $exif->getTiff();
             }
         } elseif ( PelTiff::isValid( $data ) ) {
+                /*
+                 * The data was recognized as TIFF data. We prepare a PelTiff
+                 * object to hold it, and record in $file that the PelTiff object is
+                 * the top-most object (the one on which we will call getBytes).
+                 */
+                $tiff = $file = new PelTiff();
+                /* Now load the data. */
+                $tiff->load( $data );
+            } else {
+                /*
+                 * The data was not recognized as either JPEG or TIFF data.
+                 * Complain loudly, dump the first 16 bytes, and exit.
+                 */
+                if ( $debug )$msg .= println( 'Unrecognized image format! The first 16 bytes follow:', "" );
+                PelConvert::bytesToDump( $data->getBytes( 0, 16 ) );
+                return $msg;;
+            }
             /*
-             * The data was recognized as TIFF data. We prepare a PelTiff
-             * object to hold it, and record in $file that the PelTiff object is
-             * the top-most object (the one on which we will call getBytes).
+             * TIFF data has a tree structure much like a file system. There is a
+             * root IFD (Image File Directory) which contains a number of entries
+             * and maybe a link to the next IFD. The IFDs are chained together
+             * like this, but some of them can also contain what is known as
+             * sub-IFDs. For our purpose we only need the first IFD, for this is
+             * where the image description should be stored.
              */
-            $tiff = $file = new PelTiff();
-            /* Now load the data. */
-            $tiff->load( $data );
-        } else {
-            /*
-             * The data was not recognized as either JPEG or TIFF data.
-             * Complain loudly, dump the first 16 bytes, and exit.
-             */
-            if ( $debug )$msg .= println( 'Unrecognized image format! The first 16 bytes follow:', "" );
-            PelConvert::bytesToDump( $data->getBytes( 0, 16 ) );
-            return $msg;;
-        }
-        /*
-         * TIFF data has a tree structure much like a file system. There is a
-         * root IFD (Image File Directory) which contains a number of entries
-         * and maybe a link to the next IFD. The IFDs are chained together
-         * like this, but some of them can also contain what is known as
-         * sub-IFDs. For our purpose we only need the first IFD, for this is
-         * where the image description should be stored.
-         */
         $ifd0 = $tiff->getIfd();
         if ( $ifd0 == null ) {
             /*
@@ -784,6 +799,7 @@ function rrwPHPel( $argv ) {
     }
     return $msg;
 }
+
 function convertText2EeixID( $text ) {
     // codes from https://www.exiftool.org/TagNames/EXIF.html
     global $eol, $errorBeg, $errorEnd;
@@ -808,6 +824,7 @@ function convertText2EeixID( $text ) {
     }
     // assert never  get here.
 }
+
 function findTagtype( $tag ) {
     switch ( $tag ) {
         case PelTag::COPYRIGHT:
@@ -827,10 +844,13 @@ function findTagtype( $tag ) {
             return "no";
         case "COMPUTED":
             return "COMPUTED"; // 0xbc81
+        case "datetimedigitized":
+            return "ascii";
         default:
-            throw new Exception( "E#484 Invalid Tag Nameof '$text'" );
+            throw new Exception( "E#484 looking for typeof exif[$text]" );
     }
 }
+
 function testpel2( $attr ) {
     global $gallery, $eol;
     $msg = "";
@@ -846,6 +866,7 @@ function testpel2( $attr ) {
     $msg .= dumpMeta( $input_file, $output_file );
     return $msg;
 }
+
 function changeItem( $input_file, $output_file, $item, $newVale ) {
     global $gallery, $eol;
     $msg = "";
@@ -860,6 +881,7 @@ function changeItem( $input_file, $output_file, $item, $newVale ) {
     $msg .= rrwPHPel( $argv );
     return $msg;
 }
+
 function testpel() {
     global $gallery, $eol;
     $msg = "";
@@ -883,6 +905,7 @@ function testpel() {
     }
     return $msg;
 }
+
 function testpel3() {
     global $photoPath, $eol;
     $msg = "";
@@ -910,6 +933,7 @@ function testpel3() {
     $msg .= dumpMeta( $input_file, $output_file );
     return $msg;
 }
+
 function dumpMeta( $file1 = "", $file2 = "" ) {
     global $eol, $errorBeg, $errorEnd;
     $msg = "";
@@ -941,12 +965,14 @@ function dumpMeta( $file1 = "", $file2 = "" ) {
     $msg .= "</table>";
     return $msg;
 }
+
 function rrw_exif_read_data( $file ) {
     error_reporting( E_ALL ^ E_WARNING );
     $exifArray = exif_read_data( $file );
     error_reporting( E_ALL || E_STRICT );
     return $exifArray;
 }
+
 function reada3a4( $attr ) {
     // reads and displays the meta data for file f1, f2
     ini_set( "display_errors", true );
