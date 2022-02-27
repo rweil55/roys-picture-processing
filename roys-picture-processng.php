@@ -11,46 +11,46 @@
  * Text Domain: Roys-picture-processng
  * Domain Path: /translation
  
-  * Version: 2.0.37
+  * Version: 2.0.39
  */
 // disable direct access
 ini_set( "display_errors", true );
 error_reporting( E_ALL | E_STRICT );
 
-use lsolesen\pel\Pel;
-use lsolesen\pel\PelConvert;
-use lsolesen\pel\PelCanonMakerNotes;
-use lsolesen\pel\PelDataWindow;
-use lsolesen\pel\PelEntryAscii;
-use lsolesen\pel\PelEntryByte;
-use lsolesen\pel\PelEntryCopyright;
-use lsolesen\pel\PelEntryLong;
-use lsolesen\pel\PelEntryNumber;
-use lsolesen\pel\PelEntryRational;
-use lsolesen\pel\PelEntryShort;
-use lsolesen\pel\PelEntrySRational;
-use lsolesen\pel\PelEntrySLong;
-use lsolesen\pel\PelEntryTime;
+use lsolesen\ pel\ Pel;
+use lsolesen\ pel\ PelConvert;
+use lsolesen\ pel\ PelCanonMakerNotes;
+use lsolesen\ pel\ PelDataWindow;
+use lsolesen\ pel\ PelEntryAscii;
+use lsolesen\ pel\ PelEntryByte;
+use lsolesen\ pel\ PelEntryCopyright;
+use lsolesen\ pel\ PelEntryLong;
+use lsolesen\ pel\ PelEntryNumber;
+use lsolesen\ pel\ PelEntryRational;
+use lsolesen\ pel\ PelEntryShort;
+use lsolesen\ pel\ PelEntrySRational;
+use lsolesen\ pel\ PelEntrySLong;
+use lsolesen\ pel\ PelEntryTime;
 //use lsolesen\pel\PelEntryUndefined;
-use lsolesen\pel\PelEntryUserComment;
-use lsolesen\pel\PelEntryUserCopyright;
-use lsolesen\pel\PelEntryVersion;
-use lsolesen\pel\PelEntryWindowsString;
-use lsolesen\pel\PelEntryUndefined;
-use lsolesen\pel\PelExif;
-use lsolesen\pel\PelFormat;
-use lsolesen\pel\PelIfd;
-use lsolesen\pel\PelIfdException;
-use lsolesen\pel\PelIllegalFormatException;
-use lsolesen\pel\PelInvalidDataException;
-use lsolesen\pel\PelJpeg;
-use lsolesen\pel\PelJpegComment;
-use lsolesen\pel\PelJpegContent;
-use lsolesen\pel\PelJpegInvalidMarkerException;
-use lsolesen\pel\PelJpegMarker;
-use lsolesen\pel\PelMakerNotes;
-use lsolesen\pel\PelTag;
-use lsolesen\pel\PelTiff;
+use lsolesen\ pel\ PelEntryUserComment;
+use lsolesen\ pel\ PelEntryUserCopyright;
+use lsolesen\ pel\ PelEntryVersion;
+use lsolesen\ pel\ PelEntryWindowsString;
+use lsolesen\ pel\ PelEntryUndefined;
+use lsolesen\ pel\ PelExif;
+use lsolesen\ pel\ PelFormat;
+use lsolesen\ pel\ PelIfd;
+use lsolesen\ pel\ PelIfdException;
+use lsolesen\ pel\ PelIllegalFormatException;
+use lsolesen\ pel\ PelInvalidDataException;
+use lsolesen\ pel\ PelJpeg;
+use lsolesen\ pel\ PelJpegComment;
+use lsolesen\ pel\ PelJpegContent;
+use lsolesen\ pel\ PelJpegInvalidMarkerException;
+use lsolesen\ pel\ PelJpegMarker;
+use lsolesen\ pel\ PelMakerNotes;
+use lsolesen\ pel\ PelTag;
+use lsolesen\ pel\ PelTiff;
 
 ini_set( "display_errors", true );
 $pel = "/home/pillowan//www-shaw-weil-pictures/wp-content/plugins" .
@@ -121,32 +121,71 @@ class FreewheelingCommon {
                 and tell us what you did to get here ($from) ";
         return $msg;
     } // end funvtion missingImageMessage
-    public static function copyMeta( $inputPath, $outputPath ) {
+    public static function copyMeta( $filename, $outputPath ) {
         global $eol, $errorBeg, $errorEnd;
         $msg = "";
-        return $msg;
-        $debug = true;
+        $debugExif = true;
         ini_set( "displaoy_errors", true );
         error_reporting( E_ALL | E_STRICT );
         try {
-            $inputPel = new PelJpeg( $inputPath );
-            $outputPel = new PelJpeg( $outputPath );
-            $exif = $inputPel->getExif();
+            if ( $debugExif )$msg .= "input file - $filename $eol 
+                                    output file - $outputPath $eol";
+            // pushto     
+            $contents = file_get_contents( $filename );
+            if ( $debugExif )$msg .= " got contents of $filename $eol";
+            $ss = strlen( $contents );
+            if ( $debugExif )$msg .= " contents size is $ss $eol";
+
+            $jpeg = $fileInMemory = new PelJpeg();
+            if ( $debugExif )$msg .= " new PelJpeg() worked  $eol";
+            $jpeg->loadfile( $filename );
+            if ( $debugExif )$msg .= " loadfile worked  $eol";
+            //       $exif = $jpeg->getExif();
+            if ( $debugExif )$msg .= " getExif worked  $eol";
+            $exif = exif_read_data( $filename, 0, true );
+            if ( $debugExif )$msg .= " exif_read_data worked  $eol";
             if ( is_null( $exif ) )
                 throw new Exceprion( "$errorBeg e#491 inputPel->getExif() failed $errorEnd" );
-            if ( $debug ) print "got exif$eol ";
-            $resultr1 = $outputPath->setExif( $exif );
-            if ( $debug ) print "called setExif exif$eol ";
+            $cnt = 0;
+            foreach ( $exif as $key => $section ) {
+                $cnt++;
+                if ( $cnt > 50 )
+                    break;
+                foreach ( $section as $name => $val ) {
+                    $cnt++;
+                    if ( $cnt > 50 )
+                        break;
+                    $msg .= "$key.$name: $val $eol";
+                }
+            }
+            if ( $debugExif )$msg .= " display  $eol";
+            $jpeg->clearExif();
+            if ( $debugExif )$msg .= " clearExif worked  $eol";
+            $fileInMemory->savefile( $outputPath );
+            if ( $debugExif )$msg .= " save file worked  $eol";
+
+            return $msg;
+            /* fatial error in save
+                     if ( $debugExif )$msg .= " display  $eol";
+                        $exifNew = new PelExif();
+                        if ( $debugExif )$msg .= " new exif  worked  $eol";
+                        $jpeg->setExif( $exifNew );
+                        if ( $debugExif )$msg .= " setExif worked  $eol";
+                        $fileInMemory->savefile( $outputPath );
+                */
+            $resultr1 = $outputPath->setExif();
+            if ( $debugExif ) print "called setExif empty $eol ";
             if ( is_null( $resultr1 ) )
                 throw new Exceprion( "$errorBeg e#492 outputPath->setExif() failed $errorEnd" );
             $resullt2 = $outputPel->saveFile( $outputPath );
-            if ( $debug ) print "got exif$eol ";
+
+            if ( $debugExif ) print "got exif$eol ";
             if ( is_null( $resullt2 ) )
                 throw new Exceprion( "$errorBeg e#492 outputPel->saveFile(() failed $errorEnd" );
         } catch ( Exception $ex ) {
-            $msg .= "E#400 xxx catch " . $ex->get_message();
+            $msg .= "E#400 xxx catch ";
         }
-        return "$msg Meta copied from $eol$inputPath $eol $outputPath $eol";
+        return "$msg Meta copied from $filename $eol $outputPath $eol";
     }
 } // end of class
 function SetConstants( $whocalled ) {
@@ -199,127 +238,6 @@ function direReport( $field, $report = "" ) {
 }
 
 
-/*
-function doCopyright( $item ) {
-    global $eol;
-    global $wpdbExtra, $rrw_photos, $rrw_photographer, $rrw_keywords;
-    global $photoUrl, $photoPath, $thumbUrl, $thumbPath, $highresUrl, $highresPath;
-    $msg = "";
-    try {
-        print direReport( $item, "with blank $item" );
-        $msg .=  rrwUtil::deltaTimer() . $eol;
-        switch ( $item ) {
-            case "copyright":
-                $sql = "select ph.copyright item, filename, copyrightDefault defaultitem
-                from $rrw_photos ph
-                left join $rrw_photographer pres 
-                        on ph.photographer = pres.photographer
-                 where ph.copyright = ''";
-                $exifItem = $item;
-                break;
-            case "photoKeyword":
-                $sqlMatch = "select distinct $rrw_photos.photo_id, filename 
-                        from $rrw_photos 
-                        join $rrw_keywords 
-                            on Not $rrw_keywords.photo_id = $rrw_photos.photo_id ";
-                $recsIds = $wpdbExtra->get_resultsA($sqlMatch);
-                $cnt =0;
-                foreach($recsIds as $recId) {
-                    $cnt++;
-                    $photoid = $recId["photo_id"];
-                    $filename = $recId["filename"];
-                    $sqlFix = "update $rrw_keywords 
-                        set keywordFilename = '$filename'
-                            where photo_id = $photoid";
-                    $wpdbExtra->query($sqlFix);
-                }
-                $msg .= "update $cnt filenames in keyword $eol";
-                $sql = "select photoKeyword item, filename, photoKeyword defaultitem
-                from $rrw_photos ph
-                 where photoKeyword = ''";
-                $exifItem = "keyword";
-                 break;
-            default:
-                $msg .= "E#497 Unknown item of  '$item' $eol ";
-                return $msg;
-        }
-        $msg .= "$sql $eol";
-        $recs = $wpdbExtra->get_resultsA( $sql );
-        $cntrecs = $wpdbExtra->num_rows;
-       print "Found $cntrecs rows of data $eol";
-        $msg .= "Found $cntrecs rows of data $eol";
-        $cntInsert = 0;
-        $sqlList = array(); // list of the flippers
-        $cnt = 0;
-        $msg .= "<table>";  
-        $msg .= rrwFormat::headerRow( "file", "database", "meta data", "defalut" );
-        $exifdata = "";
-        foreach ( $recs as $rec ) {
-            $cntInsert++;
-            if ( $cntInsert > 2 )
-                break;
-            $searchname = $rec[ "filename" ];
-            $defaultitem = $rec[ "defaultitem" ];
-            $dbItem = $rec["item"];
-            $sqlkeys = "select keyword from $rrw_keywords 
-                    where keywordfilename = '$searchname'";
-            $reckeys = $wpdbExtra->get_resultsA($sqlkeys);
-             $defaultitem = "";
-            foreach($reckeys as $reckey) {                
-                $defaultitem .= $reckey["keyword"] . ",";
-            }
-            $msg .= "keys are $defaultitem $eol";
-            foreach ( array( $photoPath => "_cr.jpg", $thumbPath => "_tmb.jpg" ) as $path => $ext ) {
-                $fullFilename = "$path/$searchname{$ext}";
-                $FilenameDisplay = "<a href='https://pictures.shaw-weil.com" .
-                "/display-one-photo?photoname=$searchname'  target ='one' >
-                    $searchname</a>";
-                if ( !file_exists( $fullFilename ) ) {
-                    $msg .= rrwFormat::CellRow( $FilenameDisplay, "E#493 file not exist",
-                        "**************" );
-                    break;
-                }
-                $debugExif = true;
-                
-                print "$FilenameDisplay - " . filesize( $fullFilename ) . "bytes, 
-                <a href='/fix?task=rename&amp;filename=$searchname' 
-                        target='rename' > rename </a> ";
-                //         continue;
-                if ($debugExif) print "about  exif_read_data( $fullFilename $eol)"; 
-                $meta = rrw_exif_read_data( $fullFilename );
-                if ($debugExif) print "looking for key $item $eol";
-                if ( array_key_exists( "$exifItem", $meta ) )
-                    $metaItem = $meta[ "$exifItem" ];
-                else
-                    $metaItem = "&lt;&lt; Missing &gt;&gt;";
-                $msg .= rrwFormat::CellRow( $FilenameDisplay, $dbItem, $metaItem,
-                    $defaultitem );
-                if ( $metaItem != $dbItem ) {
-                    $tmpfname = str_replace( "jpg", "_copyright.jpg", $fullFilename );
-                     if ($debugExif) print "changeItem( $fullFilename, $tmpfname, $exifItem, $defaultitem ) $eol";
-                    $msg .= changeItem( $fullFilename, $tmpfname, $exifItem, $defaultitem );
-                    $sqlins = "update $rrw_photos set $item = '$defaultitem'
-                        where filename = '$searchname' ";
-                    $updateCnt = $wpdbExtra->query( $sqlins );
-                    //              $msg .= "$updateCnt -- $sqlins $eol ";
-                    //              $msg .= dumpMeta( "$fullFilename", $tmpfname);
-                    unlink( $fullFilename );
-                    rename( $tmpfname, $fullFilename );
-                }
-            } // end of checking _cr and _rmb
-        } // end of looking for records
-        //        
-        $msg .= "</table>";
-        $msg .= direReport( "copyright", "with blank copyright" );
-        foreach ( $sqlList as $sql )
-            $msg .= "$sql $eol";
-     } catch ( Exception $ex ) {
-        $msg .= "E#491 ";
-    }
-    $msg .=  rrwUtil::deltaTimer() . $eol;
-   return $msg;
-} // end of updatdoCopyright
-*/
 function readexifItem( $filename, $item, & $msg ) {
     global $eol, $errorBeg, $errorEnd;
     $debugExif = true;
@@ -345,29 +263,32 @@ function pushToImage( $filename, $item, $value ) {
     $msg = "";
     $debugExif = false;
     try {
+        if ( $debugExif )$msg .= "---------------------------------------$eol";
         if ( false === strpos( $filename, "home" ) )
             $filename = "$photoPath/$filename" . "_cr.jpg";
-        ini_set( 'memory_limit', '32M' );
+        //       ini_set( 'memory_limit', '32M' );
         if ( $debugExif )$msg .= "( $filename, $item, $value ) $eol";
         $tmpfname = str_replace( "jpg", "_copyright.jpg", $filename );
         if ( $debugExif )$msg .= "tempfile is $tmpfname $eol";
         $contents = file_get_contents( $filename );
-       if ( $debugExif )$msg .= " got contents of $filename $eol";
-        $ss = strlen($contents);
-       if ( $debugExif )$msg .= " contents size is $ss $eol";
-        //   return $msg;
+        if ( $debugExif )$msg .= " got contents of $filename $eol";
+        $ss = strlen( $contents );
+        if ( $debugExif )$msg .= " contents size is $ss $eol";
         $data = new PelDataWindow( $contents );
         if ( $debugExif )$msg .= " new PelDataWindow worked  $eol";
-        //    return $msg;
         $jpeg = $fileInMemory = new PelJpeg();
         if ( $debugExif )$msg .= " new PelJpeg() worked  $eol";
-        //    return $msg;
-        $jpeg->load( $data );
+        try {
+            //          $jpeg->load( $data );
+            $jpeg->loadfile( $filename );
+        } // end try
+        catch ( Exception $ex ) {
+            throw new Exception( "$errorBeg E#703 working on $item, 
+                    jprg->load(data) failed" . $ex->getMessage() . $errorEnd );
+        }
         if ( $debugExif )$msg .= "load worked  $eol";
-        //  return $msg;
         $exif = $jpeg->getExif(); // get the desired data
-        if ( $debugExif )$msg .= "exif isloaded $eol";
-        //  return $msg;
+        if ( $debugExif )$msg .= "exif is loaded $eol";
         if ( $exif == null ) {
             if ( $debugExif )$msg .= println( 'No APP1 section found, added new.' );
             $exif = new PelExif(); // create on
@@ -376,9 +297,10 @@ function pushToImage( $filename, $item, $value ) {
             $tiff = new PelTiff();
             $exif->setTiff( $tiff );
         } else {
-            if ( $debugExif )$msg .= println( 'Found existing APP1 section.' );
+            if ( $debugExif )$msg .= println( 'Found existing APP1 section.$eol' );
             $tiff = $exif->getTiff();
         }
+        if ( $debugExif )$msg .= "get/et Tiff worked $eol";
         /*
          * TIFF data has a tree structure much like a file system. There is a
          * root IFD (Image File Directory) which contains a number of entries
@@ -389,17 +311,18 @@ function pushToImage( $filename, $item, $value ) {
          */
         $ifd0 = $tiff->getIfd();
         if ( $ifd0 == null ) {
-            if ( $debugExif )$msg .= println( 'No IFD found, adding new.' );
+            if ( $debugExif )$msg .= 'No IFD found, adding new. IFD0 $eol';
             $ifd0 = new PelIfd( PelIfd::IFD0 );
             $tiff->setIfd( $ifd0 );
         }
-        if ( $debugExif )$msg .= "That compleates setup, get/adjust the data $eol ";
+        if ( $debugExif )$msg .= "compleated setup, get/adjust the data $eol ";
         $tag = convertText2EeixID( $item ); // item name into tag integer
+        if ( $debugExif )$msg .= "tag integer is $tag $eol ";
         $textThing = $ifd0->getEntry( $tag );
         if ( is_null( $textThing ) ) {
-            $msg .= "tag did not exist, creae a new one $eol";
+            if ( $debugExif )$msg .= "tag did not exist, create a new one $eol";
             $type = findTagtype( $tag );
-            if ( $debugExif )$msg .= println( "Adding new I$tag of type $type with value $value" );
+            if ( $debugExif )$msg .= println( "Adding new $tag of type $type with value $value" );
             switch ( $type ) {
                 case "copyright":
                     $textThing = new PelEntryCopyright( $value );
@@ -416,24 +339,30 @@ function pushToImage( $filename, $item, $value ) {
             }
             $ifd0->addEntry( $textThing );
             $textValue = "NULL";
-        } else {
-            $textValue = $textThing->getValue();
-            if ( $debugExif )$msg .= rrwUtil::print_r( $textValue, true, "found old value of $item" );
-            $textThing->setValue( $value );
-            if ( $debugExif )$msg .= "setting new value -- $value $eol";
-        }
-        if ( $debugExif )$msg .= println( "Writing file $tmpfname" );
-        $fileInMemory->saveFile( $tmpfname );
+        } // we now kow there is a tag
+        if ( $debugExif )$msg .= "tag thing exits $eol";
+        $textValue = $textThing->getValue();
+        if ( $debugExif )$msg .= rrwUtil::print_r( $textValue, true, "found old value of $item" );
+        $textThing->setValue( $value );
+        if ( $debugExif )$msg .= rrwUtil::print_r( $textValue, true, " set new tag value of $item" );
+        if ( $debugExif )$msg .= println( "Writing file $tmpfname $eol" );
+        //$fileInMemory->saveFile( $tmpfname );
+        $jpeg->saveFile( $tmpfname );
         $sizeOld = filesize( $filename );
         $sizeNew = filesize( $tmpfname );
-        $msg .= dumpMeta( $filename, $tmpfname );
+        if ( $debugExif )$msg .= dumpMeta( $filename, $tmpfname );
         if ( abs( $sizeOld - $sizeNew ) < 500 ) {
+            //      copy($tmpfname, "$filename.jpg");
+            //    if ( $debugExif )$msg .= "copy( $tmpfname, $filename.jpg ) $eol";
+            //   return $msg;
             unlink( $filename );
             rename( $tmpfname, $filename );
+            if ( $debugExif )$msg .= "rename( $tmpfname, $filename ) $eol";
         } else {
             if ( true ) {
                 unlink( $filename );
                 rename( $tmpfname, $filename );
+                if ( $debugExif )$msg .= "rename( $tmpfname, $filename ) $eol";
             }
             throw new Exception( " $msg E#461 old size is $sizeOld, new size is $sizeNew,
                 difference is more than 500 please check$eol file not written $eol" );
@@ -447,6 +376,7 @@ function pushToImage( $filename, $item, $value ) {
         $oldValue = rrwUtil::print_r( $textValue, true, "old value" );
         $comment = "$basename -- $oldValue -> $value";
         $msg .= rrwUtil::InsertIntoHistory( $itemname, $comment );
+        if ( $debugExif )$msg .= "History writin $comment $eol ----- $eol";
     } // end try
     catch ( Exception $ex ) {
         $msg .= "$errorBeg E#963 in pushtoimage: " . $ex->getMessage() . $errorEnd;
@@ -486,7 +416,6 @@ function writea5( $attr ) {
     $msg .= "file unlinked $eol";
     $er = new phpExifWriter( $filename );
     $msg .= "phpExifWriter( $filename ); involed $eol";
-    //    return $msg;
     $er->debug = true;
     /*
      * Add comments to the file
@@ -687,7 +616,7 @@ function rrwPHPel( $argv ) {
              * PelTiff object was inserted by the code above. But this is no
              * problem, we just create and inserts an empty PelIfd object.
              */
-            if ( $debug )$msg .= println( 'No IFD found, adding new.' );
+            if ( $debug )$msg .= println( 'No IFD found, adding new.$eol' );
             $ifd0 = new PelIfd( PelIfd::IFD0 );
             $tiff->setIfd( $ifd0 );
         }
@@ -714,7 +643,6 @@ function rrwPHPel( $argv ) {
         $desc = $ifd0->getEntry( $tag );
         if ( $debug )
             if ( $debug )$msg .= println( "for $tag found the $desc $eol " );
-            //   return $msg;
             //     We need to check if the image already had a description stored. 
         if ( $desc == null ) {
             //        The was no description in the image. 
@@ -722,7 +650,7 @@ function rrwPHPel( $argv ) {
             //   * the description. The constructor for PelEntryAscii needs to know
             //   * the tag and contents of the new entry.
             $type = findTagtype( $tag );
-            if ( $debug )$msg .= println( "Adding new I$tag of type $type with $description" );
+            if ( $debug )$msg .= println( "Adding new $tag of type $type with $description $eol " );
             switch ( $type ) {
                 case "copyright":
                     $desc = new PelEntryCopyright( description );
@@ -745,8 +673,8 @@ function rrwPHPel( $argv ) {
         } else {
             //     An old description was found in the image. 
             $oldDescription = rrwUtil::print_r( $desc->getValue(), true, "existng" );
-            if ( $debug )$msg .= println( "IMAGE_DESCRIPTION entry from $oldDescription" );
-            if ( $debug )$msg .= println( "IMAGE_DESCRIPTION entry TO &nbsp; " . $description );
+            if ( $debug )$msg .= println( "IMAGE_DESCRIPTION entry from $oldDescription" ) . $eol;
+            if ( $debug )$msg .= println( "IMAGE_DESCRIPTION entry TO &nbsp; " . $description ) . $eol;
             // The description is simply updated with the new description. 
         }
         /*
@@ -757,7 +685,7 @@ function rrwPHPel( $argv ) {
          * completes the script.
          */
         if ( $debug )$msg .= println( 'Writing file "%s".', $output );
-        $file->saveFile( $output );
+        $file->saveFile( $output ) . $eol;
         if ( $debug )$msg .= println( "finished with test Pel $eol" );
         if ( $debug )$msg .= println( "  -------------------------------- end PHPel  $eol" );
     } catch ( Exception $ex ) {
@@ -770,9 +698,13 @@ function convertText2EeixID( $text ) {
     // codes from https://www.exiftool.org/TagNames/EXIF.html
     global $eol, $errorBeg, $errorEnd;
     switch ( $text ) {
+        case "artist":
+            return 0x013b;
+        case "comment":
+            return 0x9c9c;
         case "copyright":
             return PelTag::COPYRIGHT;
-        case "desc":
+        case "ImageDescription":
             return 0x010e; // PelTag::IMAGEDESCRIPTION;
             //    ImageDescription
         case "datetimeoriginal":
@@ -795,8 +727,17 @@ function findTagtype( $tag ) {
     switch ( $tag ) {
         case PelTag::COPYRIGHT:
             return "copyright";
+        case 0x13B: // artist
+            //    case "keyword":    
+            //    case 0x9c9e: // keyword
+        case 0x010e: //  Image Description
+        case 0x0132: // modify date
+        case 0x9003: //Datetime original
+        case 0x9004: //CreateDate
         case 0x010e: // PelTag::IMAGEDESCRIPTION;
             return "ascii";
+        case "keywords":
+        case 0x9c9c:       // comment
         case 0x9c9e: // (WindowsXPKeywords)
             return "byte";
             //       case PelTag::GPS_LATITUDE:
@@ -813,7 +754,9 @@ function findTagtype( $tag ) {
         case "datetimedigitized":
             return "ascii";
         default:
-            throw new Exception( "E#484 looking for typeof exif[$text]" );
+            $hex = dechex( $tag );
+            throw new Exception( "E#695 looking for typeof exif[$tag]
+            of exif[$hex]" );
     }
 }
 

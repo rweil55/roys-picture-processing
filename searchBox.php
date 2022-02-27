@@ -54,12 +54,15 @@ class rrwPictures_searchBox {
         // common routinue to putput the pictures administrators admin bar
         if ( current_user_can( 'edit_posts' ) ) {
             $exifUrl = "/wp-content/plugins/roys-picture-processng/Exif/html";
+            $exifList = "https://devpictures.shaw-weil.com/wp-content/plugins/roys-picture-processng/Exif/html/TagNames/EXIF.html";
             $msg = "
             <p>[ <a href='/admin' target='admin' >admin </a>]
             [ <a href='/submission' target='admin' >submit photo </a> ]
             [ c:\_e &nbsp; php sub.php ]
             [ <a href='/upload' target='admin' >process upload </a> ]
             [ <a href='$exifUrl/' target='one' >EXIF description </a> ]
+            [ <a href='$exifList/' target='one' >EXIF description </a> ]
+            
             </p>\n ";
         } else
             $msg = "<!-- user can not edit posts -->\n";

@@ -21,7 +21,7 @@ class rrwPicSubmission {
     private static function uploadfile() {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_photographers, $rrw_photos;
-        global $uploadPath;
+        global $uploadPath, $highresPath;
         $msg = "";
         $debug = false;
 
@@ -82,7 +82,8 @@ class rrwPicSubmission {
                 letters, numbers, and spaces" );
             $photoname = $matchs[ 0 ];
             $HighResfilename = "$photoname.$ext";
-            $FullfileHighRes = "$uploadPath/$HighResfilename";
+            $Fullfileupload = "$uploadPath/$HighResfilename";
+            $FullfileHighRes = "$highresPath/$HighResfilename";
 
             if ( false !== strpos( $HighResfilename, "_cr.jpg" ) ) {
                 $msg .= "$errorBeg _cr.jpg not allowed.
@@ -96,16 +97,14 @@ class rrwPicSubmission {
             // see if metat data exists
             $sqlexists = "select photographer from $rrw_photos
                         where photoname = '$photoname' ";
-            $msg .= "check for meta  $sqlexists";
             $recs = $wpdbExtra->get_resultsA( $sqlexists );
-            $msg .= "$sqlexists found " . $wpdbExtra->num_rows . " rows of data";
             if ( 1 == $wpdbExtra->num_rows ) {
                 // have meta date, update it
                 if ( 'on' == $replacephoto ) {
                     $msg .= "Per your request existing photo will be replaced $eol";
                 } else {
                     $dateMod = filemtime( $FullfileHighRes );
-                    $datemod = date( "Y-M-d", $dateMod );
+                    $dateMod = date( "Y-M-d", $dateMod );
                     $msg .= "$errorBeg $eol E#814 $$HighResfilename 
                     was uploaded previously on $dateMod. 
                     You must check the box to allow the replacement $errorEnd" ;
@@ -139,12 +138,12 @@ class rrwPicSubmission {
             }
             // meta data now set, move the filw
             if ( !move_uploaded_file(
-                    $_FILES[ 'inputfile' ][ 'tmp_name' ], $FullfileHighRes ) ) {
+                    $_FILES[ 'inputfile' ][ 'tmp_name' ], $Fullfileupload ) ) {
                 throw new RuntimeException( 'Failed to move uploaded file.' );
             }
 
             $msg .= rrwUtil::InsertIntoHistory( $photoname, "uploaded " );
-            $msg .= "File was uploaded successfully to $FullfileHighRes $eol";
+            $msg .= "File was uploaded successfully to $Fullfileupload $eol";
             if ( $debugsubmit )$msg .= "lets process upload dire$eol";
             $attr = array("uploadfilename"=>$HighResfilename);
             if ( $debug )$msg .= rrwUtil::print_r($attr, true, "parameters to upload");

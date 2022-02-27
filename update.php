@@ -22,7 +22,8 @@ class freeWheeling_DisplayUpdate {
             $comment = rrwUtil::fetchparameterString( "comment", $attr );
             $people = rrwUtil::fetchparameterString( "people", $attr );
             $direonp = rrwUtil::fetchparameterString( "direonp", $attr );
-            list( $msgTemp, $keyWordList ) = self::fetchParameterKeywordList( $attr );
+            list( $msgTemp, $keyWordList ) =           
+                        keywordHandling::fetchParameterKeywordList( $attr );
             $msg .= $msgTemp;
             if ( ( strlen( $location ) < 1 ) )
                 $location = "Unspecified";
@@ -47,45 +48,25 @@ class freeWheeling_DisplayUpdate {
             $msg .= self::compare( "comment", $comment, $recOld );
             $msg .= self::compare( "DireOnP", $direonp, $recOld );
             $msg .= self::compare( "PhotoDate", $photodate, $recOld );
-            $msg .= self::compare( "photoKeyword", $keyWordList, $recOld );
-            if ( $debug ) {
-                $sqlCheck = "select * from $rrw_photos where filename ='$photoname'";
-                $rec = $wpdbExtra->get_resultsA( $qlChexk );
+            
+            $msg .= keywordHandling::remove($photoname);
+            $msg .= keywordHandling::insertList($photoname, $keyWordList);
+            
+            $sqlCheck = "select * from $rrw_photos where filename ='$photoname'";
+            $rec = $wpdbExtra->get_resultsA( $sqlCheck );
+            $msg .= freewheeling_fixit::fixAssumeDatabaseCorrect( $rec[ 0 ] );
+           if ( $debug ) {
                 $msg .= rrwUtil::print_r( $rec, true, "Check record" );
                 $msg .= "<h3>Update completed</h3>
                 <a href='/display-one-photo/?photoname=$photoname' >$photoname</a>";
-            } else
-                $msg .= freeWheeling_DisplayOne::DisplayOne( null );
+            }
+            $msg .= freeWheeling_DisplayOne::DisplayOne( null );
         } catch ( Exception $ex ) {
             $msg .= "E#490" . $ex->getMessage();
         }
         return $msg;
     } // end DisplayUpdate
-    private static function fetchParameterKeywordList( $attr ) {
-        // keyword display list is numbered, return comma seperated list
-        $msg = "";
-        $debug = false;
-        // get the new keywords entered
-        $keywordcnt = rrwUtil::fetchparameterString( "keywordcnt", $attr );
-        $keywordList = rrwUtil::fetchparameterString( "commalist", $attr );
-        $keywordList .= ",";
-        $cnt = 0;
-        if ( $debug )$msg .= rrwUtil::print_r( $_POST, true, "Post" );
-        for ( $jj = 0; $jj < $keywordcnt; $jj++ ) {
-            $cnt++;
-            if ( $cnt > 300 )
-                break;
-            $key = "keyword$jj";
-            $keywordnew = rrwUtil::fetchparameterString( "$key", $attr );
-            if ( empty( $keywordnew ) )
-                continue;
-            $keywordList .= "$keywordnew,";
-        }
-        if ( $debug )$msg .= "keywordList: $keywordList $eol";
-        if ( $debug )$msg .= "commalist: $commalist $eol";
-        return array( $msg, $keywordList );
-    }
-
+    
     public static function compare( $itemName, $newValue, $rec ) {
         //compare old and new value, update if different
         global $eol, $errorBeg, $errorEnd;
@@ -110,10 +91,6 @@ class freeWheeling_DisplayUpdate {
             // rrw_photo has one field updated, deal with the related.
             if ( "copyright" == $itemName ) {
                 $msg .= pushToImage( $photoname, "copyright", $newValue );
-            } elseif ( "photoKeyword" == $itemName ) {
-                $msg .= keywordHandling::remove( $photoname ); // remove all keywords
-                $msg .= keywordHandling::insertList( $photoname, $newValue );
-                //       $msg .= ( $photoname, "Keywords", $newValue );
             } elseif ( "photodate" == $itemName ) {
                 $msg .= "$errorBeg E#701 date inside photo not updated $errorEnd";
             } elseif ( "photographer" == $itemName ) {

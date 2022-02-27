@@ -56,6 +56,9 @@ class freewheeling_fixit {
                 case "badcopyright":
                     $msg .= freewheeling_fixit::badCopyright();
                     break;
+                case "copymeta":
+                    $msg .= freewheeling_fixit::copymeta();
+                    break;
                 case "copyrightfix":
                     $msg .= freewheeling_fixit::copyrightfix();
                     break;
@@ -180,6 +183,21 @@ class freewheeling_fixit {
         throw new Exception( "$msg $errorBeg $errMessage 
                     permission has not been granted,
                     you need to be logged in to do this.  $errorEnd" );
+    }
+
+    private static function copymeta() {
+        global $highresPath;
+        $msg = "";
+        //        $msg .= SetConstants( "copyMeta" );
+
+
+        $fileIn = "$highresPath/IMGP3723.jpg";
+        $fileout = "$highresPath/IMGP3723_clean.jpg";
+        $msg .= FreewheelingCommon::copyMeta( $fileIn, $fileout );
+        $msg .= "did it";
+        return $msg;
+
+
     }
 
     private static function exifMissing() {
@@ -348,7 +366,7 @@ class freewheeling_fixit {
             if ( false === $copyRight || empty( $copyRight ) )
                 throw new Exception( "$errorBeg E#865 missing Author or author copyright $errorEnd $sqlPhoto $eol " );
             $fileFull = "$photoPath/$filename" . "_cr.jpg";
-            $msg .= pushToImage( $fileFull, "copyright", $copyRight );
+            //      $msg .= pushToImage( $fileFull, "copyright", $copyRight );
             $sqlUpdate = "update $rrw_photos set copyright = '$copyRight' 
                         where filename = '$filename'";
             $cnt = $wpdbExtra->query( $sqlUpdate );
@@ -415,61 +433,61 @@ class freewheeling_fixit {
         return $msg;
 
     }
-
-    private static function extraKeyword() {
-        list( $msg, $cntExtra, $cntMissing ) = freewheeling_fixit::extraKeywordCnts( true );
-        return $msg;
-    }
-
-    public static function extraKeywordCnts( $list = false ) {
-        global $eol;
-        global $wpdbExtra, $rrw_photos, $rrw_digipix, $rrw_keywords, $rrw_trails;
-        $msg = "";
-
-        $sqlKey = "select keyword from $rrw_keywords";
-        $recKeys = $wpdbExtra->get_resultsA( $sqlKey );
-        $keys = array();
-        foreach ( $recKeys as $recKey ) {
-            $keys[ $recKey[ "keyword" ] ] = 0;
+    /*
+        private static function extraKeyword() {
+            list( $msg, $cntExtra, $cntMissing ) = freewheeling_fixit::extraKeywordCnts( true );
+            return $msg;
         }
-        $sqlPhotoKeys = "select filename, photoKeyword from $rrw_photos ";
-        $recphotos = $wpdbExtra->get_resultsA( $sqlPhotoKeys );
-        $cntMissing = 0;
-        foreach ( $recphotos as $recphoto ) {
-            $words = explode( ",", $recphoto[ "photoKeyword" ] );
-            foreach ( $words as $word ) {
-                $word = trim( $word );
-                if ( empty( $word ) )
-                    continue;
-                if ( array_key_exists( $word, $keys ) ) {
-                    $keys[ $word ]++;
-                } else {
-                    $cntMissing++;
-                    $keys[ $word ] = 1;
-                    if ( $list ) {
-                        $filename = $recphoto[ "filename" ];
-                        $sqlins = "insert into $rrw_keywords (keywordFilename, keyword, is_location )  values ('$filename', '$word','0')";
-                        $msg .= "$sqlins $eol";
+
+        public static function extraKeywordCnts( $list = false ) {
+            global $eol;
+            global $wpdbExtra, $rrw_photos, $rrw_digipix, $rrw_keywords, $rrw_trails;
+            $msg = "";
+
+            $sqlKey = "select keyword from $rrw_keywords";
+            $recKeys = $wpdbExtra->get_resultsA( $sqlKey );
+            $keys = array();
+            foreach ( $recKeys as $recKey ) {
+                $keys[ $recKey[ "keyword" ] ] = 0;
+            }
+            $sqlPhotoKeys = "select filename, photoKeyword from $rrw_photos ";
+            $recphotos = $wpdbExtra->get_resultsA( $sqlPhotoKeys );
+            $cntMissing = 0;
+            foreach ( $recphotos as $recphoto ) {
+                $words = explode( ",", $recphoto[ "photoKeyword" ] );
+                foreach ( $words as $word ) {
+                    $word = trim( $word );
+                    if ( empty( $word ) )
+                        continue;
+                    if ( array_key_exists( $word, $keys ) ) {
+                        $keys[ $word ]++;
+                    } else {
+                        $cntMissing++;
+                        $keys[ $word ] = 1;
+                        if ( $list ) {
+                            $filename = $recphoto[ "filename" ];
+                            $sqlins = "insert into $rrw_keywords (keywordFilename, keyword, is_location )  values ('$filename', '$word','0')";
+                            $msg .= "$sqlins $eol";
+                        }
                     }
                 }
             }
-        }
-        $cntExtra = 0;
-        ksort( $keys );
-        foreach ( $keys as $key => $value ) {
-            if ( 0 == $value ) {
-                // key word in keyword list, but not in any file
-                $cntExtra++;
-                if ( $list ) {
-                    $sqldel = "delete from $rrw_keywords where keyword = '$key'";
-                    $msg .= "$sqldel $eol";
+            $cntExtra = 0;
+            ksort( $keys );
+            foreach ( $keys as $key => $value ) {
+                if ( 0 == $value ) {
+                    // key word in keyword list, but not in any file
+                    $cntExtra++;
+                    if ( $list ) {
+                        $sqldel = "delete from $rrw_keywords where keyword = '$key'";
+                        $msg .= "$sqldel $eol";
+                    }
                 }
             }
+            $msg .= "Found $cntExtra Extra keywords, $cntMissing missing keywords $eol";
+            return array( $msg, $cntExtra, $cntMissing );
         }
-        $msg .= "Found $cntExtra Extra keywords, $cntMissing missing keywords $eol";
-        return array( $msg, $cntExtra, $cntMissing );
-    }
-
+    */
     private static function setUseStatus( $newStatus ) {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_photos, $rrw_digipix, $rrw_keywords, $rrw_trails;
@@ -685,16 +703,12 @@ class freewheeling_fixit {
             $sqlChange = "update $rrw_keywords set keyword = '$new' 
                         where keyword = '$old' ";
             $cnt = $wpdbExtra->query( $sqlChange );
-            $msg .= "Update $cnt keywords in keyword table from $old to $new $eol ";
-            $sqlChange2 = " update $rrw_photos 
-                set photoKeyword = replace (photoKeyword, '$old', '$new') 
-                where photoKeyword like '%$old%' ";
-            $msg .= "$sqlChange2 $eol ";
-            $cnt2 = $wpdbExtra->query( $sqlChange2 );
-            $msg .= "Update $cnt2 keywords in photo table from $old to $new $eol ";
+            $msg .= "Update $cnt keywords in keyword table from $old to $new $eol
+            Do a refresh to see the selection counts $eol";
+
         }
         return $msg;
-    }
+    } //  end keywordForm
 
     private static function listPhotog() {
         global $eol;
@@ -813,10 +827,10 @@ class freewheeling_fixit {
             $photoname;
 
         }
-        foreach ( array( "_cr", "_tmb", "-s.", "-w." ) as $check ) {
+        foreach ( array( "_cr.", "_tmb.", "-s.", "-w." ) as $check ) {
             if ( strpos( $photoname, $check ) !== false ) {
-                $newphotoname = str_replace( $check, "", $photoname );
-                $msg .= " &nb<a href='/fix/?task=rename&filename=$photoname&newname=$newphotoname' target='check' >becomes  $newphotoname </a> ";
+                $newphotoname = str_replace( $check, ".", $photoname );
+                $msg .= " &nbsp; <a href='/fix/?task=rename&filename=$photoname&newname=$newphotoname' target='check' > becomes  $newphotoname </a> ";
             }
         } // end foreach check
         $msg .= "<form method='get' action='/fix/'>
@@ -928,8 +942,7 @@ class freewheeling_fixit {
 
         $description = rrwUtil::fetchparameterString( "description" );
         //  item is  trail_name, direonp
-        $sql = "select filename, trail_name, photographer, photostatus, 
-                        photokeyword
+        $sql = "select filename, trail_name, photographer, photostatus
                 from $rrw_photos 
                 where $sqlWhere  order by filename "; // missng source
         $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
@@ -1003,12 +1016,12 @@ class freewheeling_fixit {
         $msg = "";
 
         $debug = true;
-        if ( $debug )$msg .= "updateRename( $filename, $newname ) ";
 
         if ( empty( $filename ) ) {
             $filename = trim( rrwUtil::fetchparameterString( "filename" ) );
             $newname = trim( rrwUtil::fetchparameterString( "newname" ) );
         }
+        if ( $debug )$msg .= "start updateRename( $filename, $newname ) $eol";
         if ( empty( $newname ) ) {
             $msg .= "<form >
         <input type='text' name='filename' diabled value='$filename' />
@@ -1018,12 +1031,18 @@ class freewheeling_fixit {
         </form>";
             return $msg;
         } //  ---------------------------------------------- move three files
+        $msg .= self::checkAndRename( "$photoPath/${filename}.jpg",
+            "$photoPath/{$newname}jpg" );
         $msg .= self::checkAndRename( "$photoPath/${filename}_cr.jpg",
             "$photoPath/{$newname}_cr.jpg" );
+
         $msg .= self::checkAndRename( "$thumbPath/{$filename}_tmb.jpg",
             "$thumbPath/{$newname}_tmb.jpg" );
+        $msg .= self::checkAndRename( "$thumbPath/{$filename}.jpg",
+            "#thumbPath/{$newname}.jpg" );
+
         $msg .= self::checkAndRename( "$highresPath/{$filename}.jpg",
-            "$<strong>thumbPath</strong>/{$newname}.jpg" );
+            "$thumbPath/{$newname}.jpg" );
         //  ------------------------------------------------- things in rrw_photos
         $sqlExist = "select filename from $rrw_photos where filename = '$newname'";
         $recExists = $wpdbExtra->get_resultsA( $sqlExist );
@@ -1031,11 +1050,11 @@ class freewheeling_fixit {
             $msg .= "$errorBeg E#420 file $newname is already in the photo table,
                     not replaced $errorEnd";
         else {
-            $sqlupdate = "update $rrw_photos set filename = '$newname',
+            $sqlupdate = "update $rrw_photos set filename = '$newname'
                 where filename ='$filename' ";
             $rec = $wpdbExtra->query( $sqlupdate );
-            $sqlupdate = "update $rrw_leywords set ketwordfilename = '$newname',
-                where kwywordfilename ='$filename' ";
+            $sqlupdate = "update $rrw_keywords set keywordFilename = '$newname'
+                where keywordFilename ='$filename' ";
             $rec = $wpdbExtra->query( $sqlupdate );
             $msg .= "$sqlupdate $eol";
         } // ------------------------------------------------  direonp
@@ -1237,7 +1256,7 @@ class freewheeling_fixit {
         $recs = $wpdpExtra->get_resultsA( $sql );
         if ( 1 != $wpdpExtra->num_recs )
             throw new Exception( "$errorBeg E#674 wrong number of records found, or not found $errorEnd $sql $eol" );
-        $msg .= Do_forceDatabse2matchexif( $recs[ 0 ] );
+        $msg .= fixAssumeExifCorrect( $recs[ 0 ] );
         return $msg;
     }
 
@@ -1252,7 +1271,7 @@ class freewheeling_fixit {
             $cntRecs = 0;
             $cntPUShed = 0;
             foreach ( $recs as $rec ) {
-                $msg .= Do_forceDatabse2matchexif( $rec );
+                $msg .= fixAssumeExifCorrect( $rec );
                 // search through all photos
                 $cntRecs++;
                 if ( $cntRecs > 3 )
@@ -1266,68 +1285,196 @@ class freewheeling_fixit {
         return $msg;
     } // end function
 
-    public static function Do_forceDatabse2matchexif( $rec ) {
+    public static function fixAssumeDatabaseCorrect( $rec ) {
+        return self::fixAssume( $rec, false );
+    }
+
+    public static function fixAssumeExifCorrect( $rec ) {
+        return self::fixAssume( $rec, true );
+    }
+    private static function fixAssume( $rec, $exifCorrect ) {
+        // if either is empty, move known to empty
+        // if difference, use $exif to determine which way to move
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_photos, $rrw_digipix, $rrw_keywords,
         $rrw_photographers;
         global $photoPath, $thumbPath, $highresPath;
         $msg = "";
         $debugForce = false;
-        $sofar = "Do_forceDatabse2matchexif entry";
+        $sofar = "fixAssumeExifCorrect entry";
         try {
             $photoname = $rec[ "filename" ];
             $databaseCopyright = $rec[ "copyright" ];
             $datebasePhotoDate = $rec[ "PhotoDate" ];
             $databasePhotographer = $rec[ "photographer" ];
-            $databaseKeyword = $rec[ "photoKeyword" ];
+            $databaseKeyword =
+                freeWheeling_DisplayOne::GetkkeywordList( $photoname );
             $databaseHeight = $rec[ "height" ];
             $databaseWidth = $rec[ "width" ];
             $fullFile = "$photoPath/$photoname" . "_cr.jpg";
+
             $sqlUpdate = array();
             if ( !file_exists( $fullFile ) )
                 throw new Exception( "$errorBeg E#448  file $fullFile not found $errorEnd" );
-            if ( $debugForce )$msg .= "<a href='display-one-photo?photoname=$photoname' target='one'          >$photoname </a>, ";
+            if ( $debugForce )$msg .= "
+            <a href='display-one-photo?photoname=$photoname' 
+            target='one' >$photoname </a>, ";
             // --------------------------------------------- exif
             // https://exiftool.org/TagNames/EXIF.html list most tags
             try {
                 $fileExif = rrw_exif_read_data( $fullFile );
             } // end try
             catch ( Exception $ex ) {
-                throw new Exception( "$msg E#469 " . $ex->getMessage() . " while        reading exif of '$fullFile' in Do_forceDatabse2matchexif " );
+                throw new Exception( "$msg E#469 " . $ex->getMessage() . " while        reading exif of '$fullFile' in fixAssumeExifCorrect " );
             }
             if ( empty( $fileExif ) || !is_array( $fileExif ) )
                 throw new Exception( "$errorBeg #854 Fetch of exif 
                                 from $fullFile failed $errorEnd" );
             if ( $debugForce )$msg .= rrwUtil::print_r( $fileExif, true, "$fullFile exif " );
             $sofar = "exif rread, go datetime";
-            //  --------------------------------------------- datetime
-            $FileDateTime = self::getPhotoDateTime( $fileExif );
-            if ( empty( $FileDateTime ) && empty( $datebasePhotoDate ) )
-            ; // do nothing
-            elseif ( empty( $FileDateTime ) && !empty( $datebasePhotoDate ) )
-                $msg .= pushToImage( $photoname, "datetimedigitized", $datebasePhotoDate );
-            elseif ( empty( $FileDateTime ) && !empty( $datebasePhotoDate ) )
-                $sqlUpdate[ "PhotoDate" ] = $FileDateTime;
-            else { // both have data 
-                if ( $datebasePhotoDate != $FileDateTime )
-                    $sqlUpdate[ "PhotoDate" ] = $FileDateTime;
+
+            //  -------------------------- fix Database auther but no copywight
+            if ( empty( $databaseCopyright ) && !empty( $databasePhotographer ) ) {
+                $sqlDefault = "select copyrightDefault from $rrw_photographers
+                            where photographer = '$databasePhotographer' ";
+                $copyrightDefault = $wpdbExtra->get_var( $sqlDefault );
+                if ( 1 == $wpdbExtra - num_recs ) {
+                    $databaseCopyright = $copyrightDefault; // found it
+                    $sqlUpdate = "sql update $rrw_photos 
+                            set Copyright = '$copyrightDefault'
+                            where photoname = '$photoname' ";
+                }
             }
             // ---------------------------- ------------------ copyright
-            $sofar = "go fo copyright";
+            //  note: order matters, older jpg will accept only one attribute
+            $sofar = "go for copyright";
             if ( array_key_exists( "Copyright", $fileExif ) )
                 $fileCopyRight = $fileExif[ "Copyright" ];
             else
                 $fileCopyRight = "";
-            if ( empty( $databaseCopyright ) && !empty( $databasePhotographer ) ) {
-                $sqlDefault = "select copyrightDefault from $rrw_photographers
-                            where photographer = 'databasePhotographer' ";
-                $databaseCopyright = $wpdbExtra->get_var( $sqlDefault );
-                $sqlUpdate[ "Copyright" ] = $databaseCopyright;
+            $msg .= "file: $fileCopyRight , database: $databaseCopyright $eol";
+            if ( empty( $fileCopyRight ) && empty( $databaseCopyright ) )
+            ; // do nothing
+            elseif ( empty( $fileCopyRight ) && !empty( $databaseCopyright ) ) {
+                $msg .= pushToImage( $photoname, "copyright", $databaseCopyright );
+                $fileCopyRight = $databaseCopyright;
             }
-            if ( $fileCopyRight != $databaseCopyright )
-                $sqlUpdate[ "Copyright" ] = $fileCopyRight;
+            elseif ( !empty( $fileCopyRight ) && empty( $databaseCopyright ) ) {
+                $sqlUpdate[ "copyright" ] = $fileCopyRight;
+                $databaseCopyright = $fileCopyRight;
+            } elseif ( $databaseCopyright != $fileCopyRight ) { // both have data
+                if ( $exifCorrect ) {
+                    $sqlUpdate[ "copyright" ] = $fileCopyRight;
+                    $databaseCopyright = $fileCopyRight;
+                } else {
+                    $msg .= pushToImage( $photoname, "copyright", $databaseCopyright );
+                    $fileCopyRight = $databaseCopyright;
+                }
+            }
 
-            // --------------------------------- image height, image width
+            //  -------------------------------------------- photographer
+            if ( array_key_exists( "Artist", $fileExif ) )
+                $fileArtist = $fileExif[ "Artist" ];
+            else
+                $fileArtist = "";
+            $msg .= "Artist file - $fileArtist, 
+                    database - $databasePhotographer $eol";
+            if ( empty( $fileArtist ) && empty( $databasePhotographer ) )
+            ; // do nothing
+            elseif ( empty( $fileArtist ) && !empty( $databasePhotographer ) ) {
+                $msg .= pushToImage( $photoname, "artist", $databasePhotographer );
+                $fileArtist = $databasePhotographer;
+            }
+            elseif ( !empty( $fileArtist ) && empty( $databasePhotographer ) ) {
+                $sqlUpdate[ "photographer" ] = $fileArtist;
+                $databasePhotographer = $fileAtrist;
+            }
+            elseif ( $databasePhotographer != $fileArtist ) { // both have data
+                    if ( $exifCorrect ) {
+                        $sqlUpdate[ "photographer" ] = $fileArtist;
+                        $databasePhotographer = $fileArtist;
+                    } else {
+                        $msg .= pushToImage( $photoname, "artist", $databasePhotographer );
+                        $fileArtist = $databasePhotographer;
+                    }
+                } // end diff test
+            $sofar = "phtographer";
+            //  --------------------------------------------- datetime
+            $FileDateTime = self::getPhotoDateTime( $fileExif );
+            if ( empty( $FileDateTime ) && empty( $datebasePhotoDate ) )
+            ; // do nothing
+            elseif ( empty( $FileDateTime ) && !empty( $datebasePhotoDate ) ) {
+                $msg .= pushToImage( $photoname, "datetimeoriginal", $datebasePhotoDate );
+                $FileDateTime = datebasePhotoDate;
+            } elseif ( !empty( $FileDateTime ) && empty( $datebasePhotoDate ) ) {
+                $sqlUpdate[ "PhotoDate" ] = $FileDateTime;
+                $datebasePhotoDate = $FileDateTime;
+            } elseif ( $datebasePhotoDate != $FileDateTime ) { // both have data
+                if ( $exifCorrect ) {
+                    $sqlUpdate[ "PhotoDate" ] = $fileArtist;
+                    $datebasePhotoDate = $fileArtist;
+                } else {
+                    $msg .= pushToImage( $photoname, "datetimeoriginal", $datebasePhotoDate );
+                    $fileArtist = $datebasePhotoDate;
+                }
+            }
+
+            // -------------------------------------------- keywodes
+            // more code needed here to get the file tags
+            $sofar = "keywrods";
+            $debugKeywords = false;
+
+            $keywordname = "0x9c9e";
+            $keywordname = "tags";
+            $keywordname = "Tags";
+            $keywordname = "IPTC:Keywords";
+            $keywordname = "IPTC:keywords";
+            $keywordname = "XPKeywords";
+            $keywordname = "Description";
+            $keywordname = "description";
+            $keywordname = "comment";
+            $keywordname = "ImageDescription";
+            $keywordname = "keyword";
+            $keywordname = "keywords";
+
+            //       $keywordName = "";
+            if ( array_key_exists( "ImageDescription", $fileExif ) ) {
+                $fileKeywords = $fileExif[ "ImageDescription" ];
+                $keywordname = "ImageDescription";
+            }
+            if ( array_key_exists( "XPKeywords", $fileExif ) ) {
+                $fileKeywords = $fileExif[ "XPKeywords" ];
+                $keywordname = "XPKeywords";
+            }
+            if ( array_key_exists( "keyword", $fileExif ) ) {
+                $fileKeywords = $fileExif[ "keyword" ];
+                $keywordname = "keyword";
+            }
+            if ( array_key_exists( "keywords", $fileExif ) ) {
+                $fileKeywords = $fileExif[ "keywords" ];
+                $keywordname = "keywords";
+            }
+            if ( $debugKeywords )$msg .= "fileKeywords - $fileKeywords $eol";
+            if ( $debugKeywords )$msg .= "databaseKeyword - $databaseKeyword $eol";
+            if ( empty( $fileKeywords ) && empty( $databaseKeyword ) )
+            ; // do nothing
+            elseif ( empty( $fileKeywords ) && !empty( $databaseKeyword ) ) {
+                $msg .= pushToImage( $photoname, $keywordname, $databaseKeyword );
+                $fileKeywords = $databaseKeyword;
+            } elseif ( !empty( $fileKeywords ) && empty( $databaseKeyword ) ) {
+                // removed from db  $sqlUpdate[ "photoKeyword" ] = $fileKeywords;
+                $databaseKeyword = $fileKeywords;
+                // update keyword table
+            } elseif ( $databaseKeyword != $fileKeywords ) { // both have data
+                    if ( $exifCorrect ) {
+                        // $sqlUpdate[ "photoKeyword" ] = $fileKeywords;
+                        $databaseKeyword = $fileKeywords;
+                    } else {
+                        $msg .= pushToImage( $photoname, "datetimeoriginal", $databaseKeyword );
+                        $fileKeywords = $databaseKeyword;
+                    }
+                }
+                // --------------------------------- image height, image width
             $sofar = "go for height, width";
             $imageheight = $fileExif[ "COMPUTED" ][ "Height" ];
             $imagewidth = $fileExif[ "COMPUTED" ][ "Width" ];
@@ -1335,44 +1482,21 @@ class freewheeling_fixit {
                 $sqlUpdate[ "height" ] = $imageheight;
             if ( $databaseWidth != $imagewidth )
                 $sqlUpdate[ "width" ] = $imagewidth;
-            // -------------------------------------------- keywodes
-            // more code needed here to get the file tags
-            $sofar = "keywrods";
-            if ( array_key_exists( "XPKeywords", $fileExif ) )
-                $fileKeywords = $fileExif[ "XPKeywords" ];
-            else
-                $fileKeywords = "";
-            if ( empty( $fileKeywords ) && empty( $databaseKeyword ) )
-            ; // do nothing
-            elseif ( empty( $fileKeywords ) && !empty( $databaseKeyword ) )
-                $msg = pushToImage( $photoname, "XPKeywords", $databaseKeyword );
-            elseif ( !empty( $fileKeywords ) && empty( $databaseKeyword ) ) {
-                $sqlUpdate[ "photoKeyword" ] = $fileKeywords;
-                // update keyword table
-            } else { // both have data 
-                if ( $databaseKeyword != $fileKeywords ) {
-                    $sqlUpdate[ "photoKeyword" ] = $fileKeywords;
-                    // update keyword table
-                }
-            }
 
-            //  -------------------------------------------- photographer
-            //  exif has no place for photographer
-            $sofar = "phtographer";
-
+            //  all the checks have been done, Any dtabase to update
             if ( count( $sqlUpdate ) > 0 ) { // now update the database
                 $answer = $wpdbExtra->update( $rrw_photos, $sqlUpdate,
                     array( "filename" => $photoname ) );
                 if ( $debugForce )$msg .= "had " . count( $sqlUpdate ) .
                 " to be updated in $answer record $eol";
             }
-            $sofar = "Do_forceDatabse2matchexif is done";
+            $sofar = "fixAssumeExifCorrect is done";
         } catch ( Exception $ex ) {
-            $msg .= "$msg E#440 in Do_forceDatabse2matchexif:$sofar: " .
+            $msg .= "$msg E#440 in fixAssumeExifCorrect:$sofar: " .
             $ex->getMessage() . $eol;
         }
         return $msg;
-    } // end function Do_forceDatabse2matchexif
+    } // end function fixAssumeExifCorrect
 
     private static function getPhotoDateTime( $fileExif ) {
         global $eol;
@@ -1387,7 +1511,6 @@ class freewheeling_fixit {
                 return $pictureDate;
             foreach ( array( /* all times are strings  */
                     "datetimeoriginal", "DateTimeOriginal",
-                    "datetimedigitized",
                     "previewdatetime", "PreviewDateTime",
                     "ModifyDate", "modifydate",
                     //       "gpstimestamp", "GPSTimeStamp", // rational64 number

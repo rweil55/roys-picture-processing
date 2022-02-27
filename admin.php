@@ -23,7 +23,7 @@ class freewhilln_Administration_Pictures {
                 $displaykey = true;
             if ( "off" == $setdisplaykey )
                 $displaykey = false;
-            //  ----------------------------------------------- various counts
+            //  ----------------------------------------------- vaenious counts
             $sql = "select count(*) from $rrw_photos"; // total photos
             $msg .= ( "<!-- sql is $sql -->\n" );
             $photoRowCnt = $wpdbExtra->get_var( $sql );;
@@ -119,9 +119,10 @@ class freewhilln_Administration_Pictures {
             $msg .= self::EmptyCount( "photographer", "Photographers" );
             $msg .= self::EmptyCount( "location", "location" );
             $msg .= self::EmptyCount( "PhotoDate", "Photo Date" );
-            $msg .= self::EmptyCount( "photoKeyword", "keywords" );
+            $msg .= self::SQLcount(" Keywords ",
+                        "photoname not in (select distinct keywordFilename
+                                from $rrw_keywords )");
             $msg .= self::EmptyCount( "copyright", "copyright" );
-            $msg .= self::EmptyCount( "photokeyword", "keywords" );
             $msg .= self::EmptyCount( "DireOnP", "source directory" );
             $msg .= self::EmptyCount( "height", "height" );
             $msg .= self::EmptyCount( "width", "width" );
@@ -156,10 +157,12 @@ To Modify/Merge <a href='/fix?task=keywordform' target='modify'>Keywords</a>
     and
     <input type=text name=enddate value='$today' >
     <input type=submit value='Go Display'>
-</form>
-<!-- Display keywords with the photos <a href='/admin?setting=on' >On</a> &nbsp; 
-<a href='/admin?setting=off' >Off</a> &nbsp;<br />-->
+</form>"; /*
+Display keywords with the photos <a href='/admin?setting=on' >On</a> &nbsp; 
+<a href='/admin?setting=off' >Off</a> &nbsp;<br />
 <a href='/notindatabase.php?doupdate=please'> 
+*/
+            $msg .= "
 <form method='post' action='/fix?task=deletephoto' >
     Delete photo named
     <input type='text' name='del3' id='del3 '>
@@ -168,8 +171,8 @@ To Modify/Merge <a href='/fix?task=keywordform' target='modify'>Keywords</a>
     <input type='submit' value='Delete the photo from database' >
 </form>
 <form method='post' action='/fix' >
-     rename photo <input type='text' name='filename' size='40' value='$photo' />
-    <input type='text' name='new' size='40' value='$photo' />
+     rename photo <input type='text' name='filename' size='140' value='$photo' />
+    <input type='text' name='newname' size='140' value='$photo' />
     <input type='submit' value='rename dataase/files' />
     <input type='hidden' name='task' value='rename' />
 </form><br />

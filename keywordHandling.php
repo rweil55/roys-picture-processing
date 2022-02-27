@@ -21,11 +21,11 @@ class keywordHandling {
         $debug = false;
         if ( $debug )$msg .= "keywordInsert( $photoname, $keywords ) $eol";
         $items = explode( ",", $keywords );
-        if ($debug) $msg .= rrwUtil::print_r($items, true, "things to add");
+        if ( $debug )$msg .= rrwUtil::print_r( $items, true, "things to add" );
         foreach ( $items as $item ) {
             if ( empty( $item ) )
                 continue;
-            $item = trim($item);
+            $item = trim( $item );
             if ( $debug )$msg .= "adding keyword $item $eol ";
             $insertItem = array( "keywordfilename" => $photoname,
                 "keyword" => $item );
@@ -39,15 +39,41 @@ class keywordHandling {
                     where filename = '$photoname' ";
                 if ( $debug )$msg .= "\r$sql<br>\r";
                 $cnt = $wpdbExtra->query( $sql );
-                if (1 != $cnt)
-                    $msg.= "$errorBeg E#621 Something happened with '$item'. 
+                if ( 1 != $cnt )
+                    $msg .= "$errorBeg E#621 Something happened with '$item'. 
                                 $cnt should one $errorEnd";
             }
         } // end of processing one keyword
         return $msg;
     } // end keyword insert
 
-    public static function keyword2photo( $filename ) {
+    
+    public static function fetchParameterKeywordList( $attr ) {
+        // keyword display list is numbered, return comma seperated list
+        $msg = "";
+        $debug = false;
+        // get the new keywords entered
+        $keywordcnt = rrwUtil::fetchparameterString( "keywordcnt", $attr );
+        $keywordList = rrwUtil::fetchparameterString( "commalist", $attr );
+        $keywordList .= ",";
+        $cnt = 0;
+        if ( $debug )$msg .= rrwUtil::print_r( $_POST, true, "Post" );
+        for ( $jj = 0; $jj < $keywordcnt; $jj++ ) {
+            $cnt++;
+            if ( $cnt > 300 )
+                break;
+            $key = "keyword$jj";
+            $keywordnew = rrwUtil::fetchparameterString( "$key", $attr );
+            if ( empty( $keywordnew ) )
+                continue;
+            $keywordList .= "$keywordnew,";
+        }
+        if ( $debug )$msg .= "keywordList: $keywordList $eol";
+        if ( $debug )$msg .= "commalist: $commalist $eol";
+        return array( $msg, $keywordList );
+    }
+
+/*    public static function keyword2photo( $filename ) {
         global $wpdbExtra, $phhotoDB, $rrw_keywords, $rrw_photos;
         global $eol, $errorBeg, $errorEnd;
         $debug = false;
@@ -59,12 +85,15 @@ class keywordHandling {
         $keyList = "";
         $recset_query = $wpdbExtra->get_resultsA( $sqlkeyList );
         foreach ( $recset_query as $rec ) {
-            $keyList .= $rec[ "keyword" ] . ",";
+            $keyList .= trim( $rec[ "keyword" ] ) . ", ";
         }
+        $keyList = substr( $keyList, 0, -2 ); // remove last comma
         $sql = "update $rrw_photos set photokeyword = '$keyList' 
                     where filename  = '$filename' ";
         if ( $debug )$msg .= "keyword2photo: $sql $eol";
         $wpdbExtra->query( $sql );
         return $msg;
     } // end 
+*/
+    
 } // end class

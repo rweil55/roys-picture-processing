@@ -123,7 +123,7 @@ class uploadProcessDire {
         $msg .= self::MakeImakeImages( $sourceFile, $photographer ) ;
 
         // meta date exists make it consistant with the EXIF
-        $msg .= freewheeling_fixit::Do_forceDatabse2matchexif( $recOld );
+        $msg .= freewheeling_fixit::fixAssumeDatabaseCorrect( $recOld );
         return $msg;
     } // end function processOneFile
 

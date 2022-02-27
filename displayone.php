@@ -288,6 +288,7 @@ class freeWheeling_DisplayOne {
     private static function DisplayTableDataOne( $recset ) {
         global $photoUrl, $photoPath, $highresPath, $thumbPath;
         global $eol;
+        global $wpdbExtra, $rrw_keywords;
         $msg = "";
 
         $photoname = $recset[ "filename" ];
@@ -343,9 +344,27 @@ class freeWheeling_DisplayOne {
         $msg .= "$copyRight $eol";
 
         # -------------------- keywords
-        $msg .= "<strong>Existing keywords:</strong>\n";
-        $words = explode( ",", $recset[ "photoKeyword" ] );
-        foreach ( $words as $keyWordItem ) {
+        $msg .= "<strong>Existing keywords:</strong>\n" .
+        self::GetkkeywordList( $photoname );
+
+        $msg .= "$eol<strong>Identifiable People:</strong>" . $recset[ "people" ] . "
+<div id='missedClassifi' onclick='openMissedClassifi(this,$photoname);'>
+    if any of this infomation is incorrect or missing. Please
+    <a href='/webmaster-feedback'>let us know</a></div>$eol";
+        return $msg;
+
+    } // end display table
+
+    public static function GetkkeywordList( $photoname ) {
+        global $eol;
+        global $wpdbExtra, $rrw_keywords;
+        $msg = "";
+
+        $sqlkey = "select keyword from $rrw_keywords 
+                        where keywordfilename = '$photoname'";
+        $recKeys = $wpdbExtra->get_resultsA( $sqlkey );
+        foreach ( $recKeys as $reckey ) {
+            $keyWordItem = $reckey[ "keyword" ];
             $keyWordItem = trim( $keyWordItem );
             if ( empty( $keyWordItem ) )
                 continue;
@@ -355,13 +374,8 @@ class freeWheeling_DisplayOne {
             $msg .= " <a onclick='onClickKeyword(\"$keyWordItem\");' >
                         $keyWordItem, </a> ";
         }
-        $msg .= "$eol<strong>Identifiable People:</strong>" . $recset[ "people" ] . "
-<div id='missedClassifi' onclick='openMissedClassifi(this,$photoname);'>
-    if any of this infomation is incorrect or missing. Please
-    <a href='/webmaster-feedback'>let us know</a></div>$eol";
         return $msg;
-
-    } // end display table
+    }
 
     public static function listbox2( $db, $table, $field, $oldvalue, $sortField ) {
 
