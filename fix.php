@@ -1355,7 +1355,7 @@ class freewheeling_fixit {
                 $fileCopyRight = $fileExif[ "Copyright" ];
             else
                 $fileCopyRight = "";
-            $msg .= "file: $fileCopyRight , database: $databaseCopyright $eol";
+            if ($debugForce)$msg .= "file: $fileCopyRight , database: $databaseCopyright $eol";
             if ( empty( $fileCopyRight ) && empty( $databaseCopyright ) )
             ; // do nothing
             elseif ( empty( $fileCopyRight ) && !empty( $databaseCopyright ) ) {
@@ -1380,7 +1380,7 @@ class freewheeling_fixit {
                 $fileArtist = $fileExif[ "Artist" ];
             else
                 $fileArtist = "";
-            $msg .= "Artist file - $fileArtist, 
+            if ($debugForce)$msg .= "Artist file - $fileArtist, 
                     database - $databasePhotographer $eol";
             if ( empty( $fileArtist ) && empty( $databasePhotographer ) )
             ; // do nothing

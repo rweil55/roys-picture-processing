@@ -11,7 +11,7 @@
  * Text Domain: Roys-picture-processng
  * Domain Path: /translation
  
-  * Version: 2.0.40
+  * Version: 2.0.43
  */
 // disable direct access
 ini_set( "display_errors", true );
@@ -240,7 +240,7 @@ function direReport( $field, $report = "" ) {
 
 function readexifItem( $filename, $item, & $msg ) {
     global $eol, $errorBeg, $errorEnd;
-    $debugExif = true;
+    $debugExif = false;
     ini_set( "display_errors", true );
     error_reporting( E_ALL | E_STRICT );
     if ( !file_exists( $filename ) ) {
@@ -261,7 +261,7 @@ function pushToImage( $filename, $item, $value ) {
     global $eol, $errorBeg, $errorEnd;
     global $photoPath;
     $msg = "";
-    $debugExif = true;
+    $debugExif = false;
     try {
         if ( $debugExif )$msg .= "---------------------------------------$eol";
         if ( false === strpos( $filename, "home" ) )
@@ -317,12 +317,13 @@ function pushToImage( $filename, $item, $value ) {
         }
         if ( $debugExif )$msg .= "compleated setup, get/adjust the data $eol ";
         $tag = convertText2EeixID( $item ); // item name into tag integer
-      if ( $debugExif )$msg .= "item is $item,, tag integer is $tag $eol ";
-         $textThing = $ifd0->getEntry( $tag );
+        if ( $debugExif )$msg .= "item is $item,, tag integer is $tag $eol ";
+        $textThing = $ifd0->getEntry( $tag );
         if ( is_null( $textThing ) ) {
             if ( $debugExif )$msg .= "tag did not exist, create a new one $eol";
             $type = findTagtype( $tag );
-            if ( $debugExif )$msg .= println( "Adding new $tag of type $type with value $value" );
+            if ( $debugExif )$msg .= println( "Adding new $tag of type $type (" .
+                                     dechex($type) . ") with value $value" );
             switch ( $type ) {
                 case "Copyright":
                 case "copyright":
@@ -330,7 +331,7 @@ function pushToImage( $filename, $item, $value ) {
                     break;
                 case "Ascii":
                 case "ascii":
-                    $textThing = new PelEntryAscii( $tag, value );
+                    $textThing = new PelEntryAscii( $tag, $value );
                     break;
                 case "byte":
                 case "Byte":
@@ -341,16 +342,15 @@ function pushToImage( $filename, $item, $value ) {
                     break;
             }
             $ifd0->addEntry( $textThing );
-            $textValue = "NULL";
         } // we now kow there is a tag
-      if ( $debugExif )$msg .= "tag thing exits $eol";
-        $textValue = $textThing->getValue();
-        if ( $debugExif )$msg .= rrwUtil::print_r( $textValue, true, "found old value of $item" );
+        if ( $debugExif )$msg .= "tag thing exits $eol";
+        $oldValue = $textThing->getValue();
+        if ( $debugExif )$msg .= rrwUtil::print_r( $oldValue, true, "found old value of $item" );
         $textThing->setValue( $value );
-        if ( $debugExif )$msg .= rrwUtil::print_r( $textValue, true, " set new tag value of $item" );
+         $newValue = $textThing->getValue();
+       if ( $debugExif )$msg .= rrwUtil::print_r($newValue, true, " set new tag value of $item" );
         if ( $debugExif )$msg .= println( "Writing file $tmpfname $eol" );
-       return $msg;
-        //$fileInMemory->saveFile( $tmpfname );
+       $fileInMemory->saveFile( $tmpfname );
         $jpeg->saveFile( $tmpfname );
         $sizeOld = filesize( $filename );
         $sizeNew = filesize( $tmpfname );
@@ -377,8 +377,8 @@ function pushToImage( $filename, $item, $value ) {
         $itemname = str_replace( "_cr", "", $itemname );
         $itemname = str_replace( "_tmb", "", $itemname );
         // copyright and comment may be stored as an arrray
-        $oldValue = rrwUtil::print_r( $textValue, true, "old value" );
-        $comment = "$basename -- $oldValue -> $value";
+        
+        $comment = "$basename -- $oldValue -> $newValue";
         $msg .= rrwUtil::InsertIntoHistory( $itemname, $comment );
         if ( $debugExif )$msg .= "History writin $comment $eol ----- $eol";
     } // end try
@@ -707,20 +707,20 @@ function rrwPHPel( $argv ) {
 function convertText2EeixID( $text ) {
     // codes from https://www.exiftool.org/TagNames/EXIF.html
     global $eol, $errorBeg, $errorEnd;
-    print " convertText2EeixID( $text )  $eol ";
-     switch ( $text ) {
+    // print " convertText2EeixID( $text )  $eol ";
+    switch ( $text ) {
         case "artist":
             return 0x013b;
         case "comment":
             return 0x9c9c;
         case "copyright":
-             print "found copyright $eol ";
+            print "found copyright $eol ";
             return 0x8298;
         case "ImageDescription":
-         case "desc":
-         case "decription":
+        case "desc":
+        case "decription":
             return 0x010e;
-         case "datetimeoriginal":
+        case "datetimeoriginal":
             return 0x0132; // Peltag::DATETIMEOROGINAL ;  // 0x0132 //  0x9003;
         case "keyword":
             return 0x9c9e; // (WindowsXPKeywords)
@@ -737,29 +737,30 @@ function convertText2EeixID( $text ) {
 }
 
 function findTagtype( $tag ) {
-            print " findTagtype( $tag ) $eol";
-   switch ( $tag ) {
-         // foramt names in class PelFormat, 
+    global $eol, $errorBeg, $errorEnd;
+    // print " findTagtype( $tag ) $eol";
+    switch ( $tag ) {
+        // foramt names in class PelFormat, 
         //   should match switch ( $type ) abour line 326
         case 0x8298: // copyright
-  //          return "Copyright";
-         case 0x13B: // artist
+            //          return "Copyright";
+        case 0x13B: // artist
         case 0x010e: // Image Description
         case 0x0132: // modify date
         case 0x9003: //Datetime original
         case 0x9004: //CreateDate
-            return "ascii";         // string
-    //     case "keywords":
+            return "ascii"; // string
+            //     case "keywords":
         case 0x9c9c: // comment
-        case 0x9c9d:     // Author
+        case 0x9c9d: // Author
         case 0x9c9e: // (WindowsXPKeywords)
-        case 0x9c9f:    // Subject
-            return "byte";              // int8u
+        case 0x9c9f: // Subject
+            return "byte"; // int8u
             //       case PelTag::GPS_LATITUDE:
             //        case PelTag::GPS_LONGITUDE:
             //        case GPS_ALTITUDE:
             //            return "rational";
-    /*    case "date":
+            /*    case "date":
             return "int"; // Peltag::DATETIMEOROGINAL ;  // 0x0132 //  0x9003;
         case "width":
         case "height":

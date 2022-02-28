@@ -29,6 +29,19 @@ class freeWheeling_DisplayUpdate {
                 $location = "Unspecified";
             if ( ( strlen( $photodate ) < 1 ) )
                 $photodate = "Unknown";
+            // no direct user input for copyright - use photographer if empty
+            if (empty($copyright) && ! empty($photographer)) {
+                $sqlCopy = "select copyrightDefault from $rrw_photographers
+                            where photographer = '$photographer' ";
+                $copydefalt = $wpdbExtra->get_var($sqlCopy);
+                if (1 == $wpdbExtra->num_rows) {
+                    $sqlupdateCopy = "update $rrw_photos 
+                                set copyright = $copydefalt
+                                where $photoname = '$photoname' ";
+                    $cnt = $wpdbExtra->query($sqlupdateCopy);
+                }
+            }
+            // get old data
             $sqlOld = "select * from $rrw_photos where filename = '$photoname'";
             $recsold = $wpdbExtra->get_resultsA( $sqlOld );
             if ( 1 < $wpdbExtra->num_rows )
@@ -48,7 +61,7 @@ class freeWheeling_DisplayUpdate {
             $msg .= self::compare( "comment", $comment, $recOld );
             $msg .= self::compare( "DireOnP", $direonp, $recOld );
             $msg .= self::compare( "PhotoDate", $photodate, $recOld );
-            
+            // updat the keyword list
             $msg .= keywordHandling::remove($photoname);
             $msg .= keywordHandling::insertList($photoname, $keyWordList);
             

@@ -1,4 +1,4 @@
-F<?php
+<?php
 /**
  * PEL: PHP Exif Library.
  * A library with support for reading and
