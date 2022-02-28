@@ -122,6 +122,9 @@ class freewheeling_fixit {
                 case "test":
                     $msg .= freewheeling_fixit::test();
                     break;
+                   case "testpel":
+                    $msg .= testpel();
+                    break;
                 default:
                     $msg .= "task=$task$eol
        <a href='/fix/?task=add' >upload photos from the source table</a>$eol 

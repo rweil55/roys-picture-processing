@@ -13,7 +13,7 @@ class uploadProcessDire {
         //      moves to the high_resoltion directory
         //
         $msg = "";
-        $debug = false;
+        $debug = true;
 
         try {
             if ( $debug )$msg .= "uploadProcessDire ($uploadPath) $eol";

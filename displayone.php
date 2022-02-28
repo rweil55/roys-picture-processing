@@ -237,6 +237,7 @@ class freeWheeling_DisplayOne {
     } // end function
 
     private static function keywodCheckboxes( $photoname ) {
+        // buld the display of keyword checkbox
         global $wpdbExtra, $rrw_keywords;
         global $eol;
         $msg = "";
@@ -288,7 +289,6 @@ class freeWheeling_DisplayOne {
     private static function DisplayTableDataOne( $recset ) {
         global $photoUrl, $photoPath, $highresPath, $thumbPath;
         global $eol;
-        global $wpdbExtra, $rrw_keywords;
         $msg = "";
 
         $photoname = $recset[ "filename" ];

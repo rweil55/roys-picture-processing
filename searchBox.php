@@ -60,8 +60,8 @@ class rrwPictures_searchBox {
             [ <a href='/submission' target='admin' >submit photo </a> ]
             [ c:\_e &nbsp; php sub.php ]
             [ <a href='/upload' target='admin' >process upload </a> ]
-            [ <a href='$exifUrl/' target='one' >EXIF description </a> ]
-            [ <a href='$exifList/' target='one' >EXIF description </a> ]
+            [ <a href='$exifUrl' target='one' >EXIF description </a> ]
+            [ <a href='$exifList' target='one' >EXIF description </a> ]
             
             </p>\n ";
         } else

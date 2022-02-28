@@ -23,7 +23,7 @@ class freewhilln_Administration_Pictures {
                 $displaykey = true;
             if ( "off" == $setdisplaykey )
                 $displaykey = false;
-            //  ----------------------------------------------- vaenious counts
+            //  ----------------------------------------------- various counts
             $sql = "select count(*) from $rrw_photos"; // total photos
             $msg .= ( "<!-- sql is $sql -->\n" );
             $photoRowCnt = $wpdbExtra->get_var( $sql );;

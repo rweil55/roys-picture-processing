@@ -11,7 +11,7 @@
  * Text Domain: Roys-picture-processng
  * Domain Path: /translation
  
-  * Version: 2.0.39
+  * Version: 2.0.40
  */
 // disable direct access
 ini_set( "display_errors", true );
@@ -53,7 +53,7 @@ use lsolesen\ pel\ PelTag;
 use lsolesen\ pel\ PelTiff;
 
 ini_set( "display_errors", true );
-$pel = "/home/pillowan//www-shaw-weil-pictures/wp-content/plugins" .
+$pel = "/home/pillowan/www-shaw-weil-pictures-dev/wp-content/plugins" .
 "/roys-picture-processng/pel-master/src";
 require_once "$pel/Pel.php";
 require_once "$pel/PelException.php";
@@ -261,7 +261,7 @@ function pushToImage( $filename, $item, $value ) {
     global $eol, $errorBeg, $errorEnd;
     global $photoPath;
     $msg = "";
-    $debugExif = false;
+    $debugExif = true;
     try {
         if ( $debugExif )$msg .= "---------------------------------------$eol";
         if ( false === strpos( $filename, "home" ) )
@@ -317,20 +317,23 @@ function pushToImage( $filename, $item, $value ) {
         }
         if ( $debugExif )$msg .= "compleated setup, get/adjust the data $eol ";
         $tag = convertText2EeixID( $item ); // item name into tag integer
-        if ( $debugExif )$msg .= "tag integer is $tag $eol ";
-        $textThing = $ifd0->getEntry( $tag );
+      if ( $debugExif )$msg .= "item is $item,, tag integer is $tag $eol ";
+         $textThing = $ifd0->getEntry( $tag );
         if ( is_null( $textThing ) ) {
             if ( $debugExif )$msg .= "tag did not exist, create a new one $eol";
             $type = findTagtype( $tag );
             if ( $debugExif )$msg .= println( "Adding new $tag of type $type with value $value" );
             switch ( $type ) {
+                case "Copyright":
                 case "copyright":
                     $textThing = new PelEntryCopyright( $value );
                     break;
+                case "Ascii":
                 case "ascii":
                     $textThing = new PelEntryAscii( $tag, value );
                     break;
                 case "byte":
+                case "Byte":
                     $textThing = new PelEntryByte( $tag, $value );
                     break;
                 default:
@@ -340,12 +343,13 @@ function pushToImage( $filename, $item, $value ) {
             $ifd0->addEntry( $textThing );
             $textValue = "NULL";
         } // we now kow there is a tag
-        if ( $debugExif )$msg .= "tag thing exits $eol";
+      if ( $debugExif )$msg .= "tag thing exits $eol";
         $textValue = $textThing->getValue();
         if ( $debugExif )$msg .= rrwUtil::print_r( $textValue, true, "found old value of $item" );
         $textThing->setValue( $value );
         if ( $debugExif )$msg .= rrwUtil::print_r( $textValue, true, " set new tag value of $item" );
         if ( $debugExif )$msg .= println( "Writing file $tmpfname $eol" );
+       return $msg;
         //$fileInMemory->saveFile( $tmpfname );
         $jpeg->saveFile( $tmpfname );
         $sizeOld = filesize( $filename );
@@ -471,10 +475,10 @@ function rrwPHPel( $argv ) {
     ini_set( 'display_startup_errors', 1 );
     error_reporting( E_ALL | E_STRICT );
     $msg = "";
-    $debug = false;
+    $debug = true;
     try {
         $msg .= SetConstants( "testPel" );
-        if ( $debugExif )$msg .= println( "--------------------- emter rrwPHPel $eol" );
+        if ( $debug )$msg .= println( "--------------------- emter rrwPHPel $eol" );
         $prog = array_shift( $argv );
         $error = false;
         /*
@@ -519,22 +523,26 @@ function rrwPHPel( $argv ) {
         }
         /* Any remaining arguments are considered the new description. */
         $description = implode( ' ', $argv );
-        if ( $debug )$msg .= println( "the new desrription '$description'$eol" );
+        if ( $debug )$msg .= "inputfile - $input, $eol outputfile $output, $eol
+              item = $tag, new value - $description ";
         /*
          * We typically need lots of RAM to parse TIFF images since they tend
          * to be big and uncompressed.
          */
-        ini_set( 'memory_limit', '32M' );
+        ini_set( 'memory_limit', '120M' );
         /*
          * The input file is now read into a PelDataWindow object. At this
          * point we do not know if the file stores JPEG or TIFF data, so
          * instead of using one of the loadFile methods on PelJpeg or PelTiff
          * we store the data in a PelDataWindow.
          */
-        if ( $debug )$msg .= println( 'Reading file "%s".', $input );
+        if ( $debug )$msg .= "Reading file $input ...";
         $buffer = file_get_contents( $input );
-        if ( $debug )$msg .= println( "got " . strlen( $buffer ) . "bytes from the files" );
+        if ( $debug )$msg .= println( "got " . strlen( $buffer ) . "bytes from the files $eol" );
+
         $data = new PelDataWindow( $buffer );
+        $msg .= "GOT DATA $eol";
+
         /*
          * The static isValid methods in PelJpeg and PelTiff will tell us in
          * an efficient maner which kind of data we are dealing with.
@@ -560,6 +568,8 @@ function rrwPHPel( $argv ) {
              * of getting the right section with a minimum of fuzz.
              */
             $exif = $jpeg->getExif();
+            if ( $debug )$msg .= "got the exif $eol ";
+
             if ( $exif == null ) {
                 /*
                  * Ups, there is no APP1 section in the JPEG file. This is where
@@ -627,19 +637,19 @@ function rrwPHPel( $argv ) {
          * contain such an entry, null will be returned.
          */
         if ( $debug )$msg .= println( "  -------------------------------- $eol" );
-        $textList = array( "copyright", "desc", "date", "keyword" ); // "width", "height");
+        $textList = array( "copyright", "description", "date", "keyword" ); // "width", "height");
         foreach ( $textList as $text ) {
             $tagL = convertText2EeixID( $text );
             $textThing = $ifd0->getEntry( $tagL );
             if ( is_null( $textThing ) ) {
-                if ( $debug )$msg .= println( "did not find an entry  for $text" );
+                if ( $debug )$msg .= println( "E#702 did not find an entry  for $text $eol" );
             } else {
                 $textValue = $textThing->getValue();
                 if ( $debug )$msg .= println( $textThing . rrwUtil::print_r( $textValue, true, "$text" ) );
             }
         }
-        if ( $debug )
-            if ( $debug )$msg .= println( "  -------------------------------- $eol" );
+        if ( $debug )$msg .= println( "  about to get entry $eol" );
+        return $msg;
         $desc = $ifd0->getEntry( $tag );
         if ( $debug )
             if ( $debug )$msg .= println( "for $tag found the $desc $eol " );
@@ -697,17 +707,20 @@ function rrwPHPel( $argv ) {
 function convertText2EeixID( $text ) {
     // codes from https://www.exiftool.org/TagNames/EXIF.html
     global $eol, $errorBeg, $errorEnd;
-    switch ( $text ) {
+    print " convertText2EeixID( $text )  $eol ";
+     switch ( $text ) {
         case "artist":
             return 0x013b;
         case "comment":
             return 0x9c9c;
         case "copyright":
-            return PelTag::COPYRIGHT;
+             print "found copyright $eol ";
+            return 0x8298;
         case "ImageDescription":
-            return 0x010e; // PelTag::IMAGEDESCRIPTION;
-            //    ImageDescription
-        case "datetimeoriginal":
+         case "desc":
+         case "decription":
+            return 0x010e;
+         case "datetimeoriginal":
             return 0x0132; // Peltag::DATETIMEOROGINAL ;  // 0x0132 //  0x9003;
         case "keyword":
             return 0x9c9e; // (WindowsXPKeywords)
@@ -724,27 +737,29 @@ function convertText2EeixID( $text ) {
 }
 
 function findTagtype( $tag ) {
-    switch ( $tag ) {
-        case PelTag::COPYRIGHT:
-            return "copyright";
-        case 0x13B: // artist
-            //    case "keyword":    
-            //    case 0x9c9e: // keyword
-        case 0x010e: //  Image Description
+            print " findTagtype( $tag ) $eol";
+   switch ( $tag ) {
+         // foramt names in class PelFormat, 
+        //   should match switch ( $type ) abour line 326
+        case 0x8298: // copyright
+  //          return "Copyright";
+         case 0x13B: // artist
+        case 0x010e: // Image Description
         case 0x0132: // modify date
         case 0x9003: //Datetime original
         case 0x9004: //CreateDate
-        case 0x010e: // PelTag::IMAGEDESCRIPTION;
-            return "ascii";
-        case "keywords":
-        case 0x9c9c:       // comment
+            return "ascii";         // string
+    //     case "keywords":
+        case 0x9c9c: // comment
+        case 0x9c9d:     // Author
         case 0x9c9e: // (WindowsXPKeywords)
-            return "byte";
+        case 0x9c9f:    // Subject
+            return "byte";              // int8u
             //       case PelTag::GPS_LATITUDE:
             //        case PelTag::GPS_LONGITUDE:
             //        case GPS_ALTITUDE:
             //            return "rational";
-        case "date":
+    /*    case "date":
             return "int"; // Peltag::DATETIMEOROGINAL ;  // 0x0132 //  0x9003;
         case "width":
         case "height":
@@ -752,7 +767,8 @@ function findTagtype( $tag ) {
         case "COMPUTED":
             return "COMPUTED"; // 0xbc81
         case "datetimedigitized":
-            return "ascii";
+            return "Ascii";
+*/
         default:
             $hex = dechex( $tag );
             throw new Exception( "E#695 looking for typeof exif[$tag]
@@ -792,14 +808,14 @@ function changeItem( $input_file, $output_file, $item, $newVale ) {
 }
 
 function testpel() {
-    global $gallery, $eol;
+    global $photoPath, $eol;
     $msg = "";
     $msg .= SetConstants( "testPel" );
-    $output_file = "$gallery/a5.jpg";
-    $output_file6 = "$gallery/a6.jpg";
-    foreach ( array( "$gallery/a3.jpg",
-            "$gallery/US 422 underpass 422-142235.jpg" ) as $input_file ) {
-        $msg .= changeItem( $input_file, $output_file, "desc",
+    $output_file = "$photoPath/a5.jpg";
+    $output_file6 = "$photoPath/a6.jpg";
+    foreach ( array( "$photoPath/a3.jpg", ) as $input_file ) {
+        $output_file = str_replace( ".jpg", "", $input_file ) . "new.jpg";
+        $msg .= changeItem( $input_file, $output_file, "artist",
             "a change in description" );
         $msg .= dumpMeta( $input_file, $output_file );
         $msg .= changeItem( $input_file, $output_file, "copyright",
@@ -808,9 +824,9 @@ function testpel() {
         $msg .= changeItem( $input_file, $output_file, "keyword",
             "a change in keyword in a5" );
         $msg .= dumpMeta( $input_file, $output_file );
-        $msg .= changeItem( $output_file, $output_file6, "keyword",
+        $msg .= changeItem( $output_file, $output_file, "keyword",
             "a change in keyword in a6" );
-        $msg .= dumpMeta( $output_file, $output_file6 );
+        $msg .= dumpMeta( $output_file, $output_file );
     }
     return $msg;
 }
@@ -913,7 +929,6 @@ add_shortcode( "perl", "testperl" );
 add_shortcode( "addtag", "addtag" );
 add_shortcode( "reada3a4", "reada3a4" );
 add_shortcode( "writea5", "writea5" );
-add_shortcode( "testPel", "testPel3" );
 require 'plugin_update_check.php';
 $MyUpdateChecker = new PluginUpdateChecker_2_0(
     'http://pluginserver.royweil.com/roys-picture-processng.php',
