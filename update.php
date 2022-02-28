@@ -37,8 +37,10 @@ class freeWheeling_DisplayUpdate {
                 if (1 == $wpdbExtra->num_rows) {
                     $sqlupdateCopy = "update $rrw_photos 
                                 set copyright = '$copydefalt'
-                                where $photoname = '$photoname' ";
+                                where photoname = '$photoname' ";
                     $cnt = $wpdbExtra->query($sqlupdateCopy);
+           //         $msg .= "$cnt = $cnt,  $sqlupdateCopy $eol ";
+                    $copyright = $copydefalt;
                 }
             }
             // get old data

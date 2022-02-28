@@ -30,7 +30,7 @@ class uploadProcessDire {
                 // not a single file request. walk the directory
                 $handle = opendir( $uploadPath );
                 if ( !is_resource( $handle ) )
-                    throw new Exception( "$errorBeg E#496 failed to 
+                    throw new Exception( "$errorBeg E#710 failed to 
                                     open $uploadPath $errorEnd" );
                 if ( $debug )$msg .= "Entries:$eol";
                 $cnt = 0;

@@ -122,7 +122,7 @@ class freewheeling_fixit {
                 case "test":
                     $msg .= freewheeling_fixit::test();
                     break;
-                   case "testpel":
+                case "testpel":
                     $msg .= testpel();
                     break;
                 default:
@@ -237,7 +237,7 @@ class freewheeling_fixit {
         foreach ( $dirlistRes as $file => $fileFull ) {
             if ( !array_key_exists( $file, $dirlist_cr ) ) {
                 $msg .= "$fileFull is not in $photoPath ";
-                $msg .= self::addcreate_searchlink( $photoPath, $file, $fileFull );
+                $msg .= self::addcreate_searchlink( $file );
                 $cntFound++;
             }
         }
@@ -246,7 +246,7 @@ class freewheeling_fixit {
         foreach ( $dirlist_cr as $file => $fileFull ) {
             if ( !array_key_exists( $file, $dirlistRes ) ) {
                 $msg .= "$fileFull is not in $highresPath ";
-                $msg .= self::addcreate_searchlink( $file, $file, "$photoPath/$fileFull" );
+                $msg .= self::addcreate_searchlink( $file );
             }
         }
         return $msg;
@@ -295,13 +295,13 @@ class freewheeling_fixit {
         }
         $cntFound = 0;
         foreach ( $dirlistRes as $highres => $fullfilename ) {
-            $highresTest = str_replace( ".jpg", "", $highres );
-            $highresTest = str_replace( "$highresPath/", "", $highresTest );
+            $filename = str_replace( "$highresPath/", "", $highres );
+            $highresTest = str_replace( ".jpg", "", $filename );
             if ( !array_key_exists( $highresTest, $photolist ) ) {
-                $msg .= "$highresTest is not in the photo table,
+                $msg .= "<a href='/display-one-photo?photoname=$highresTest' >
+                $highresTest</a> is not in the photo table,
                 but we have a high resolution image ";
-                $msg .= self::addcreate_searchlink( $highres, $highresTest,
-                    $fullfilename );
+                $msg .= self::addcreate_searchlink( $filename );
                 $cntFound++;
             }
         }
@@ -309,23 +309,28 @@ class freewheeling_fixit {
         return $msg;
     }
 
-    private static function addcreate_searchlink( $highres, $partial, $fullfilename ) {
+    private static function addcreate_searchlink( $photoname ) {
         global $eol, $errorBeg, $errorEnd;
         $msg = "";
-        if ( strpos( $highres, "_cr" ) !== false ||
-            strpos( $highres, "_tmb" ) !== false ||
-            strpos( $highres, "-s." ) !== false ||
-            strpos( $highres, "-w." ) !== false )
-            $msg .= "
-                <a href='/fix/?
-                    task=filelike&photoname=$partial&partial=$partial' 
-                    target='create' > search for high res</a> $eol ";
+
+        $partial = "";
+  //      $msg .= "$eol addcreate_searchlink( $photoname ) $eol"; 
+        foreach ( array( "_cr.", "_tmb.", "-s.", "-w." ) as $bad )
+            if ( strpos( $photoname, $bad ) !== false ) {
+                $partial = str_replace( $bad, ".", $photoname );
+                break;
+            }
+        if ( empty( $partial ) )
+            $msg .= "<a href='/fix/?task=reload&fullfilename=$photoname' 
+                    target='create' > create meta</a> 
+                    <strong>$photoname</strong> $eol ";
         else
-            $msg .= "                   
-                <a href='/fix/?task=reload&fullfilename=$fullfilename' 
-                    target='create' > create meta</a> $eol ";
+            $msg .= "<a href='/fix/?task=filelike&photoname=$photoname&partial=$partial' 
+                    target='create' > search for high res</a> 
+                    <strong>$photoname</strong> $eol ";
         return $msg;
     }
+
     private static function reload( $attr ) {
         // given a fullfilename, move file to the upload directoy and reload it
         global $eol, $errorBeg, $errorEnd;
@@ -987,6 +992,7 @@ class freewheeling_fixit {
                 foreach ( $recset as $name => $valu ) {
                     switch ( $name ) {
                         case 'filename':
+                        case 'photoname':
                         case "keywordfilename":
                         case "sourceFilename":
                             $valu = freewheeling_fixit::formatPhotoLink( $valu );
@@ -1355,7 +1361,7 @@ class freewheeling_fixit {
                 $fileCopyRight = $fileExif[ "Copyright" ];
             else
                 $fileCopyRight = "";
-            if ($debugForce)$msg .= "file: $fileCopyRight , database: $databaseCopyright $eol";
+            if ( $debugForce )$msg .= "file: $fileCopyRight , database: $databaseCopyright $eol";
             if ( empty( $fileCopyRight ) && empty( $databaseCopyright ) )
             ; // do nothing
             elseif ( empty( $fileCopyRight ) && !empty( $databaseCopyright ) ) {
@@ -1380,7 +1386,7 @@ class freewheeling_fixit {
                 $fileArtist = $fileExif[ "Artist" ];
             else
                 $fileArtist = "";
-            if ($debugForce)$msg .= "Artist file - $fileArtist, 
+            if ( $debugForce )$msg .= "Artist file - $fileArtist, 
                     database - $databasePhotographer $eol";
             if ( empty( $fileArtist ) && empty( $databasePhotographer ) )
             ; // do nothing
