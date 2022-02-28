@@ -947,7 +947,7 @@ class freewheeling_fixit {
         //  item is  trail_name, direonp
         $sql = "select filename, trail_name, photographer, photostatus
                 from $rrw_photos 
-                where $sqlWhere  order by filename "; // missng source
+                where $sqlWhere  order by direonp, filename "; // missng source
         $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
             "photos wih no $description" );
         return $msg;

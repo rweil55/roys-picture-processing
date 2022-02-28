@@ -11,7 +11,7 @@
  * Text Domain: Roys-picture-processng
  * Domain Path: /translation
  
-  * Version: 2.0.43
+  * Version: 2.0.44
  */
 // disable direct access
 ini_set( "display_errors", true );

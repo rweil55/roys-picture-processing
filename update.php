@@ -36,7 +36,7 @@ class freeWheeling_DisplayUpdate {
                 $copydefalt = $wpdbExtra->get_var($sqlCopy);
                 if (1 == $wpdbExtra->num_rows) {
                     $sqlupdateCopy = "update $rrw_photos 
-                                set copyright = $copydefalt
+                                set copyright = ''$copydefalt'
                                 where $photoname = '$photoname' ";
                     $cnt = $wpdbExtra->query($sqlupdateCopy);
                 }
