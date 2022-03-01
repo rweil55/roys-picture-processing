@@ -345,10 +345,10 @@ class freewheeling_fixit {
         $filename = substr( $fullFilename, $iislash );
         $uploadfilename = "$uploadPath/$filename";
         // move the file
-        if($debug) $msg .= "= rename( $highresPath/$fullFilename, $uploadfilename $eol ";
-        $answer = rename( $fullFilename, $uploadfilename );
+        if($debug) $msg .= "= rename( $highresPath/$filename, $uploadfilename $eol ";
+        $answer = rename( "$highresPath/$filename", $uploadfilename );
         if ( $debug )$msg .= "lets process upload dire$eol";
-        $attr = array( "uploadfilename" => $uploadfilename );
+        $attr = array( "uploadfilename" => $filename );
         if ( $debug )$msg .= rrwUtil::print_r( $attr, true, "parameters to upload" );
         $msg .= uploadProcessDire::upload( $attr );
         return $msg;

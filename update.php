@@ -22,24 +22,24 @@ class freeWheeling_DisplayUpdate {
             $comment = rrwUtil::fetchparameterString( "comment", $attr );
             $people = rrwUtil::fetchparameterString( "people", $attr );
             $direonp = rrwUtil::fetchparameterString( "direonp", $attr );
-            list( $msgTemp, $keyWordList ) =           
-                        keywordHandling::fetchParameterKeywordList( $attr );
+            list( $msgTemp, $keyWordList ) =
+                keywordHandling::fetchParameterKeywordList( $attr );
             $msg .= $msgTemp;
             if ( ( strlen( $location ) < 1 ) )
                 $location = "Unspecified";
             if ( ( strlen( $photodate ) < 1 ) )
                 $photodate = "Unknown";
             // no direct user input for copyright - use photographer if empty
-            if (empty($copyright) && ! empty($photographer)) {
+            if ( empty( $copyright ) && !empty( $photographer ) ) {
                 $sqlCopy = "select copyrightDefault from $rrw_photographers
                             where photographer = '$photographer' ";
-                $copydefalt = $wpdbExtra->get_var($sqlCopy);
-                if (1 == $wpdbExtra->num_rows) {
+                $copydefalt = $wpdbExtra->get_var( $sqlCopy );
+                if ( 1 == $wpdbExtra->num_rows ) {
                     $sqlupdateCopy = "update $rrw_photos 
                                 set copyright = '$copydefalt'
                                 where photoname = '$photoname' ";
-                    $cnt = $wpdbExtra->query($sqlupdateCopy);
-           //         $msg .= "$cnt = $cnt,  $sqlupdateCopy $eol ";
+                    $cnt = $wpdbExtra->query( $sqlupdateCopy );
+                    //         $msg .= "$cnt = $cnt,  $sqlupdateCopy $eol ";
                     $copyright = $copydefalt;
                 }
             }
@@ -64,13 +64,13 @@ class freeWheeling_DisplayUpdate {
             $msg .= self::compare( "DireOnP", $direonp, $recOld );
             $msg .= self::compare( "PhotoDate", $photodate, $recOld );
             // updat the keyword list
-            $msg .= keywordHandling::remove($photoname);
-            $msg .= keywordHandling::insertList($photoname, $keyWordList);
-            
+            $msg .= keywordHandling::remove( $photoname );
+            $msg .= keywordHandling::insertList( $photoname, $keyWordList );
+
             $sqlCheck = "select * from $rrw_photos where filename ='$photoname'";
             $rec = $wpdbExtra->get_resultsA( $sqlCheck );
             $msg .= freewheeling_fixit::fixAssumeDatabaseCorrect( $rec[ 0 ] );
-           if ( $debug ) {
+            if ( $debug ) {
                 $msg .= rrwUtil::print_r( $rec, true, "Check record" );
                 $msg .= "<h3>Update completed</h3>
                 <a href='/display-one-photo/?photoname=$photoname' >$photoname</a>";
@@ -81,7 +81,7 @@ class freeWheeling_DisplayUpdate {
         }
         return $msg;
     } // end DisplayUpdate
-    
+
     public static function compare( $itemName, $newValue, $rec ) {
         //compare old and new value, update if different
         global $eol, $errorBeg, $errorEnd;
@@ -91,7 +91,10 @@ class freeWheeling_DisplayUpdate {
         try {
             ini_set( "display_errors", true );
             error_reporting( E_ALL | E_STRICT );
-            $dubigCompare = false;
+            if ( "trail_name" == $itemName )
+                $dubigCompare = true;
+            else
+                $dubigCompare = false;
             if ( $dubigCompare )$msg .= " compare( $itemName, $newValue -> ";
             $oldValue = $rec[ $itemName ];
             if ( $dubigCompare )$msg .= " $oldValue $eol";
