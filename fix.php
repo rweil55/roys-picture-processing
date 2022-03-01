@@ -304,12 +304,17 @@ class freewheeling_fixit {
                 $msg .= "<a href='/display-one-photo?photoname=$highresTest' >
                 $highresTest</a> is not in the photo table,
                 but we have a high resolution image ";
-                $msg .= self::addcreate_searchlink( $filename );
+                $msg .= " [ " . self::updateeRenameLink($highresTest) . " ] ";
+                $msg .= " [ " . self::addcreate_searchlink( $filename ) . " ] ";
                 $cntFound++;
             }
         }
         $msg .= "Found $cntFound photos  but no photo information ";
         return $msg;
+    }
+
+    public static function BadPhotonameEndings() {
+        return array( "_cr.", "_tmb.", "-s.", "-w." );
     }
 
     private static function addcreate_searchlink( $photoname ) {
@@ -318,7 +323,7 @@ class freewheeling_fixit {
 
         $partial = "";
         //      $msg .= "$eol addcreate_searchlink( $photoname ) $eol"; 
-        foreach ( array( "_cr.", "_tmb.", "-s.", "-w." ) as $bad )
+        foreach ( self::BadPhotonameEndings() as $bad )
             if ( strpos( $photoname, $bad ) !== false ) {
                 $partial = str_replace( $bad, ".", $photoname );
                 break;
@@ -1021,8 +1026,21 @@ class freewheeling_fixit {
         }
         return $msg;
     }
-
-    public static function updateRename( $photoname, $newname ) {
+    public static function updateRenameform() {
+        return  "<form acton='/fix/' method='post' >
+            Old Name: 
+        <input type='text' name='photoname' size='20' value='' />
+        New Name: 
+        <input type='text' name='newname' size='20' value='' />
+         &nbsp;
+        <input type='submit' value='rename dataase/files' />
+        <input type='hidden' name='task' value='rename' />
+        </form>";
+    }
+    public static function updateeRenameLink($photoname = "") {
+        return "<a href='/fix/?task=rename&photoname=$photoname.jpg&newname=' > rename $photoname</a>";
+    }
+    public static function updateRename( $photoname = "", $newname = "" ) {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_photos, $rrw_keywords;
         global $photoPath, $thumbPath, $highresPath;
@@ -1035,17 +1053,22 @@ class freewheeling_fixit {
             $newname = trim( rrwUtil::fetchparameterString( "newname" ) );
         }
         if ( $debug )$msg .= "start updateRename( $photoname, $newname ) $eol";
-        if ( empty( $newname ) ) {
-            $msg .= "<form acton='/fix/' method='post' >
-            Old Name: 
-        <input type='text' name='photoname' size='20' value='$photoname' />
-        New Name: 
-        <input type='text' name='newname' size='20' value='$photoname' />
-         &nbsp;
-        <input type='submit' value='rename dataase/files' />
-        <input type='hidden' name='task' value='rename' />
-        </form>";
-            return $msg;
+        if ( empty( $newname ) && !empty( $photoname ) ) {
+            $notfound = "true";
+            foreach ( self::BadPhotonameEndings() as $bad ) {
+                if ( strpos( $photoname, $bad ) !== false ) {
+                    $newname = str_replace( $bad, ".", $photoname );
+                    $notfound = false;
+                    break;
+                }
+            }
+            if ( $notfound )
+                $msg .= "$errorBeg E#710 $photoname does not contain " .
+            implode( ";", self::BadPhotonameEndings() ) .
+            $errorEnd;
+        }
+        if ( empty( $newname ) && empty( $photoname ) ) {
+            return self::updateRenameform();
         }
         // remove the .jpg
         $photoname = str_ireplace( ".jpg", "", $photoname );
@@ -1087,6 +1110,7 @@ class freewheeling_fixit {
                 replace(direonp, '$photoname', '$newname') where photoname = '$newname'";
         $cnt = $wpdbExtra->query( $sqldireonp );
         $msg .= "updated $cnt records with $sqldireonp $eol";
+        $msg .= self::updateRenameform();
         return $msg;
 
     } // end  updateRename( $photoname, $newname ) {
