@@ -334,7 +334,7 @@ class freewheeling_fixit {
     private static function reload( $attr ) {
         // given a fullfilename, move file to the upload directoy and reload it
         global $eol, $errorBeg, $errorEnd;
-        global $uploadPath;
+        global $uploadPath, $highresPath;
         $msg = "";
         $debug = false;
 
@@ -342,12 +342,13 @@ class freewheeling_fixit {
         if ( empty( $fullFilename ) )
             throw new Exception( "$msg $errorBeg E#669 missing filename $errorEnd" );
         $iislash = strrpos( $fullFilename, "/" );
-        $filename = substr( $fullFilename, $iislash + 1 );
-        $HighResfilename = "$uploadPath/$filename";
+        $filename = substr( $fullFilename, $iislash );
+        $uploadfilename = "$uploadPath/$filename";
         // move the file
-        $answer = rename( $fullFilename, $HighResfilename );
+        if($debug) $msg .= "= rename( $highresPath/$fullFilename, $uploadfilename $eol ";
+        $answer = rename( $fullFilename, $uploadfilename );
         if ( $debug )$msg .= "lets process upload dire$eol";
-        $attr = array( "uploadfilename" => $filename );
+        $attr = array( "uploadfilename" => $uploadfilename );
         if ( $debug )$msg .= rrwUtil::print_r( $attr, true, "parameters to upload" );
         $msg .= uploadProcessDire::upload( $attr );
         return $msg;
