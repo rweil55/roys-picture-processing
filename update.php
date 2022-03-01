@@ -104,7 +104,7 @@ class freeWheeling_DisplayUpdate {
             $update = array( $itemName => $newValue );
             $key = array( "filename" => $photoname );
             $cnt = $wpdbExtra->update( $rrw_photos, $update, $key );
-            $hisCom = "$itemName -- oldValue=> $newValue";
+            $hisCom = "$itemName -- $oldValue=> $newValue";
             $msg .= rrwUtil::InsertIntoHistory( $photoname, $hisCom );
             // rrw_photo has one field updated, deal with the related.
             if ( "copyright" == $itemName ) {

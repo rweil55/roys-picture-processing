@@ -1080,11 +1080,9 @@ class freewheeling_fixit {
             "$photoPath/{$newname}_cr.jpg" );
         $msg .= self::checkAndRename( "$thumbPath/{$photoname}_tmb.jpg",
             "$thumbPath/{$newname}_tmb.jpg" );
-        $msg .= self::checkAndRename( "$thumbPath/{$photoname}.jpg",
-            "$thumbPath/{$newname}.jpg" );
         $msg .= self::checkAndRename( "$highresPath/{$photoname}.jpg",
-            "$thumbPath/{$newname}.jpg" );
-        //  ------------------------------------------------- things in rrw_photos
+            "$highresPath/{$newname}.jpg" );
+       //  ------------------------------------------------- things in rrw_photos
         $sqlExist = "select photoname from $rrw_photos where photoname = '$newname'";
         $recExists = $wpdbExtra->get_resultsA( $sqlExist );
         if ( 0 != $wpdbExtra->num_rows )
