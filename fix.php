@@ -95,7 +95,10 @@ class freewheeling_fixit {
                     $msg .= self::reload( $attr );
                     break;
                 case "rename":
-                    $msg .= freewheeling_fixit::updateRename( "", "", "" );
+                    $msg .= freewheeling_fixit::updateRename( "", "" );
+                    break;
+                case "searchform":
+                    $msg .= freewheeling_fixit::searchform();
                     break;
                 case "SourceLoc":
                     $msg .= freewheeling_fixit::direonpOnFileMatch();
@@ -314,7 +317,7 @@ class freewheeling_fixit {
         $msg = "";
 
         $partial = "";
-  //      $msg .= "$eol addcreate_searchlink( $photoname ) $eol"; 
+        //      $msg .= "$eol addcreate_searchlink( $photoname ) $eol"; 
         foreach ( array( "_cr.", "_tmb.", "-s.", "-w." ) as $bad )
             if ( strpos( $photoname, $bad ) !== false ) {
                 $partial = str_replace( $bad, ".", $photoname );
@@ -345,7 +348,7 @@ class freewheeling_fixit {
         $filename = substr( $fullFilename, $iislash );
         $uploadfilename = "$uploadPath/$filename";
         // move the file
-        if($debug) $msg .= "= rename( $highresPath/$filename, $uploadfilename $eol ";
+        if ( $debug )$msg .= "= rename( $highresPath/$filename, $uploadfilename $eol ";
         $answer = rename( "$highresPath/$filename", $uploadfilename );
         if ( $debug )$msg .= "lets process upload dire$eol";
         $attr = array( "uploadfilename" => $filename );
@@ -1019,61 +1022,74 @@ class freewheeling_fixit {
         return $msg;
     }
 
-    private static function updateRename( $filename, $newname ) {
+    public static function updateRename( $photoname, $newname ) {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_photos, $rrw_keywords;
         global $photoPath, $thumbPath, $highresPath;
         $msg = "";
 
-        $debug = true;
+        $debug = false;
 
-        if ( empty( $filename ) ) {
-            $filename = trim( rrwUtil::fetchparameterString( "filename" ) );
+        if ( empty( $photoname ) ) {
+            $photoname = trim( rrwUtil::fetchparameterString( "photoname" ) );
             $newname = trim( rrwUtil::fetchparameterString( "newname" ) );
         }
-        if ( $debug )$msg .= "start updateRename( $filename, $newname ) $eol";
+        if ( $debug )$msg .= "start updateRename( $photoname, $newname ) $eol";
         if ( empty( $newname ) ) {
-            $msg .= "<form >
-        <input type='text' name='filename' diabled value='$filename' />
-        <input type='text' name='newname' value='$filename' />
+            $msg .= "<form acton='/fix/' method='post' >
+            Old Name: 
+        <input type='text' name='photoname' size='20' value='$photoname' />
+        New Name: 
+        <input type='text' name='newname' size='20' value='$photoname' />
+         &nbsp;
         <input type='submit' value='rename dataase/files' />
         <input type='hidden' name='task' value='rename' />
         </form>";
             return $msg;
-        } //  ---------------------------------------------- move three files
-        $msg .= self::checkAndRename( "$photoPath/${filename}.jpg",
-            "$photoPath/{$newname}jpg" );
-        $msg .= self::checkAndRename( "$photoPath/${filename}_cr.jpg",
+        }
+        // remove the .jpg
+        $photoname = str_ireplace( ".jpg", "", $photoname );
+        $newname = str_ireplace( ".jpg", "", $newname );
+        //  ---------------------------------------------- move three files
+        $msg .= self::checkAndRename( "$photoPath/${photoname}.jpg",
+            "$photoPath/{$newname}.jpg" );
+        $msg .= self::checkAndRename( "$photoPath/${photoname}_cr.jpg",
             "$photoPath/{$newname}_cr.jpg" );
-
-        $msg .= self::checkAndRename( "$thumbPath/{$filename}_tmb.jpg",
+        $msg .= self::checkAndRename( "$thumbPath/{$photoname}_tmb.jpg",
             "$thumbPath/{$newname}_tmb.jpg" );
-        $msg .= self::checkAndRename( "$thumbPath/{$filename}.jpg",
-            "#thumbPath/{$newname}.jpg" );
-
-        $msg .= self::checkAndRename( "$highresPath/{$filename}.jpg",
+        $msg .= self::checkAndRename( "$thumbPath/{$photoname}.jpg",
+            "$thumbPath/{$newname}.jpg" );
+        $msg .= self::checkAndRename( "$highresPath/{$photoname}.jpg",
             "$thumbPath/{$newname}.jpg" );
         //  ------------------------------------------------- things in rrw_photos
-        $sqlExist = "select filename from $rrw_photos where filename = '$newname'";
+        $sqlExist = "select photoname from $rrw_photos where photoname = '$newname'";
         $recExists = $wpdbExtra->get_resultsA( $sqlExist );
         if ( 0 != $wpdbExtra->num_rows )
             $msg .= "$errorBeg E#420 file $newname is already in the photo table,
                     not replaced $errorEnd";
         else {
-            $sqlupdate = "update $rrw_photos set filename = '$newname'
-                where filename ='$filename' ";
-            $rec = $wpdbExtra->query( $sqlupdate );
-            $sqlupdate = "update $rrw_keywords set keywordFilename = '$newname'
-                where keywordFilename ='$filename' ";
-            $rec = $wpdbExtra->query( $sqlupdate );
-            $msg .= "$sqlupdate $eol";
+            $sqlupdate = "update $rrw_photos set photoname = '$newname'
+                where photoname ='$photoname' ";
+            $cnt = $wpdbExtra->query( $sqlupdate );
+            $msg .= "updated $cnt records with $sqlupdate $eol";
+            $sqlupdate = "update $rrw_photos 
+                set filename = replace(filename, '$photoname', '$newname')
+                where filename ='%$photoname%' ";
+            $cnt = $wpdbExtra->query( $sqlupdate );
+            $msg .= "updated $cnt records with $sqlupdate $eol";
+
+            $sqlupdate = "update $rrw_keywords set keyword = '$newname'
+                where keyword ='$photoname' ";
+            $cnt = $wpdbExtra->query( $sqlupdate );
+            $msg .= "updated $cnt records $sqlupdate $eol";
         } // ------------------------------------------------  direonp
         $sqldireonp = "update $rrw_photos set direonp =
-                replace(direonp, '$filename', '$newname') where filename = '$newname'";
-        $rec = $wpdbExtra->query( $sqldireonp );
+                replace(direonp, '$photoname', '$newname') where photoname = '$newname'";
+        $cnt = $wpdbExtra->query( $sqldireonp );
+        $msg .= "updated $cnt records with $sqldireonp $eol";
         return $msg;
 
-    } // end  updateRename( $filename, $newname ) {
+    } // end  updateRename( $photoname, $newname ) {
 
     private static function checkAndRename( $fileFrom, $fileTo ) {
         global $eol;
@@ -1088,6 +1104,20 @@ class freewheeling_fixit {
         }
         rename( $fileFrom, $fileTo );
         return "$msg rename ($fileFrom, $fileTo) $eol";
+    }
+
+    public static function searchform() {
+        $msg = "
+<form action='/displayphotos/' method=POST>
+<input type='text' name='photoname' id='searchphoto' value='' />photo<br />
+<input type='text' name='directory' id='searchdire' value='' />directory<br />
+<input type='text' name='location' id='searchloc' value='' />location<br />
+<input type='text' name='people' id='searchpeople' value='' />people<br />
+<input type='text' name='source' id='searchsource' value='' />source<br />
+<input type='text' name='photographer' id='searchphotographer' value='' />photographer<br />
+<input type='submit' name='submit' id='submit' value='Search any' />
+</form>";
+        return $msg;
     }
 
     private static function direonpOnFileMatch() {

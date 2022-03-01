@@ -17,45 +17,44 @@
 ini_set( "display_errors", true );
 error_reporting( E_ALL | E_STRICT );
 
-use lsolesen\pel\Pel;
-use lsolesen\pel\PelConvert;
-use lsolesen\pel\PelCanonMakerNotes;
-use lsolesen\pel\PelDataWindow;
-use lsolesen\pel\PelEntryException;
-use lsolesen\pel\PelEntryAscii;
-use lsolesen\pel\PelEntryByte;
-use lsolesen\pel\PelEntryCopyright;
-use lsolesen\pel\PelEntryLong;
-use lsolesen\pel\PelEntryNumber;
-use lsolesen\pel\PelEntryRational;
-use lsolesen\pel\PelEntryShort;
-use lsolesen\pel\PelEntrySShort;
-use lsolesen\pel\PelEntrySRational;
-use lsolesen\pel\PelEntrySLong;
-use lsolesen\pel\PelEntryTime;
+use lsolesen\ pel\ Pel;
+use lsolesen\ pel\ PelConvert;
+use lsolesen\ pel\ PelCanonMakerNotes;
+use lsolesen\ pel\ PelDataWindow;
+use lsolesen\ pel\ PelEntryException;
+use lsolesen\ pel\ PelEntryAscii;
+use lsolesen\ pel\ PelEntryByte;
+use lsolesen\ pel\ PelEntryCopyright;
+use lsolesen\ pel\ PelEntryLong;
+use lsolesen\ pel\ PelEntryNumber;
+use lsolesen\ pel\ PelEntryRational;
+use lsolesen\ pel\ PelEntryShort;
+use lsolesen\ pel\ PelEntrySShort;
+use lsolesen\ pel\ PelEntrySRational;
+use lsolesen\ pel\ PelEntrySLong;
+use lsolesen\ pel\ PelEntryTime;
 //use lsolesen\pel\PelEntryUndefined;
-use lsolesen\pel\PelEntryUserComment;
-use lsolesen\pel\PelEntryUserCopyright;
-use lsolesen\pel\PelEntryVersion;
-use lsolesen\pel\PelEntryWindowsString;
-use lsolesen\pel\PelEntryUndefined;
-use lsolesen\pel\PelExif;
-use lsolesen\pel\PelFormat;
-use lsolesen\pel\PelIfd;
-use lsolesen\pel\PelIfdException;
-use lsolesen\pel\PelIllegalFormatException;
-use lsolesen\pel\PelInvalidDataException;
-use lsolesen\pel\PelJpeg;
-use lsolesen\pel\PelJpegComment;
-use lsolesen\pel\PelJpegContent;
-use lsolesen\pel\PelJpegInvalidMarkerException;
-use lsolesen\pel\PelJpegMarker;
-use lsolesen\pel\PelMakerNotes;
-use lsolesen\pel\PelTag;
-use lsolesen\pel\PelTiff;
-use lsolesen\pel\PelWrongComponentCountException;
+use lsolesen\ pel\ PelEntryUserComment;
+use lsolesen\ pel\ PelEntryUserCopyright;
+use lsolesen\ pel\ PelEntryVersion;
+use lsolesen\ pel\ PelEntryWindowsString;
+use lsolesen\ pel\ PelEntryUndefined;
+use lsolesen\ pel\ PelExif;
+use lsolesen\ pel\ PelFormat;
+use lsolesen\ pel\ PelIfd;
+use lsolesen\ pel\ PelIfdException;
+use lsolesen\ pel\ PelIllegalFormatException;
+use lsolesen\ pel\ PelInvalidDataException;
+use lsolesen\ pel\ PelJpeg;
+use lsolesen\ pel\ PelJpegComment;
+use lsolesen\ pel\ PelJpegContent;
+use lsolesen\ pel\ PelJpegInvalidMarkerException;
+use lsolesen\ pel\ PelJpegMarker;
+use lsolesen\ pel\ PelMakerNotes;
+use lsolesen\ pel\ PelTag;
+use lsolesen\ pel\ PelTiff;
+use lsolesen\ pel\ PelWrongComponentCountException;
 
-ini_set( "display_errors", true );
 $pel = "/home/pillowan/www-shaw-weil-pictures-dev/wp-content/plugins" .
 "/roys-picture-processng/pel-master/src";
 require_once "$pel/Pel.php";
@@ -293,42 +292,36 @@ function pushToImage( $filename, $item, $value ) {
                     jprg->load(data) failed" . $ex->getMessage() . $errorEnd );
         }
         if ( $debugExif )$msg .= "load worked  $eol";
-        $exif = $jpeg->getExif(); // get the desired data
-        if ( $debugExif )$msg .= "exif is loaded $eol";
-        if ( $exif == null ) {
-            if ( $debugExif )$msg .= println( 'No APP1 section found, added new.' );
-            $exif = new PelExif(); // create on
-            $jpeg->setExif( $exif ); // insert it into the memory version
-            /* We then create an empty TIFF structure in the APP1 section. */
-            $tiff = new PelTiff();
-            $exif->setTiff( $tiff );
-        } else {
-            if ( $debugExif )$msg .= println( 'Found existing APP1 section.$eol' );
-            $tiff = $exif->getTiff();
+        $pelExif = $jpeg->getExif(); // get the desired data
+        if ( $debugExif )$msg .= "pelExif is loaded $eol";
+        if ( $pelExif == null ) {
+            if ( $debugExif )$msg .= println( 'No exif found, create new.' );
+            $pelExif = new PelExif(); // create on
+            $jpeg->setExif( $pelExif ); // insert it into the memory version
         }
-        if ( $debugExif )$msg .= "get/et Tiff worked $eol";
-        /*
-         * TIFF data has a tree structure much like a file system. There is a
-         * root IFD (Image File Directory) which contains a number of entries
-         * and maybe a link to the next IFD. The IFDs are chained together
-         * like this, but some of them can also contain what is known as
-         * sub-IFDs. For our purpose we only need the first IFD, for this is
-         * where the image description should be stored.
-         */
-        $ifd0 = $tiff->getIfd();
-        if ( $ifd0 == null ) {
-            if ( $debugExif )$msg .= 'No IFD found, adding new. IFD0 $eol';
-            $ifd0 = new PelIfd( PelIfd::IFD0 );
-            $tiff->setIfd( $ifd0 );
+        $pelTiff = $pelExif->getTiff();
+        if ( $pelTiff == null ) {
+            if ( $debugExif )$msg .= println( 'No Tiff found, create new.' );
+            $pelTiff = new PelTiff();
+            $pelExif->setTiff( $pelTiff );
         }
+
+        $pelIfd0 = $pelTiff->getIfd();
+        if ( $pelIfd0 == null ) {
+            if ( $debugExif )$msg .= println( 'No ifdo found, create new.' );
+            $pelIfd0 = new PelIfd( PelIfd::IFD0 );
+            $pelTiff->setIfd( $pelIfd0 );
+        }
+        
         if ( $debugExif )$msg .= "compleated setup, get/adjust the data $eol ";
         $tag = convertText2EeixID( $item ); // item name into tag integer
-        if ( $debugExif )$msg .= "item is $item,, tag integer is $tag $eol ";
-        $textThing = $ifd0->getEntry( $tag );
+        if ( $debugExif )$msg .= "item is $item, tag integer is $tag (" .
+            dechex($tag) . ") $eol ";
+        $textThing = $pelIfd0->getEntry( $tag );
         if ( is_null( $textThing ) ) {
             if ( $debugExif )$msg .= "tag did not exist, create a new one $eol";
             $type = findTagtype( $tag );
-            if ( $debugExif )$msg .= println( "Adding new $tag of type $type (" . dechex( $type ) . ") with value $value" );
+            if ( $debugExif )$msg .= "Adding new $tag (" . dechex( $tag ) . ") of type $type  with value $value";
             switch ( $type ) {
                 case "Copyright":
                 case "copyright":
@@ -346,12 +339,16 @@ function pushToImage( $filename, $item, $value ) {
                     throw new Exception( "E#488 Unknown findtagtype for $tag" );
                     break;
             }
-            $ifd0->addEntry( $textThing );
-        } // we now kow there is a tag
-        if ( $debugExif )$msg .= "tag thing exits $eol";
-        $oldValue = $textThing->getValue();
-        if ( $debugExif )$msg .= rrwUtil::print_r( $oldValue, true, "found old value of $item" );
-        $textThing->setValue( $value );
+            $pelIfd0->addEntry( $textThing );
+            $textThing = $pelIfd0->getEntry( $tag );
+            $oldValue = "";
+        } else {
+            // update an existing tag
+            if ( $debugExif )$msg .= "tag thing exits $eol";
+            $oldValue = $textThing->getValue();
+            if ( $debugExif )$msg .= rrwUtil::print_r( $oldValue, true, "found old value of $item" );
+            $textThing->setValue( $value );
+        }
         $newValue = $textThing->getValue();
         if ( $debugExif )$msg .= rrwUtil::print_r( $newValue, true, " set new tag value of $item" );
         if ( $debugExif )$msg .= println( "Writing file $tmpfname $eol" );
@@ -748,7 +745,7 @@ function findTagtype( $tag ) {
         // foramt names in class PelFormat, 
         //   should match switch ( $type ) abour line 326
         case 0x8298: // copyright
-            //          return "Copyright";
+            return "Copyright";
         case 0x13B: // artist
         case 0x010e: // Image Description
         case 0x0132: // modify date

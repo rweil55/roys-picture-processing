@@ -132,14 +132,8 @@ class freewhilln_Administration_Pictures {
             ";
             //  -------------------------------------------  column 3
             $msg .= "</td><td style='vertical-align:top'>
-            <strong>Specilized search </strong>$eol 
-<form action='/displayphotos' method=POST>
-<input type='text' name='photo' id='searchphoto' value='' />photo<br />
-<input type='text' name='directory' id='searchdire' value='' />directory<br />
-<input type='text' name='location' id='searchloc' value='' />location<br />
-<input type='text' name='people' id='searchpeople' value='' />people<br />
-<input type='submit' name='submit' id='submit' value='Search any' />
-</form>";
+            <strong>Specilized search </strong>$eol " .
+                freewheeling_fixit::searchform();
             $msg .= "</td></tr></table>";
             //  -------------------------------------------  next section
             // trails photographers, keyword, display between
@@ -169,13 +163,10 @@ Display keywords with the photos <a href='/admin?setting=on' >On</a> &nbsp;
     repeat
     <input type='text' name='del2' id='del2'>
     <input type='submit' value='Delete the photo from database' >
-</form>
-<form method='post' action='/fix' >
-     rename photo <input type='text' name='filename' size='140' value='$photo' />
-    <input type='text' name='newname' size='140' value='$photo' />
-    <input type='submit' value='rename dataase/files' />
-    <input type='hidden' name='task' value='rename' />
-</form><br />
+</form>";
+            $msg .= freewheeling_fixit::updateRename("","");
+            $msg .= "
+            <br />
     [ <a href='/fix/?task=highresmissing' > high resolution image
                                             missing </a> ]  
     [ <a href='/fix/?task=photomissing' > photo information missing</a> ]  

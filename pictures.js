@@ -22,6 +22,9 @@ function changed() {
             seperator = " or ";
         }
     }
+    console.log ("count " + cntItems + ", " + selectDisplay);
+    if (0 == cntItems)
+        return;
     if (1 < cntItems) 
         sqlSelectDetail = "( " + sqlSelectDetail + ")"; // multiple selected
       

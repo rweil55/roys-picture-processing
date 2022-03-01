@@ -70,6 +70,7 @@ class freewheeling_displayPhotos {
         $msg = "";
 
         if ( $debug ) print "query " . $_SERVER[ 'QUERY_STRING' ] . $eol;
+        if ( $debug ) print rrwUtil::print_r( $_POST, true, "_POST" );
         $searchdropdown = rrwPara::String( "searchdropdown", $attr );
         if ( $debug ) print "found searchdropdown of $searchdropdown $eol";
         if ( strpos( $searchdropdown, "random" ) !== false ) {
@@ -119,7 +120,7 @@ class freewheeling_displayPhotos {
         $sql = "select photoname from $rrw_photos 
                 where $where 
                 and photostatus = 'use'  ";
-       if ( $debug ) print "$sql $eol ";
+        if ( $debug ) print "$sql $eol ";
         if ( empty( $where ) )
             return ""; // no searchitems found
         if ( $debug ) print "Final sql = $sql $eol ";
