@@ -11,46 +11,49 @@
  * Text Domain: Roys-picture-processng
  * Domain Path: /translation
  
-  * Version: 2.0.53
+  * Version: 2.0.54
  */
 // disable direct access
 ini_set( "display_errors", true );
 error_reporting( E_ALL | E_STRICT );
 
-use lsolesen\ pel\ Pel;
-use lsolesen\ pel\ PelConvert;
-use lsolesen\ pel\ PelCanonMakerNotes;
-use lsolesen\ pel\ PelDataWindow;
-use lsolesen\ pel\ PelEntryAscii;
-use lsolesen\ pel\ PelEntryByte;
-use lsolesen\ pel\ PelEntryCopyright;
-use lsolesen\ pel\ PelEntryLong;
-use lsolesen\ pel\ PelEntryNumber;
-use lsolesen\ pel\ PelEntryRational;
-use lsolesen\ pel\ PelEntryShort;
-use lsolesen\ pel\ PelEntrySRational;
-use lsolesen\ pel\ PelEntrySLong;
-use lsolesen\ pel\ PelEntryTime;
+use lsolesen\pel\Pel;
+use lsolesen\pel\PelConvert;
+use lsolesen\pel\PelCanonMakerNotes;
+use lsolesen\pel\PelDataWindow;
+use lsolesen\pel\PelEntryException;
+use lsolesen\pel\PelEntryAscii;
+use lsolesen\pel\PelEntryByte;
+use lsolesen\pel\PelEntryCopyright;
+use lsolesen\pel\PelEntryLong;
+use lsolesen\pel\PelEntryNumber;
+use lsolesen\pel\PelEntryRational;
+use lsolesen\pel\PelEntryShort;
+use lsolesen\pel\PelEntrySShort;
+use lsolesen\pel\PelEntrySRational;
+use lsolesen\pel\PelEntrySLong;
+use lsolesen\pel\PelEntryTime;
 //use lsolesen\pel\PelEntryUndefined;
-use lsolesen\ pel\ PelEntryUserComment;
-use lsolesen\ pel\ PelEntryUserCopyright;
-use lsolesen\ pel\ PelEntryVersion;
-use lsolesen\ pel\ PelEntryWindowsString;
-use lsolesen\ pel\ PelEntryUndefined;
-use lsolesen\ pel\ PelExif;
-use lsolesen\ pel\ PelFormat;
-use lsolesen\ pel\ PelIfd;
-use lsolesen\ pel\ PelIfdException;
-use lsolesen\ pel\ PelIllegalFormatException;
-use lsolesen\ pel\ PelInvalidDataException;
-use lsolesen\ pel\ PelJpeg;
-use lsolesen\ pel\ PelJpegComment;
-use lsolesen\ pel\ PelJpegContent;
-use lsolesen\ pel\ PelJpegInvalidMarkerException;
-use lsolesen\ pel\ PelJpegMarker;
-use lsolesen\ pel\ PelMakerNotes;
-use lsolesen\ pel\ PelTag;
-use lsolesen\ pel\ PelTiff;
+use lsolesen\pel\PelEntryUserComment;
+use lsolesen\pel\PelEntryUserCopyright;
+use lsolesen\pel\PelEntryVersion;
+use lsolesen\pel\PelEntryWindowsString;
+use lsolesen\pel\PelEntryUndefined;
+use lsolesen\pel\PelExif;
+use lsolesen\pel\PelFormat;
+use lsolesen\pel\PelIfd;
+use lsolesen\pel\PelIfdException;
+use lsolesen\pel\PelIllegalFormatException;
+use lsolesen\pel\PelInvalidDataException;
+use lsolesen\pel\PelJpeg;
+use lsolesen\pel\PelJpegComment;
+use lsolesen\pel\PelJpegContent;
+use lsolesen\pel\PelJpegInvalidMarkerException;
+use lsolesen\pel\PelJpegMarker;
+use lsolesen\pel\PelMakerNotes;
+use lsolesen\pel\PelTag;
+use lsolesen\pel\PelTiff;
+use lsolesen\pel\PelWrongComponentCountException;
 
 ini_set( "display_errors", true );
 $pel = "/home/pillowan/www-shaw-weil-pictures-dev/wp-content/plugins" .
@@ -65,6 +68,7 @@ require_once "$pel/PelCanonMakerNotes.php";
 require_once "$pel/PelConvert.php";
 require_once "$pel/PelDataWindow.php";
 require_once "$pel/PelEntry.php";
+require_once "$pel/PelEntryException.php";
 require_once "$pel/PelEntryNumber.php";
 require_once "$pel/PelEntryAscii.php";
 require_once "$pel/PelEntryByte.php";
@@ -74,6 +78,7 @@ require_once "$pel/PelEntryRational.php";
 require_once "$pel/PelEntrySLong.php";
 require_once "$pel/PelEntrySRational.php";
 require_once "$pel/PelEntryShort.php";
+require_once "$pel/PelEntrySShort.php";
 require_once "$pel/PelEntryTime.php";
 require_once "$pel/PelEntryShort.php";
 require_once "$pel/PelEntryUndefined.php";
@@ -91,6 +96,7 @@ require_once "$pel/PelJpegComment.php";
 require_once "$pel/PelJpegMarker.php";
 require_once "$pel/PelTag.php";
 require_once "$pel/PelTiff.php";
+require_once "$pel/PelWrongComponentCountException.php";
 // commonly used rutines
 require_once "freewheelingeasy-wpdpExtra.php";
 require_once "rrw_util_inc.php";
@@ -322,8 +328,7 @@ function pushToImage( $filename, $item, $value ) {
         if ( is_null( $textThing ) ) {
             if ( $debugExif )$msg .= "tag did not exist, create a new one $eol";
             $type = findTagtype( $tag );
-            if ( $debugExif )$msg .= println( "Adding new $tag of type $type (" .
-                                     dechex($type) . ") with value $value" );
+            if ( $debugExif )$msg .= println( "Adding new $tag of type $type (" . dechex( $type ) . ") with value $value" );
             switch ( $type ) {
                 case "Copyright":
                 case "copyright":
@@ -347,10 +352,10 @@ function pushToImage( $filename, $item, $value ) {
         $oldValue = $textThing->getValue();
         if ( $debugExif )$msg .= rrwUtil::print_r( $oldValue, true, "found old value of $item" );
         $textThing->setValue( $value );
-         $newValue = $textThing->getValue();
-       if ( $debugExif )$msg .= rrwUtil::print_r($newValue, true, " set new tag value of $item" );
+        $newValue = $textThing->getValue();
+        if ( $debugExif )$msg .= rrwUtil::print_r( $newValue, true, " set new tag value of $item" );
         if ( $debugExif )$msg .= println( "Writing file $tmpfname $eol" );
-       $fileInMemory->saveFile( $tmpfname );
+        $fileInMemory->saveFile( $tmpfname );
         $jpeg->saveFile( $tmpfname );
         $sizeOld = filesize( $filename );
         $sizeNew = filesize( $tmpfname );
@@ -377,7 +382,7 @@ function pushToImage( $filename, $item, $value ) {
         $itemname = str_replace( "_cr", "", $itemname );
         $itemname = str_replace( "_tmb", "", $itemname );
         // copyright and comment may be stored as an arrray
-        
+
         $comment = "$basename -- $oldValue -> $newValue";
         $msg .= rrwUtil::InsertIntoHistory( $itemname, $comment );
         if ( $debugExif )$msg .= "History writin $comment $eol ----- $eol";
