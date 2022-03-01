@@ -41,7 +41,7 @@ class uploadProcessDire {
                         break;
                     if ( is_dir( "$uploadPath/$uploadfilename" ) )
                         continue; // ignore directories
-                    if ( $debug ) $msg .= "found $uploadfilename in the diretory search $eol";
+                    if ( $debug )$msg .= "found $uploadfilename in the diretory search $eol";
                     $msg .= self::ProcessOneFile( $uploadfilename );
                     $cntUploaded++;
                     break;
@@ -49,7 +49,7 @@ class uploadProcessDire {
 
             } // end  if (! empty($uploadfilename))
             if ( 1 == $cntUploaded ) {
-                $photoname = str_replace (".jpg", "", $uploadfilename);
+                $photoname = str_replace( ".jpg", "", $uploadfilename );
                 if ( $debug )$msg .= "DisplayOne( array( \"photoname\" => $photoname ) )";
                 $msg .= freeWheeling_DisplayOne::DisplayOne(
                     array( "photoname" => $photoname ) );
@@ -113,14 +113,25 @@ class uploadProcessDire {
             );
             $wpdbExtra->insert( $rrw_photos, $insertData );
         }
-        
+
         $sqlRec = "select * from $rrw_photos 
                         where filename = '$photoname'";
         $recs = $wpdbExtra->get_resultsA( $sqlRec );
         $recOld = $recs[ 0 ];
-        $photographer = $recOld["photographer"];
-        
-        $msg .= self::MakeImakeImages( $sourceFile, $photographer ) ;
+        $photographer = $recOld[ "photographer" ];
+        if ( empty( $photographer ) ) {
+            $photographer = "Mary Shaw";
+            $sqlArtist = "update $rrw_photos set Photographer = '$photographer'
+                        where photoname = '$photoname' ";
+            $cnt = $wpdbExtra->query( $sqlArtist );
+            $sqlRec = "select * from $rrw_photos 
+                        where filename = '$photoname'";
+            $recs = $wpdbExtra->get_resultsA( $sqlRec );
+            $recOld = $recs[ 0 ];
+
+        }
+
+        $msg .= self::MakeImakeImages( $sourceFile, $photographer );
 
         // meta date exists make it consistant with the EXIF
         $msg .= freewheeling_fixit::fixAssumeDatabaseCorrect( $recOld );
@@ -162,7 +173,6 @@ class uploadProcessDire {
                 $msg .= "fullFilePhoto : $fullFilePhoto $eol";
             }
 
-            //$msg .= "rename( $sourceFile, $FullfileHighRes )";
             if ( !rename( $sourceFile, $FullfileHighRes ) ) {
                 throw new Exception( " $errorBeg $msg E#813 while attempting 
                 move ($sourceFile, $FullfileHighRes) $errorEnd" );
@@ -228,7 +238,8 @@ class uploadProcessDire {
 
                 $im_src->writeImage( $fullFilePhoto );
                 $im_src->destroy();
-                //         $msg .= "<img src='$photoUrl/$filename" . "_cr.jpg'/>";
+                if ($debugImageWork) $msg .= "made image $photoUrl/$filename $eol
+                <img src='$photoUrl/$filename" . "_cr.jpg'/> ";
                 return $msg;
 
             } else {
