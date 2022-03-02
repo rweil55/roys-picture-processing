@@ -107,6 +107,9 @@ class freewheeling_fixit {
                     $msg .= freewheeling_fixit::direonpOnFileMatch();
                     $msg .= freewheeling_fixit::updateDiretoryCloseFileMatch();
                     break;
+                case "sourceset":
+                    $msg .= freewheeling_fixit::SourceSetUseFromPhotos();
+                    break;
                 case "sourcepush":
                     $msg .= freewheeling_fixit::sourcePush();
                     break;
@@ -304,7 +307,7 @@ class freewheeling_fixit {
                 $msg .= "<a href='/display-one-photo?photoname=$highresTest' >
                 $highresTest</a> is not in the photo table,
                 but we have a high resolution image ";
-                $msg .= " [ " . self::updateeRenameLink($highresTest) . " ] ";
+                $msg .= " [ " . self::updateeRenameLink( $highresTest ) . " ] ";
                 $msg .= " [ " . self::addcreate_searchlink( $filename ) . " ] ";
                 $cntFound++;
             }
@@ -1027,7 +1030,7 @@ class freewheeling_fixit {
         return $msg;
     }
     public static function updateRenameform() {
-        return  "<form acton='/fix/' method='post' >
+        return "<form acton='/fix/' method='post' >
             Old Name: 
         <input type='text' name='photoname' size='20' value='' />
         New Name: 
@@ -1037,7 +1040,7 @@ class freewheeling_fixit {
         <input type='hidden' name='task' value='rename' />
         </form>";
     }
-    public static function updateeRenameLink($photoname = "") {
+    public static function updateeRenameLink( $photoname = "" ) {
         return "<a href='/fix/?task=rename&photoname=$photoname.jpg&newname=' > rename $photoname</a>";
     }
     public static function updateRename( $photoname = "", $newname = "" ) {
@@ -1082,7 +1085,7 @@ class freewheeling_fixit {
             "$thumbPath/{$newname}_tmb.jpg" );
         $msg .= self::checkAndRename( "$highresPath/{$photoname}.jpg",
             "$highresPath/{$newname}.jpg" );
-       //  ------------------------------------------------- things in rrw_photos
+        //  ------------------------------------------------- things in rrw_photos
         $sqlExist = "select photoname from $rrw_photos where photoname = '$newname'";
         $recExists = $wpdbExtra->get_resultsA( $sqlExist );
         if ( 0 != $wpdbExtra->num_rows )
@@ -1311,16 +1314,51 @@ class freewheeling_fixit {
 
     private static function forceOneExif() {
         global $eol, $errorBeg, $errorEnd;
-        global $wpdpExtra, $rrw_source;
+        global $wpdbExtra, $rrw_source;
 
         $photoname = $rrwPara::String( "photoname" );
         $sql = "select * from $rrw_photo where filename = '$photoname'";
-        $recs = $wpdpExtra->get_resultsA( $sql );
-        if ( 1 != $wpdpExtra->num_recs )
+        $recs = $wpdbExtra->get_resultsA( $sql );
+        if ( 1 != $wpdbExtra->num_recs )
             throw new Exception( "$errorBeg E#674 wrong number of records found, or not found $errorEnd $sql $eol" );
         $msg .= fixAssumeExifCorrect( $recs[ 0 ] );
         return $msg;
     }
+    private static function SourceSetUseFromPhotos() {
+        global $eol, $errorBeg, $errorEnd;
+        global $wpdbExtra, $rrw_source, $rrw_photos;
+        $msg = "";
+
+        $bads = self::BadPhotonameEndings();
+        array_push( $bads, "" );
+        foreach ( $bads as $dummy => $bad1 ) {
+            $bad1 = str_replace( ".", "", $bad1 );
+            $sqlMatch = "select searchname from $rrw_photos
+                join $rrw_source on replace(searchname, '$bad1', '') = 
+                replace(photoname, '-s','') ";
+            $msg .= "$sqlMatch $eol";
+            $cnt = $wpdbExtra->query( $sqlMatch );
+            $msg .= "there are $cnt records where searchname = photoname $eol";
+            $recMatchs = $wpdbExtra->get_resultsA( $sqlMatch );
+            foreach ( $recMatchs as $recMatch ) {
+                $name = $recMatch[ 'searchname' ];
+                $wpdbExtra->query( "update $rrw_source set sourcestatus = 'use'
+                            where searchname = '$name' " );
+            } //  end foreach recmatch
+        } // end foreach bad
+        // how did we do
+        $sqlResults = "select count(*) cnt, sourcestatus from $rrw_source 
+                            group by sourcestatus ";
+        $recStatuss = $wpdbExtra->get_resultsA( $sqlResults );
+        $msg .= "<table";
+        foreach ( $recStatuss as $recStatus ) {
+            $cnt = $recStatus[ 'cnt' ];
+            $sourcestatus = $recStatus[ 'sourcestatus' ];
+            $msg .= rrwFormat::CellRow( $sourcestatus, $cnt );
+        }
+        $msg .= "</table";
+        return $msg;
+    } // end SourceSetUseFromPhotos
 
     private static function forceDatabse2matchexif() {
         global $eol, $errorBeg, $errorEnd;

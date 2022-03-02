@@ -1,6 +1,6 @@
 <?php
 
-global $wpdbExtra, $rrw_photos, $rrw_keywords, $rrw_trails;
+global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords, $rrw_trails;
 global $rrw_photographer, $rrw_photographers, $rrw_access, $rrw_history;
 global $rrw_digipix;
 global $eol, $errorBeg, $errorEnd;
@@ -29,6 +29,8 @@ try {
     $tablePrefix = $wpdbExtra->prefix . "0";
     $rrw_access = $tablePrefix . "access";
     $rrw_photos = $tablePrefix . "photos";
+    $rrw_source = $tablePrefix . "source";
+    
     $rrw_keywords = $tablePrefix . "keywords";
     $rrw_photographers = $tablePrefix . "photographers";
     $rrw_trails = $tablePrefix . "trails";
