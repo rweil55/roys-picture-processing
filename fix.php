@@ -648,7 +648,7 @@ class freewheeling_fixit {
         $msg .= "$answer keyword record, &nbsp; ";
 
         $sqlreject = "update $rrw_digipix set sourcestatus = 'reject' 
-                        where sourceFilename = '$filename'";
+                        where searchname = '$filename'";
         $answer = $wpdbExtra->query( $sqlreject );
         $msg .= "Updated $answer digipix record, &nbsp; ";
 
