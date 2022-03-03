@@ -62,6 +62,7 @@ class rrwPictures_searchBox {
             [ <a href='/upload' target='admin' >process upload </a> ]
             [ <a href='$exifUrl' target='one' >EXIF description </a> ]
             [ <a href='$exifList' target='one' >EXIF description </a> ]
+            [ <a href='/display-one-photo/?photoname=nokey'  >no key words </a> ]
             
             </p>\n ";
         } else
