@@ -11,7 +11,7 @@
  * Text Domain: Roys-picture-processng
  * Domain Path: /translation
  
-  * Version: 2.0.57
+  * Version: 2.0.58
  */
 // disable direct access
 ini_set( "display_errors", true );
@@ -370,8 +370,10 @@ function pushToImage( $filename, $item, $value ) {
                 rename( $tmpfname, $filename );
                 if ( $debugExif )$msg .= "rename( $tmpfname, $filename ) $eol";
             }
-            throw new Exception( " $msg E#461 old size is $sizeOld, new size is $sizeNew,
-                difference is more than 500 please check$eol file not written $eol" );
+            throw new Exception( " $msg E#461 old size is $sizeOld, 
+                new size is $sizeNew,
+                difference  (" . $zizenew-$sizeold , ") 
+                is more than 500 please check$eol file not written $eol" );
         }
         $ii = strrpos( $filename, "/" );
         $basename = substr( $filename, $ii );

@@ -829,7 +829,7 @@ class freewheeling_fixit {
 
     public static function fileLike( $attr ) {
         global $eol;
-        global $wpdbExtra, $rrw_digipix;
+        global $wpdbExtra, $rrw_digipix, $rrw_photos;
         global $highresUrl, $highresPath;
         $msg = "";
 
@@ -839,11 +839,20 @@ class freewheeling_fixit {
             $highresfilename = "$partial.jpg";
         else
             $highresfilename = "$photoname.jpg";
+        $sqlimage = "select * from $rrw_photos where phooname = '$photoname'";
+        $recs = $wpdbExtra->get_resultsA($sqlimage);
+        if (1 == $wpdbExtra->num_rows) {
+            $source = "<strong>Source Directory<?strong>" .  rec[0]["DieonP"] . $eol;
+        } else {
+            $source = "";
+        }
         $highresfilename = str_replace( "._cr", "", $highresfilename );
         $FullFilwname = "$highresPath/$highresfilename";
         if ( file_exists( $FullFilwname ) ) {
             $imageSize = getimagesize( $FullFilwname );
-            $msg .= "<img src='$highresUrl/$highresfilename' width='300px' /> &nbsp; Current high reslution image" . $imageSize[ 3 ] . $eol .
+            $msg .= "<img src='$highresUrl/$highresfilename' width='300px' /> &nbsp;
+            <a href='/display-one-photo?photoname=$photoname' >show image details</a>
+            Current high reslution image" . $imageSize[ 3 ] . $source . $eol .
             $photoname;
 
         }
