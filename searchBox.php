@@ -29,7 +29,7 @@ class rrwPictures_searchBox {
         // ---------------------------------------  detail selection
 
         $sql = "select ' Any Detail' selection, 'Any Detail' val 
-                union  select  'random', ' random photos (21)ccc' 
+                union  select  'random_21', ' random photos (21)' 
                 union  select keyword, concat(keyword, ' (', count(*), ')') cnt 
                         from $rrw_keywords group by keyword ";
         $msg .= rrwPictures_searchBox::pictureDisplayDropDownsql( $wpdbExtra, $rrw_keywords, "selection", $sql, "" );

@@ -35,11 +35,11 @@ class freewheeling_fixit {
                 case "listing":
                     $msg .= freewheeling_fixit::listing();
                     return $msg;
-                default:
-                    break;
-                case "compareexif":
+                 case "compareexif":
                     $msg .= self::displayExif( $attr );
                     return $msg;
+                default:
+                    break;
             }
             $msg .= self::checkForLogIn( "fix task '$task' " );
 
@@ -614,7 +614,7 @@ class freewheeling_fixit {
     private static function deletePhoto() {
 
         global $eol, $errorBeg, $errorEnd;
-        global $wpdbExtra, $rrw_photos, $rrw_digipix, $rrw_keywords;
+        global $wpdbExtra, $rrw_photos, $rrw_digipix, $rrw_source, $rrw_keywords;
         global $photoPath, $thumbPath, $highresPath, $rejectPath;
         $msg = "";
 
@@ -651,7 +651,7 @@ class freewheeling_fixit {
                         where sourceFilename = '$filename'";
         $answer = $wpdbExtra->query( $sqlreject );
         $msg .= "Updated $answer digipix record, &nbsp; ";
-        
+
         $sqlreject = "update $rrw_source set sourcestatus = 'reject' 
                         where sourceFilename = '$filename'";
         $answer = $wpdbExtra->query( $sqlreject );
@@ -838,6 +838,12 @@ class freewheeling_fixit {
         global $highresUrl, $highresPath;
         $msg = "";
 
+        $host = $_SERVER[ 'HTTP_HOST' ];
+        if ( strpos( $host, "dev" ) !== false )
+            $dev = "&dev=1";
+        else
+            $dev = "&dev=0";
+
         $partial = rrwUtil::fetchparameterString( "partial", $attr );
         $photoname = rrwPara::String( "photoname" );
         if ( empty( $photoname ) )
@@ -847,7 +853,7 @@ class freewheeling_fixit {
         $sqlimage = "select * from $rrw_photos where photoname = '$photoname'";
         $recs = $wpdbExtra->get_resultsA( $sqlimage );
         if ( 1 == $wpdbExtra->num_rows ) {
-            $source = "<strong>Source Directory<?strong>" . rec[ 0 ][ "DieonP" ] . $eol;
+            $source = "<strong>Source Directory<?strong>" . $recs[ 0 ][ "DieonP" ] . $eol;
         } else {
             $source = "";
         }
@@ -896,37 +902,37 @@ class freewheeling_fixit {
             foreach ( $recs as $rec ) {
                 $color = rrwUtil::colorswap( $color );
 
-                $photoname = $rec[ "sourcefilename" ];
-                $ext = substr( $photoname, -3 );
+                $newphotoname = $rec[ "sourcefilename" ];
+                $ext = substr( $newphotoname, -3 );
                 if ( "PCD" == $ext )
                     continue;
                 $direonp = $rec[ "sourcepath" ];
                 $aspect = $rec[ "sourceaspect" ];
                 $link = " [ <a href='/fix/?task=sourcepush&photoname=$photoname"
-                    . "&sourcepath=$direonp' > update sourcename</a> ] ";
+                    . "&sourcepath=$direonp$dev' > update sourcename</a> ] ";
                 if ( strncmp( "d:", $direonp, 2 ) == 0 ) {
                     $first = str_replace( "/", "&nbsp; / &nbsp;", $direonp ) .
-                    "&nbsp; " . $photoname;
+                    "&nbsp; " . $newphotoname;
                     $sourcefile = "d:" . substr( $direonp, 2 );
                     $sourceuploadLink = " ] [
-                    <a href='http://127.0.0.1/pict/sub.php?task=pushtoupload" .
-                    "&sourcefile=$sourcefile/$photoname'  >
+                    <a href='http://127.0.0.1/pict/sub.php?task=pushtoupload$dev" .
+                    "&sourcefile=$sourcefile/$newphotoname&photname=$photoname'  >
                     create entry </a> ";
                 } else {
-                    $first = "$photoname";
+                    $first = "$newphotoname";
                     $sourceuploadLink = "";
                 }
 
                 $imgFile = "http://127.0.0.1" . substr( $direonp, 2 ) .
-                "/$photoname";
+                "/$newphotoname";
                 $direonpDisplay = "<a href='$imgFile' target='127'>$direonp</a>";
                 $direonpDisplay .= $sourceuploadLink;
                 $msg .= rrwFormat::CellRow( $color, $first, $aspect,
                     $direonpDisplay, $link );
-                $display .= "<div class='rrwDinoItem'>
+                $display .= "<div class='rrwDinoItem' 
                         <a href=''><img src='$imgFile' width='300' /></a><br />
                         $direonp<br />
-                        $photoname - $aspect<br />
+                        $newphotoname - $aspect<br />
                         </div>";
             }
             $msg .= "</table>\n";

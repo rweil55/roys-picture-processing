@@ -101,6 +101,7 @@ h3 {
     white-space: nowrap;
     list-style-type: none;
     text-overflow: clip;
+    overflow-wrap: break-word;
     background-color: white;
     grid-column-gap: 1px;
 }
