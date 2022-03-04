@@ -355,7 +355,7 @@ class freewheeling_fixit {
         if ( empty( $fullFilename ) )
             throw new Exception( "$msg $errorBeg E#669 missing filename $errorEnd" );
         $iislash = strrpos( $fullFilename, "/" );
-        $filename = substr( $fullFilename, $iislash );
+        $filename = substr( $fullFilename, $iislash +1 );
         $uploadfilename = "$uploadPath/$filename";
         // move the file
         if ( $debug )$msg .= "= rename( $highresPath/$filename, $uploadfilename $eol ";

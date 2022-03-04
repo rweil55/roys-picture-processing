@@ -25,6 +25,7 @@ class uploadProcessDire {
 
             if ( !empty( $uploadfilename ) ) {
                 $msg .= self::ProcessOneFile( $uploadfilename );
+                $msg .= self::ProcessOneFile( $uploadfilename );
                 $cntUploaded = 1;
             } else {
                 // not a single file request. walk the directory
@@ -72,7 +73,7 @@ class uploadProcessDire {
 
         if ( $debug )$msg .= "$entry, ";
         $sourceFile = "$uploadPath/$entry"; // in uplosd dire
-        // ------new ----------------------------  validate filename
+        // ------new ----------------------------  validate photoname
 
         $mime_type = mime_content_type( $sourceFile );
         switch ( $mime_type ) {
@@ -86,6 +87,7 @@ class uploadProcessDire {
                         it should .jpg, " /*.png or .gif"*/ );
         }
         $photoname = substr( $entry, 0, strlen( $entry ) - 4 );
+        $photoname = strtolower($photname);
         if ( $debug )$msg .= "photoname just aftercreate $photoname $eol";
         $pregResults = preg_match( "/[-a-zA-z0-9 _]*/",
             $photoname, $matchs );
@@ -95,12 +97,12 @@ class uploadProcessDire {
         // --------------------------- deal with database entry
         if ( $debug )$msg .= "photoname just matchs $photoname $eol";
         $sqlRec = "select * from $rrw_photos 
-                        where filename = '$photoname'";
+                        where photoname = '$photoname'";
         $recs = $wpdbExtra->get_resultsA( $sqlRec );
         if ( 1 == $wpdbExtra->num_rows ) {
             // have meta data
             $sqldate = "update $rrw_photos set uploaddate = now() 
-                                where filename ='$photoname' ";
+                                where photoname ='$photoname' ";
             $cnt = $wpdbExtra->query( $sqldate );
         } else {
             // no meta data
@@ -109,13 +111,13 @@ class uploadProcessDire {
                 "filename" => $photoname,
                 "highresfilename" => $entry,
                 "uploaddate" => date( "Y-m-d H:i" ),
-                /* all others defalt to blank */
+                /* all others default to blank */
             );
             $wpdbExtra->insert( $rrw_photos, $insertData );
         }
 
         $sqlRec = "select * from $rrw_photos 
-                        where filename = '$photoname'";
+                        where photoname = '$photoname'";
         $recs = $wpdbExtra->get_resultsA( $sqlRec );
         $recOld = $recs[ 0 ];
         $photographer = $recOld[ "photographer" ];
@@ -125,7 +127,7 @@ class uploadProcessDire {
                         where photoname = '$photoname' ";
             $cnt = $wpdbExtra->query( $sqlArtist );
             $sqlRec = "select * from $rrw_photos 
-                        where filename = '$photoname'";
+                        where photoname = '$photoname'";
             $recs = $wpdbExtra->get_resultsA( $sqlRec );
             $recOld = $recs[ 0 ];
 
