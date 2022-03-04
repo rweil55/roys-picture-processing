@@ -19,12 +19,13 @@ class uploadProcessDire {
             if ( $debug )$msg .= "uploadProcessDire ($uploadPath) $eol";
             include "setConstants.php";
 
-            $uploadfilename = rrwPara::String( "uploadfilename", $attr );
-            if ( $debug )$msg .= "found $uploadfilename in the calling parameters $eol";
+            $uploadshortname = rrwPara::String( "uploadshortname", $attr );
+            if ( $debug )$msg .= "found $uploadshortname in the calling parameters $eol";
 
 
-            if ( !empty( $uploadfilename ) ) {
-                $msg .= self::ProcessOneFile( $uploadfilename );
+            if ( !empty( $uploadshortname ) ) {
+                $msg .= self::ProcessOneFile( $uploadshortname );
+                $photoname = strToLower($uploadshortname);
                 $cntUploaded = 1;
             } else {
                 // not a single file request. walk the directory
@@ -35,22 +36,23 @@ class uploadProcessDire {
                 if ( $debug )$msg .= "Entries:$eol";
                 $cnt = 0;
                 $cntUploaded = 0;
-                while ( false !== ( $uploadfilename = readdir( $handle ) ) ) {
+                while ( false !== ( $uploadshortname = readdir( $handle ) ) ) {
                     $cnt++;
                     if ( $cnt > 600 )
                         break;
-                    if ( is_dir( "$uploadPath/$uploadfilename" ) )
+                    if ( is_dir( "$uploadPath/$uploadshortname" ) )
                         continue; // ignore directories
-                    if ( $debug )$msg .= "found $uploadfilename in the diretory search $eol";
-                    $msg .= self::ProcessOneFile( $uploadfilename );
+                    if ( $debug )$msg .= "found $uploadshortname in the diretory search $eol";
+                    $msg .= self::ProcessOneFile( $uploadshortname );
+                    $photoname = strToLower($uploadshortname);
                     $cntUploaded++;
                     break;
                 } // end while
 
-            } // end  if (! empty($uploadfilename))
+            } // end  if (! empty($uploadentry))
             if ( 1 == $cntUploaded ) {
-                $photoname = str_replace( ".jpg", "", $uploadfilename );
-                if ( $debug )$msg .= "DisplayOne( array( \"photoname\" => $photoname ) )";
+                $photoname = substr($photoname, 0, -4 );
+                if ( $debug )$msg .= "DisplayOne( array( \"photoname\" => $photoname ) ) $eol";
                 $msg .= freeWheeling_DisplayOne::DisplayOne(
                     array( "photoname" => $photoname ) );
             } else {
@@ -109,7 +111,7 @@ class uploadProcessDire {
             $insertData = array(
                 "photoname" => $photoname,
                 "filename" => $photoname,
-                "highresfilename" => $entry,
+                "highresShortname" => $entry,
                 "uploaddate" => date( "Y-m-d H:i" ),
                 /* all others default to blank */
             );
@@ -171,10 +173,11 @@ class uploadProcessDire {
             if ( $debug )$msg .= rrwUtil::print_r( $fileSplit, true, "the file split" );
             $extension = $fileSplit[ 'extension' ];
             $basename = $fileSplit[ 'basename' ];
-            $filename = $fileSplit[ 'filename' ];
+            $photoname = $fileSplit[ 'filename' ];
+            $photoname = strToLower($photoname);
             $FullfileHighRes = "$highresPath/$basename";
-            $fullfileThumb = "$thumbPath/$filename" . "_tmb.jpg";
-            $fullFilePhoto = "$photoPath/$filename" . "_cr.jpg";
+            $fullfileThumb = "$thumbPath/$photoname" . "_tmb.jpg";
+            $fullFilePhoto = "$photoPath/$photoname" . "_cr.jpg";
             if ( $debug ) {
                 $msg .= "base name : " . $fileSplit[ 'basename' ] . $eol;
                 $msg .= "extension : " . $fileSplit[ 'extension' ] . $eol;
@@ -248,8 +251,8 @@ class uploadProcessDire {
 
                 $im_src->writeImage( $fullFilePhoto );
                 $im_src->destroy();
-                if ( $debugImageWork )$msg .= "made image $photoUrl/$filename $eol
-                <img src='$photoUrl/$filename" . "_cr.jpg'/> ";
+                if ( $debugImageWork )$msg .= "made image $photoUrl/$photoname $eol
+                <img src='$photoUrl/$photoname" . "_cr.jpg'/> ";
                 return $msg;
 
             } else {

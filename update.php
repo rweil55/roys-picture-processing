@@ -44,7 +44,7 @@ class freeWheeling_DisplayUpdate {
                 }
             }
             // get old data
-            $sqlOld = "select * from $rrw_photos where filename = '$photoname'";
+            $sqlOld = "select * from $rrw_photos where photoname = '$photoname'";
             $recsold = $wpdbExtra->get_resultsA( $sqlOld );
             if ( 1 < $wpdbExtra->num_rows )
                 $msg .= "$errorBeg E#858 caution more than one photos 
@@ -67,7 +67,7 @@ class freeWheeling_DisplayUpdate {
             $msg .= keywordHandling::remove( $photoname );
             $msg .= keywordHandling::insertList( $photoname, $keyWordList );
 
-            $sqlCheck = "select * from $rrw_photos where filename ='$photoname'";
+            $sqlCheck = "select * from $rrw_photos where photoname ='$photoname'";
             $rec = $wpdbExtra->get_resultsA( $sqlCheck );
             $msg .= freewheeling_fixit::fixAssumeDatabaseCorrect( $rec[ 0 ] );
             if ( $debug ) {
@@ -100,9 +100,9 @@ class freeWheeling_DisplayUpdate {
             if ( $dubigCompare )$msg .= " $oldValue $eol";
             if ( $newValue == $oldValue )
                 return $msg; // no update neeeded
-            $photoname = $rec[ "filename" ];
+            $photoname = $rec[ "photoname" ];
             $update = array( $itemName => $newValue );
-            $key = array( "filename" => $photoname );
+            $key = array( "photoname" => $photoname );
             $cnt = $wpdbExtra->update( $rrw_photos, $update, $key );
             $hisCom = "$itemName -- $oldValue=> $newValue";
             $msg .= rrwUtil::InsertIntoHistory( $photoname, $hisCom );

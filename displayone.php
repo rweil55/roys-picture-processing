@@ -65,7 +65,7 @@ class freeWheeling_DisplayOne {
             $direonp = $recset[ "DireOnP" ];
             $trail_name = $recset[ "trail_name" ];
             $uploaddate = $recset[ "uploaddate" ];
-            $highresfilename = $recset[ "highresfilename" ];
+            $highresShortname = $recset[ "highresShortname" ];
             if ( $debugPath )$msg .= "**** 5 ******displayOne:photoUrl $photoPath <br/>";
             $htmlfileref1 = "$photoUrl/{$photoname}_cr.jpg";
             $fullfilename1 = "$photoPath/{$photoname}_cr.jpg";
@@ -159,7 +159,7 @@ class freeWheeling_DisplayOne {
                 &nbsp; &nbsp; &nbsp; &nbsp; ";
             if ( false === strpos( $photoname, "_cr" ) ) {
                 $msg .= "[ <a href='/fix/?task=reload&" .
-                "fullfilename=$highresPath/$highresfilename' >
+                "fullfilename=$highresPath/$highresShortname' >
                     reload image </a> ] ";
             }
             $msg .= "

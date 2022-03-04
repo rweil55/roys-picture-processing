@@ -81,11 +81,11 @@ class rrwPicSubmission {
                 throw new RuntimeException( "file name can consist of only
                 letters, numbers, and spaces" );
             $photoname = $matchs[ 0 ];
-            $HighResfilename = "$photoname.$ext";
-            $Fullfileupload = "$uploadPath/$HighResfilename";
-            $FullfileHighRes = "$highresPath/$HighResfilename";
+            $highresShortname = "$photoname.$ext";
+            $Fullfileupload = "$uploadPath/$highresShortname";
+            $FullfileHighRes = "$highresPath/$highresShortname";
 
-            if ( false !== strpos( $HighResfilename, "_cr.jpg" ) ) {
+            if ( false !== strpos( $highresShortname, "_cr.jpg" ) ) {
                 $msg .= "$errorBeg _cr.jpg not allowed.
                             $errorEnd select the high resolution verion " ;
                 $msg .= freewheeling_fixit::filelike(
@@ -105,13 +105,13 @@ class rrwPicSubmission {
                 } else {
                     $dateMod = filemtime( $FullfileHighRes );
                     $dateMod = date( "Y-M-d", $dateMod );
-                    $msg .= "$errorBeg $eol E#814 $$HighResfilename 
+                    $msg .= "$errorBeg $eol E#814 $$highresShortname 
                     was uploaded previously on $dateMod. 
                     You must check the box to allow the replacement $errorEnd" ;
                     return $msg;
                 }
                 $updateData[ "uploaddate" ] = date( "Y-m-d" );
-                $updateData[ "HighResfilename" ] = $HighResfilename;
+                $updateData[ "highresShortname" ] = $highresShortname;
                 $filephotographer = $recs[ 0 ][ "photographer" ];
                 if ( $filephotographer != $photographer ) {
                     $updateData[ "photographer" ] = $photographer;
@@ -130,7 +130,7 @@ class rrwPicSubmission {
                     "filename" => $photoname,
                     "photoname" => $photoname,
                     "uploaddate" => date( "Y-m-d" ),
-                    "HighResfilename" => $HighResfilename,
+                    "highresShortname" => $highresShortname,
                 );
                 $cntchaged = $wpdbExtra->insert( $rrw_photos, $Insert );
                 $msg .= rrwUtil::InsertIntoHistory( $photoname, "
@@ -145,7 +145,7 @@ class rrwPicSubmission {
             $msg .= rrwUtil::InsertIntoHistory( $photoname, "uploaded " );
             $msg .= "File was uploaded successfully to $Fullfileupload $eol";
             if ( $debugsubmit )$msg .= "lets process upload dire$eol";
-            $attr = array("uploadfilename"=>$HighResfilename);
+            $attr = array("uploadshortname"=>$highresShortname);
             if ( $debug )$msg .= rrwUtil::print_r($attr, true, "parameters to upload");
             $msg .= uploadProcessDire::upload($attr);
         } catch ( RuntimeException $e ) {

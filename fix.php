@@ -356,12 +356,12 @@ class freewheeling_fixit {
             throw new Exception( "$msg $errorBeg E#669 missing filename $errorEnd" );
         $iislash = strrpos( $fullFilename, "/" );
         $filename = substr( $fullFilename, $iislash +1 );
-        $uploadfilename = "$uploadPath/$filename";
+        $uploadfullname = "$uploadPath/$filename";
         // move the file
-        if ( $debug )$msg .= "= rename( $highresPath/$filename, $uploadfilename $eol ";
-        $answer = rename( "$highresPath/$filename", $uploadfilename );
+        if ( $debug )$msg .= "= rename( $highresPath/$filename, $uploadfullname $eol ";
+        $answer = rename( "$highresPath/$filename", $uploadfullname );
         if ( $debug )$msg .= "lets process upload dire$eol";
-        $attr = array( "uploadfilename" => $filename );
+        $attr = array( "uploadshortname" => $filename );
         if ( $debug )$msg .= rrwUtil::print_r( $attr, true, "parameters to upload" );
         $msg .= uploadProcessDire::upload( $attr );
         return $msg;
@@ -851,9 +851,9 @@ class freewheeling_fixit {
         $partial = rrwPara::String( "partial", $attr );
         $photoname = rrwPara::String( "photoname", $attr );
         if ( empty( $photoname ) )
-            $highresfilename = "$partial.jpg";
+            $highresShortname = "$partial.jpg";
         else
-            $highresfilename = "$photoname.jpg";
+            $highresShortname = "$photoname.jpg";
         $sqlimage = "select * from $rrw_photos where photoname = '$photoname'";
         $recs = $wpdbExtra->get_resultsA( $sqlimage );
         if ( 1 == $wpdbExtra->num_rows ) {
@@ -861,11 +861,11 @@ class freewheeling_fixit {
         } else {
             $source = "";
         }
-        $highresfilename = str_replace( "._cr", "", $highresfilename );
-        $FullFilwname = "$highresPath/$highresfilename";
+        $highresShortname = str_replace( "._cr", "", $highresShortname );
+        $FullFilwname = "$highresPath/$highresShortname";
         if ( file_exists( $FullFilwname ) ) {
             $imageSize = getimagesize( $FullFilwname );
-            $msg .= "<img src='$highresUrl/$highresfilename' width='300px' /> &nbsp;
+            $msg .= "<img src='$highresUrl/$highresShortname' width='300px' /> &nbsp;
             <a href='/display-one-photo?photoname=$photoname' >show image details</a>
             Current high reslution image" . $imageSize[ 3 ] . $source . $eol .
             $photoname;
@@ -993,7 +993,7 @@ class freewheeling_fixit {
         $description = rrwUtil::fetchparameterString( "description" );
         if ( empty( $table ) ) {
             $table = "$rrw_photos";
-            $fields = " filename, trail_name, photographer, photostatus ";
+            $fields = " photoname, trail_name, photographer, photostatus ";
         } else {
             $fields = "keywordFilename, keyword ";
         }
