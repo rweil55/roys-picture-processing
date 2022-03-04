@@ -296,13 +296,13 @@ class freewheeling_fixit {
         $sqlall = "select filename from $rrw_photos";
         $recAlls = $wpdbExtra->get_resultsA( $sqlall );
         $photolist = array();
-        foreach ( $recAlls as $rec ) {
+        foreach ( $recAlls as $rec ) { 
             $photolist[ $rec[ "filename" ] ] = 1;
         }
         $cntFound = 0;
         foreach ( $dirlistRes as $highres => $fullfilename ) {
             $filename = str_replace( "$highresPath/", "", $highres );
-            $highresTest = str_replace( ".jpg", "", $filename );
+            $highresTest = str_ireplace( ".jpg", "", $filename );
             if ( !array_key_exists( $highresTest, $photolist ) ) {
                 $msg .= "<a href='/display-one-photo?photoname=$highresTest' >
                 $highresTest</a> is not in the photo table,
@@ -993,7 +993,7 @@ class freewheeling_fixit {
             $table = "$rrw_photos";
             $fields = " filename, trail_name, photographer, photostatus ";
         } else {
-            $fields = "keywordFilename ";
+            $fields = "keywordFilename, keyword ";
         }
         //  item is  trail_name, direonp
         $sql = "select $fields from $table 
