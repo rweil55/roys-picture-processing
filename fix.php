@@ -297,12 +297,14 @@ class freewheeling_fixit {
         $recAlls = $wpdbExtra->get_resultsA( $sqlall );
         $photolist = array();
         foreach ( $recAlls as $rec ) { 
-            $photolist[ $rec[ "filename" ] ] = 1;
+            $photoname = strtolower($rec[ "photoname" ]);
+            $photolist[ $photoname ] = 1;
         }
         $cntFound = 0;
         foreach ( $dirlistRes as $highres => $fullfilename ) {
             $filename = str_replace( "$highresPath/", "", $highres );
             $highresTest = str_ireplace( ".jpg", "", $filename );
+            $highresTest = strtolower($highresTest);
             if ( !array_key_exists( $highresTest, $photolist ) ) {
                 $msg .= "<a href='/display-one-photo?photoname=$highresTest' >
                 $highresTest</a> is not in the photo table,
