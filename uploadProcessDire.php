@@ -25,7 +25,6 @@ class uploadProcessDire {
 
             if ( !empty( $uploadfilename ) ) {
                 $msg .= self::ProcessOneFile( $uploadfilename );
-                $msg .= self::ProcessOneFile( $uploadfilename );
                 $cntUploaded = 1;
             } else {
                 // not a single file request. walk the directory
@@ -86,8 +85,9 @@ class uploadProcessDire {
                         minetype is $mime_type, 
                         it should .jpg, " /*.png or .gif"*/ );
         }
+        $fileExif = exif_read_data( $sourceFile ); // used to get time
         $photoname = substr( $entry, 0, strlen( $entry ) - 4 );
-        $photoname = strtolower($photoname);
+        $photoname = strtolower( $photoname );
         if ( $debug )$msg .= "photoname just aftercreate $photoname $eol";
         $pregResults = preg_match( "/[-a-zA-z0-9 _]*/",
             $photoname, $matchs );
@@ -137,6 +137,14 @@ class uploadProcessDire {
 
         // meta date exists make it consistant with the EXIF
         $msg .= freewheeling_fixit::fixAssumeDatabaseCorrect( $recOld );
+        if ( $debug )$msg .= "getting date $eol";
+        $photoDate = freewheeling_fixit::getPhotoDateTime( $fileExif );
+        if ( !empty( $photoDate ) ) {
+            if ( $debug )$msg .= "photoDate now $photoDate";
+            $sqlTimeUpdate = "update $rrw_photos set photodate = '$photoDate'
+                                where photoname = '$photoname'";
+            $wpdbExtra->query( $sqlTimeUpdate );
+        }
         return $msg;
     } // end function processOneFile
 
@@ -240,7 +248,7 @@ class uploadProcessDire {
 
                 $im_src->writeImage( $fullFilePhoto );
                 $im_src->destroy();
-                if ($debugImageWork) $msg .= "made image $photoUrl/$filename $eol
+                if ( $debugImageWork )$msg .= "made image $photoUrl/$filename $eol
                 <img src='$photoUrl/$filename" . "_cr.jpg'/> ";
                 return $msg;
 

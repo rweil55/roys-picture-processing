@@ -1633,7 +1633,7 @@ class freewheeling_fixit {
         return $msg;
     } // end function fixAssumeExifCorrect
 
-    private static function getPhotoDateTime( $fileExif ) {
+    public static function getPhotoDateTime( $fileExif ) {
         global $eol;
 
         $debugTime = false;
@@ -1641,7 +1641,7 @@ class freewheeling_fixit {
             // -----------------------------------------------------------  datetime
             // return the photo data in the formst YYYY-MM-DD
             // or return blank
-            $pictureDate = ""; // date not present in photo
+            $pictureDate = "1800-01-01"; // date not present in photo
             if ( !is_array( $fileExif ) )
                 return $pictureDate;
             foreach ( array( /* all times are strings  */
@@ -1656,7 +1656,7 @@ class freewheeling_fixit {
                 }
             }
             if ( empty( $pictureDate ) )
-                return $pictureDate;
+                return "1800-02-02";
             // now get the correct format
             if ( strncmp( "16450", $pictureDate, 5 ) == 0 ) {
                 if ( $debugTime ) print "pictureDate $pictureDate is unix ";
@@ -1673,7 +1673,7 @@ class freewheeling_fixit {
         catch ( Exception $ex ) {
             print $ex->getMessage() . "$errorBeg  E#673 somewhere in 
                 getPhotoDateTime with a datekey of $datekey $errorEnd";
-            return "";
+            return "1800-03-03";
         }
         return $msg;
     } // end  getPhotoDateTime function

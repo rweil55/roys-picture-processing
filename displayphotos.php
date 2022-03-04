@@ -7,7 +7,7 @@ class freewheeling_displayPhotos {
         $highresUrl, $highresPath;
         $msg = "";
 
-        $debugProgress = true;
+        $debugProgress = false;
 
         $msg .= SetConstants( "displayphotos" );
         if ( $debugProgress )$msg .= "photos go here$eol";
