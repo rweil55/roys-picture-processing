@@ -49,6 +49,9 @@ class freeWheeling_DisplayOne {
             $recset_query = $wpdbExtra->get_resultsA( $sql );
             if ( 1 != $wpdbExtra->num_rows ) {
                 $msg .= "E#856 no meta data for image $photoname was found             $errorEnd $sql $eol";
+                $msg .= freewheeling_fixit::filelike(
+                    array( "photname" => $photoname,
+                        "partial" => $photoname ) );
                 return $msg;
             }
             $recset = $recset_query[ 0 ];
@@ -164,9 +167,9 @@ class freeWheeling_DisplayOne {
                     search High resolution</a> ] 
             &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 
             [ <a href='/fix?task=deletephoto&del2=$photoname&del3=$photoname" .
-                    "&why='duplicate' > Remove duplicate photo </a> ] 
+            "&why='duplicate' > Remove duplicate photo </a> ] 
             [ <a href='/fix?task=deletephoto&del2=$photoname&del3=$photoname" .
-                    "&why='reject' > Reject photo </a> ] $eol
+            "&why='reject' > Reject photo </a> ] $eol
             Location: <input type='text' name='location' size='50' 
                         value='$location'>" . "\n" .
             "<br><strong>People:</strong>

@@ -846,8 +846,8 @@ class freewheeling_fixit {
         else
             $dev = "&dev=0";
 
-        $partial = rrwUtil::fetchparameterString( "partial", $attr );
-        $photoname = rrwPara::String( "photoname" );
+        $partial = rrwPara::String( "partial", $attr );
+        $photoname = rrwPara::String( "photoname", $attr );
         if ( empty( $photoname ) )
             $highresfilename = "$partial.jpg";
         else
@@ -898,7 +898,8 @@ class freewheeling_fixit {
             $recs = $wpdbExtra->get_resultsA( $sqlFind );
             $msg .= "Found " . $wpdbExtra->num_rows . " records like '$partial' $eol";
 
-            $msg .= "<table>\n";
+            $msg .= "<table>$eol" . rrwFormat::HeaderRow( 
+                    "On local machine", "aspect", "upload", "");
             $color = rrwUtil::colorswap();
             $display = "";
             foreach ( $recs as $rec ) {
@@ -908,32 +909,28 @@ class freewheeling_fixit {
                 $ext = substr( $newphotoname, -3 );
                 if ( "PCD" == $ext )
                     continue;
-                $direonp = $rec[ "sourcefullname" ];
+                $sourcefullname = $rec[ "sourcefullname" ];
                 $aspect = $rec[ "aspect" ];
-                $link = " [ <a href='/fix/?task=sourcepush&photoname=$photoname"
-                    . "&sourcefullname=$direonp$dev' > update sourcename</a> ] ";
-                if ( strncmp( "d:", $direonp, 2 ) == 0 ) {
-                    $first = str_replace( "/", "&nbsp; / &nbsp;", $direonp ) .
-                    "&nbsp; " . $newphotoname;
-                    $sourcefile = "d:" . substr( $direonp, 2 );
-                    $sourceuploadLink = " ] [
+                $link = "<a href='/fix/?task=sourcepush&photoname=$photoname"
+                    . "&sourcefullname=$sourcefullname$dev' > change dire</a> ";
+                if ( strncmp( "d:", $sourcefullname, 2 ) == 0 ) {
+                    $sourcefile = "d:" . substr( $sourcefullname, 2 );
+                    $sourceuploadLink = "
                     <a href='http://127.0.0.1/pict/sub.php?task=pushtoupload$dev" .
                     "&sourcefile=$sourcefile&photname=$photoname'  >
-                    create entry </a> ";
+                    create entry $newphotoname</a> ";
                 } else {
-                    $first = "$newphotoname";
                     $sourceuploadLink = "";
                 }
 
-                $imgFile = "http://127.0.0.1" . substr( $direonp, 2 );
-                $direonpDisplay = "<a href='$imgFile' target='127'>$direonp</a>";
-                $direonpDisplay .= $sourceuploadLink;
-                $msg .= rrwFormat::CellRow( $color, $first, $aspect,
-                    $direonpDisplay, $link );
+                $imgFile = "http://127.0.0.1" . substr( $sourcefullname, 2 );
+                $sourcefullnameDisplay = "<a href='$imgFile' target='127'>$sourcefullname</a>";
+                $msg .= rrwFormat::CellRow( $color, 
+                    $sourcefullnameDisplay, $aspect, $sourceuploadLink, $link );
                 $display .= "<div class='rrwDinoItem' >
                         <a href='$imgFile' target='one' >
                         <img src='$imgFile' width='300' />
-                        $eol $direonp $eol $newphotoname $eol $aspect $eol
+                        $eol $sourcefullname $eol $newphotoname $eol $aspect $eol
                         </a></div>";
             }
             $msg .= "</table>\n";
