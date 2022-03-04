@@ -122,6 +122,9 @@ class freewhilln_Administration_Pictures {
             $msg .= self::SQLcount(" Keywords ",
                         "photoname not in (select distinct keywordFilename
                                 from $rrw_keywords )");
+           $msg .= self::SQLcount(" Keyword no photo ",
+                        "keywordFilename not in (select distinct photoname
+                                from $rrw_photos )", $rrw_keywords);
             $msg .= self::EmptyCount( "copyright", "copyright" );
             $msg .= self::EmptyCount( "DireOnP", "source directory" );
             $msg .= self::EmptyCount( "height", "height" );
@@ -209,11 +212,14 @@ Too upload new photos.
         return $msg;
     } // end enptycount
     
-    private static function SQLcount( $description, $sqlWhere ) {
+    private static function SQLcount( $description, $sqlWhere, 
+                                     $table = "" ) {
         global $wpdbExtra, $rrw_photos;
         global $eol;
         $msg = "";
-        $sql = "select count(*) from $rrw_photos where $sqlWhere";
+        if ("" == $table )
+            $table = $rrw_photos;
+        $sql = "select count(*) from $table where $sqlWhere";
         //       print ( "<!-- sql is $sql -->\n" );"
         $cnt = $wpdbExtra->get_var( $sql );;
         $query = str_replace( "'", "xxy", $sqlWhere );
