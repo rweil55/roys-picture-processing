@@ -87,7 +87,7 @@ class uploadProcessDire {
                         it should .jpg, " /*.png or .gif"*/ );
         }
         $photoname = substr( $entry, 0, strlen( $entry ) - 4 );
-        $photoname = strtolower($photname);
+        $photoname = strtolower($photoname);
         if ( $debug )$msg .= "photoname just aftercreate $photoname $eol";
         $pregResults = preg_match( "/[-a-zA-z0-9 _]*/",
             $photoname, $matchs );
