@@ -7,7 +7,7 @@ class freewheeling_displayPhotos {
         $highresUrl, $highresPath;
         $msg = "";
 
-        $debugProgress = false;
+        $debugProgress = true;
 
         $msg .= SetConstants( "displayphotos" );
         if ( $debugProgress )$msg .= "photos go here$eol";
@@ -34,8 +34,8 @@ class freewheeling_displayPhotos {
             //   $msg .= "image file is at imageTmb $eol ";;
             $msg .= "\n<li> ";
             if ( !file_exists( "$thumbPath/$thumbname" ) )
-                $msg .= "<!-- <a href='display-one-photo?photoname=$photoname' > 
-                $photoname </a> was not found.  $eol -->";
+                $msg .= "<a href='display-one-photo?photoname=$photoname' > 
+                $photoname $eol not found</a> $eol ";
             else {
                 $meta = getimagesize( "$thumbPath/$thumbname" );
                 $onePhotoUrl = site_url( "/display-one-photo" );

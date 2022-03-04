@@ -163,9 +163,11 @@ class freeWheeling_DisplayOne {
              [ <a href='/fix/?task=filelike&partial=$photoname&photoname=$photoname' >
                     search High resolution</a> ] 
             &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 
-            [ <a href='/fix?task=deletephoto&del2=$photoname&del3=$photoname'>
-            Delete photo ]</a> ] 
-           <br>Location: <input type='text' name='location' size='50' 
+            [ <a href='/fix?task=deletephoto&del2=$photoname&del3=$photoname" .
+                    "&why='duplicate' > Remove duplicate photo </a> ] 
+            [ <a href='/fix?task=deletephoto&del2=$photoname&del3=$photoname" .
+                    "&why='reject' > Reject photo </a> ] $eol
+            Location: <input type='text' name='location' size='50' 
                         value='$location'>" . "\n" .
             "<br><strong>People:</strong>
             <input type='text' name='people' size='50' 

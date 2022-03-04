@@ -10,7 +10,7 @@ class freewhilln_Administration_Pictures {
             return false;
     }
     static public function administrationPicures( $attr ) {
-        global $wpdbExtra, $rrw_photos, $rrw_digipix, $rrw_keywords, $rrw_trails;
+        global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords, $rrw_trails;
         global $rrw_photographers;
         global $eol;
         global $photoUrl, $photoPath, $thumbUrl, $thumbPath, $highresUrl, $highresPath;
@@ -76,9 +76,9 @@ class freewhilln_Administration_Pictures {
                 group by keyword, keywordFilename having count(*) > 1";
             $recKeywordDup = $wpdbExtra->get_resultsA( $sqlKeywordDups );
             $cntKeywordDup = $wpdbExtra->num_rows;
-            $sqlMore = "select count(*) from $rrw_digipix where sourcestatus = 'use' and ( sourcePath like '%w-pa-trails%' or
-                      sourcePath like '%ytrek%' ) and 
-                     not sourceFilename in (select filename from $rrw_photos)";
+            $sqlMore = "select count(*) from $rrw_source where sourcestatus = 'use' and ( sourcefullname like '%w-pa-trails%' or
+                      sourcefullname like '%ytrek%' ) and 
+                     not searchname in (select photoname from $rrw_photos)";
             $cntMore = $wpdbExtra->get_var( $sqlMore );
             $sqlBadCopyright = "SELECT count(*) FROM $rrw_photos
                         where not copyright like 'copyright%'
@@ -108,7 +108,7 @@ class freewhilln_Administration_Pictures {
                     target='list' >
                     distinct photographers</a> used of $PhotogTotalCnt 
                     in the photo tables $eol";
-            $msg .= "$cntMore approximately 
+            $msg .= "$cntMore approximately wpatrails, ytrek
                     <a href='/fix?task=addlist' target='list'>
                         photos to be added</a> $eol";
             $msg .= "$cntKeywords distinct keywords$eol";
@@ -162,6 +162,8 @@ Display keywords with the photos <a href='/admin?setting=on' >On</a> &nbsp;
     <input type='text' name='del3' id='del3 '>
     repeat
     <input type='text' name='del2' id='del2'>
+    <input type='radio' name='why' id='why' value='duplicate'>duplicte
+    <input type='radio' name='why' id+'why' value='reject'>reject 
     <input type='submit' value='Delete the photo from database' >
 </form>";
             $msg .= freewheeling_fixit::updateRename("","");
