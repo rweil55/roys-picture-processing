@@ -293,7 +293,7 @@ class freewheeling_fixit {
                     but no meta information in the database </strong><br>";
         $dirlistRes = self::getFileList( $highresPath );
 
-        $sqlall = "select filename from $rrw_photos";
+        $sqlall = "select photoname from $rrw_photos";
         $recAlls = $wpdbExtra->get_resultsA( $sqlall );
         $photolist = array();
         foreach ( $recAlls as $rec ) { 
