@@ -35,7 +35,7 @@ class freewheeling_fixit {
                 case "listing":
                     $msg .= freewheeling_fixit::listing();
                     return $msg;
-                 case "compareexif":
+                case "compareexif":
                     $msg .= self::displayExif( $attr );
                     return $msg;
                 default:
@@ -592,7 +592,7 @@ class freewheeling_fixit {
         return $msg;
         */
     }
-    
+
     public static function addsearch( $fields ) {
         global $eol;
         global $rrw_photos, $rrw_source;
@@ -625,7 +625,7 @@ class freewheeling_fixit {
         $debug = false;
 
         $why = rrwUtil::fetchParameterString( "why" );
-        if (empty($wny))
+        if ( empty( $wny ) )
             $why = "because";
         $filename = rrwUtil::fetchParameterString( "del2" );
         if ( $debug )$msg .= "into delete photo $filename $eol";
@@ -898,8 +898,8 @@ class freewheeling_fixit {
             $recs = $wpdbExtra->get_resultsA( $sqlFind );
             $msg .= "Found " . $wpdbExtra->num_rows . " records like '$partial' $eol";
 
-            $msg .= "<table>$eol" . rrwFormat::HeaderRow( 
-                    "On local machine", "aspect", "upload", "");
+            $msg .= "<table>$eol" . rrwFormat::HeaderRow(
+                "On local machine", "aspect", "upload", "" );
             $color = rrwUtil::colorswap();
             $display = "";
             foreach ( $recs as $rec ) {
@@ -925,7 +925,7 @@ class freewheeling_fixit {
 
                 $imgFile = "http://127.0.0.1" . substr( $sourcefullname, 2 );
                 $sourcefullnameDisplay = "<a href='$imgFile' target='127'>$sourcefullname</a>";
-                $msg .= rrwFormat::CellRow( $color, 
+                $msg .= rrwFormat::CellRow( $color,
                     $sourcefullnameDisplay, $aspect, $sourceuploadLink, $link );
                 $display .= "<div class='rrwDinoItem' >
                         <a href='$imgFile' target='one' >
@@ -985,14 +985,19 @@ class freewheeling_fixit {
         $msg = "";
 
         $sqlWhere = rrwUtil::fetchparameterString( "where" );
+        $table = rrwUtil::fetchparameterString( "table" );
         $sqlWhere = str_replace( "xxy", "'", $sqlWhere );
         $sqlWhere = htmlspecialchars_decode( $sqlWhere );
-
         $description = rrwUtil::fetchparameterString( "description" );
+        if ( empty( $table ) ) {
+            $table = "$rrw_photos";
+            $fields = " filename, trail_name, photographer, photostatus ";
+        } else {
+            $fields = "keywordFilename ";
+        }
         //  item is  trail_name, direonp
-        $sql = "select filename, trail_name, photographer, photostatus
-                from $rrw_photos 
-                where $sqlWhere  order by direonp, filename "; // missng source
+        $sql = "select $fields from $table 
+                where $sqlWhere  order by $fields "; // missng source
         $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
             "photos wih no $description" );
         return $msg;
@@ -1145,8 +1150,8 @@ class freewheeling_fixit {
     } // end  updateRename( $photoname, $newname ) {
 
     private static function checkAndRename( $fileFrom, $fileTo ) {
-         global $eol, $errorBeg, $errorEnd;
-       $msg = "";
+        global $eol, $errorBeg, $errorEnd;
+        $msg = "";
         if ( !file_exists( $fileFrom ) ) {
             $msg .= "From file $fileFrom does not exists $eol";
             return $msg;
@@ -1176,8 +1181,8 @@ class freewheeling_fixit {
     private static function direonpOnFileMatch() {
         // used to relate the entries in photo datta database to the file location on spoke
         // if file name matchs then update the diterctory field
-         global $eol, $errorBeg, $errorEnd;
-       global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_photographers;
+        global $eol, $errorBeg, $errorEnd;
+        global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_photographers;
         $msg = "$errorBeg needs check because of rrw_souce dchange $errorEnd";
         $debug = false;
         try {
@@ -1378,7 +1383,7 @@ class freewheeling_fixit {
         $sqlResults = "select count(*) cnt, sourcestatus from $rrw_source 
                             group by sourcestatus ";
         $recStatuss = $wpdbExtra->get_resultsA( $sqlResults );
-        $msg .= "<table>". rrwFormat::HeaderRow( "status","Count");
+        $msg .= "<table>" . rrwFormat::HeaderRow( "status", "Count" );
         foreach ( $recStatuss as $recStatus ) {
             $cnt = $recStatus[ 'cnt' ];
             $sourcestatus = $recStatus[ 'sourcestatus' ];

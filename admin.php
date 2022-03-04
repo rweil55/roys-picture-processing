@@ -120,11 +120,11 @@ class freewhilln_Administration_Pictures {
             $msg .= self::EmptyCount( "location", "location" );
             $msg .= self::EmptyCount( "PhotoDate", "Photo Date" );
             $msg .= self::SQLcount(" Keywords ",
-                        "photoname not in (select distinct keywordFilename
-                                from $rrw_keywords )");
+                        "photoname not in " .
+                    "(select distinct keywordFilename from  $rrw_keywords )");
            $msg .= self::SQLcount(" Keyword no photo ",
-                        "keywordFilename not in (select distinct photoname
-                                from $rrw_photos )", $rrw_keywords);
+                        "keywordFilename not in (select distinct photoname" .
+                                 " from $rrw_photos )", $rrw_keywords);
             $msg .= self::EmptyCount( "copyright", "copyright" );
             $msg .= self::EmptyCount( "DireOnP", "source directory" );
             $msg .= self::EmptyCount( "height", "height" );
@@ -213,19 +213,21 @@ Too upload new photos.
     } // end enptycount
     
     private static function SQLcount( $description, $sqlWhere, 
-                                     $table = "" ) {
+                                     $tablein = "" ) {
         global $wpdbExtra, $rrw_photos;
         global $eol;
         $msg = "";
-        if ("" == $table )
+        if ("" == $tablein )
             $table = $rrw_photos;
+        else
+            $table = $tablein;
         $sql = "select count(*) from $table where $sqlWhere";
         //       print ( "<!-- sql is $sql -->\n" );"
         $cnt = $wpdbExtra->get_var( $sql );;
         $query = str_replace( "'", "xxy", $sqlWhere );
         $msg .= "$cnt photos with no 
             <a href='/fix/?task=listing&amp;where=$query" .
-        "&amp;description=$description' >
+        "&amp;description=$description&amp;table=$tablein' >
             $description</a>";
         if ( !empty( Trim( $description ) ) )
             $msg .= $eol;
