@@ -44,7 +44,7 @@ class freeWheeling_DisplayOne {
                             ";
                 $photoname = $recNokey[ 0 ][ "filename" ];
             }
-            $sql = "Select * from $rrw_photos where filename = '$photoname'";
+            $sql = "Select * from $rrw_photos where photoname = '$photoname'";
             $msg .= ( "\n<!-- sql is $sql -->\n" );
             $recset_query = $wpdbExtra->get_resultsA( $sql );
             if ( 1 != $wpdbExtra->num_rows ) {

@@ -7,6 +7,12 @@ function changed() {
     var seperator = "";
      var eol = "<br />";
     var cntItems = 0;
+    
+    console.log("trail '" + trail + "'");
+    var sqlSelectTrail = "trail=" + trail;
+    if (" Any Trail" == trail) {
+        sqlSelectTrail = "";
+    }
     for (var i = 0; i < field.options.length; i++) {
         if (field.options[i].selected) {
             var valu = field.options[i].value;
@@ -23,17 +29,13 @@ function changed() {
         }
     }
     console.log ("count " + cntItems + ", " + selectDisplay);
-    if (0 == cntItems)
-        return;
+    if (0 == cntItems && "" == sqlSelectTrail)
+        return true;
     if (1 < cntItems) 
         sqlSelectDetail = "( " + sqlSelectDetail + ")"; // multiple selected
       
     console.log("sqlSelectDetail '" + sqlSelectDetail + "'");
-    console.log("trail '" + trail + "'");
-    var sqlSelectTrail = "trail=" + trail;
-    if (" Any Trail" == trail) {
-        sqlSelectTrail = "";
-    }
+   
     var display = trail;
     if (display.length == 0){
         display = sqlSelectDetail;
@@ -46,11 +48,7 @@ function changed() {
         }
     
     console.log (sqlSelectDetail);
-    var sqlSeperator = ""; // if only one selected
-    if ("" != sqlSelectDetail && "" != sqlSelectTrail) {
-        sqlSeperator = " and "; // both selected
-    }
-      var place = document.getElementById("main");
+    var place = document.getElementById("main");
     var selectionMsg = "Selection is " + display;
     place.innerHTML = selectionMsg + " -- One Moment " + eol;
     var loc = window.location;

@@ -111,6 +111,13 @@ class freewhilln_Administration_Pictures {
             $msg .= "$cntMore approximately wpatrails, ytrek
                     <a href='/fix?task=addlist' target='list'>
                         photos to be added</a> $eol";
+            $sqlWhere =  " sourcestatus = 'use' and 
+                        ( sourcefullname like '%w-pa-trails%' or
+                          sourcefullname like '%ytrek%' ) and 
+                     not searchname in (select photoname from $rrw_photos)";
+            
+            $msg.= self::SQLcount("possible adds", $sqlWhere, $rrw_source,15);
+            
             $msg .= "$cntKeywords distinct keywords$eol";
             //  -----------------------------------------------   column 2
             $msg .= "\n</td><td style='vertical-align:top'>\n
@@ -129,6 +136,8 @@ class freewhilln_Administration_Pictures {
             $msg .= self::EmptyCount( "DireOnP", "source directory" );
             $msg .= self::EmptyCount( "height", "height" );
             $msg .= self::EmptyCount( "width", "width" );
+             $msg .= self::SQLcount(" mismated filename ",
+                        "not Filename = photoname", $rrw_keywords);
             $msg .= "
             $cntKeywordDup duplicate  <a href='/fix?task=keyworddups' target='list'>
                     photoName-Keywords </a> $eol
@@ -213,7 +222,7 @@ Too upload new photos.
     } // end enptycount
     
     private static function SQLcount( $description, $sqlWhere, 
-                                     $tablein = "" ) {
+                                     $tablein = "", $limit = "") {
         global $wpdbExtra, $rrw_photos;
         global $eol;
         $msg = "";
@@ -222,12 +231,14 @@ Too upload new photos.
         else
             $table = $tablein;
         $sql = "select count(*) from $table where $sqlWhere";
+        if (! empty($limit))
+            $sql .= " limit $limit";
         //       print ( "<!-- sql is $sql -->\n" );"
         $cnt = $wpdbExtra->get_var( $sql );;
         $query = str_replace( "'", "xxy", $sqlWhere );
         $msg .= "$cnt photos with no 
             <a href='/fix/?task=listing&amp;where=$query" .
-        "&amp;description=$description&amp;table=$tablein' >
+        "&amp;description=$description&amp;table=$tablein&amp;limit=$limit' >
             $description</a>";
         if ( !empty( Trim( $description ) ) )
             $msg .= $eol;
