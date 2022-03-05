@@ -136,8 +136,9 @@ class freewhilln_Administration_Pictures {
             $msg .= self::EmptyCount( "DireOnP", "source directory" );
             $msg .= self::EmptyCount( "height", "height" );
             $msg .= self::EmptyCount( "width", "width" );
-             $msg .= self::SQLcount(" mismated filename ",
-                        "not Filename = photoname", $rrw_keywords);
+             $msg .= self::SQLcount(" mismatched keywords ",
+                        "not keywordfilename in(
+                        select photoname from $rrw_photos)", $rrw_keywords);
             $msg .= "
             $cntKeywordDup duplicate  <a href='/fix?task=keyworddups' target='list'>
                     photoName-Keywords </a> $eol

@@ -602,6 +602,10 @@ class freewheeling_fixit {
                     (sourcefullname like '%w-pa-trails%' or
                      sourcefullname like '%ytrek%' ) and 
                     not searchname in (select photoname from $rrw_photos)";
+        $sql = "select * from $rrw_source where sourcestatus = '' and
+                    (sourcefullname like '%w-pa-trails%' or
+                     sourcefullname like '%ytrek%' )";
+        
         return $sql;
     }
     private static function addList() {
@@ -1110,8 +1114,8 @@ class freewheeling_fixit {
             if ( 0 == $missngsourceCnt )
                 return $msg;
             $color = rrwUtil::colorSwap();
-            $msg .= "$eol <table></tr> \n";
-            foreach ( $missngsource[ 0 ] as $name => $valu ) {
+            $msg .= "$eol <table><tr> \n";
+            foreach ( $missngsource[ 0 ] as $name => $valu ) { 
                 $msg .= rrwFormat::CellHeader( $name );
             }
             $msg .= "</tr>";
@@ -1127,11 +1131,11 @@ class freewheeling_fixit {
                 }
                 $color = rrwUtil::colorSwap( $color );
                 $msg .= "<tr style='background-color:$color;' >\n";
-                if (array_key_exists("sourcestatus", $recset))
-                    $sourcestatus = $recset["sourcestatus"];
+                if ( array_key_exists( "sourcestatus", $recset ) )
+                    $sourcestatus = $recset[ "sourcestatus" ];
                 else
-                    $sourcestatus = ""; 
-                $msg .= rrwFormat::Cell( "$cnt $sourcestatus ");
+                    $sourcestatus = "";
+                $msg .= rrwFormat::Cell( "$cnt $sourcestatus " );
                 foreach ( $recset as $name => $valu ) {
                     $imgfile = "";
                     switch ( $name ) {
@@ -1480,19 +1484,26 @@ class freewheeling_fixit {
         $msg .= fixAssumeExifCorrect( $recs[ 0 ] );
         return $msg;
     }
-    private static function SourceSetUseFromPhotos( $filename, $newstatus ) {
+    private static function SourceSetUseFromPhotos() {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_source, $rrw_photos;
         $msg = "";
 
-        $photoname = self::removeEndingsJpgDire( $filename );
-        foreach ( $self::photonameEndings() as $end ) {
-            $sqlUpdate = "update $rrw_source set status = '$newstatus'
+        $status = "use";
+        $sqlAll = "select photoname, photostatus from $rrw_photos ";
+        $recalls = $wpdbExtra->get_resultsA( $sqlAll );
+        foreach ( $recalls as $recall ) {
+            $photoname = $recall[ "photoname" ];
+            $status = $recall[ "photostatus" ];
+            $photoname = self::removeEndingsJpgDire( $filename );
+            foreach ( $self::photonameEndings() as $end ) {
+                $sqlUpdate = "update $rrw_source set status = '$status'
                 where searchname = '$photoname$end'";
-            if ( debug )$msg .= "$sqlUpdate $eol";
-            $cnt = $wpdbExtra->query( $sqlUpdate );
-            if ( $debug )$msg .= "update $cnt records for $photoname$end $eol";
-        } //  for each
+                if ( debug )$msg .= "$sqlUpdate $eol";
+                $cnt = $wpdbExtra->query( $sqlUpdate );
+                if ( $debug )$msg .= "update $cnt records for $photoname$end $eol";
+            } //  for each photonameEndings
+        } // end foreach photoname
         return $msg;
     } // end SourceSetUseFromPhotos
 
