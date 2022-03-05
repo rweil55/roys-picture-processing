@@ -1073,7 +1073,7 @@ class freewheeling_fixit {
         $description = rrwUtil::fetchparameterString( "description" );
         switch ( $table ) {
             case "$rrw_source":
-                $fields = "sourcefullname, searchname, 1 createentry, aspect";
+                $fields = "sourcefullname, searchname, 1 createentry, aspect, sourcestatus";
                 $orderby = "sourcefullname, searchname, aspect";
                 break;
             case "$rrw_keywords":
@@ -1127,7 +1127,11 @@ class freewheeling_fixit {
                 }
                 $color = rrwUtil::colorSwap( $color );
                 $msg .= "<tr style='background-color:$color;' >\n";
-                $msg .= rrwFormat::Cell( $cnt );
+                if (array_key_exists("sourcestatus", $recset))
+                    $sourcestatus = $recset["sourcestatus"];
+                else
+                    $sourcestatus = ""; 
+                $msg .= rrwFormat::Cell( "$cnt $sourcestatus ");
                 foreach ( $recset as $name => $valu ) {
                     $imgfile = "";
                     switch ( $name ) {
@@ -1156,6 +1160,7 @@ class freewheeling_fixit {
                             break;
                         case "aspect":
                             $aspect = $valu;
+                            break;
                         default:
                             // just plane $valu
                             break;
@@ -1168,7 +1173,7 @@ class freewheeling_fixit {
                     $display .= "<div class='rrwDinoItem' >
                         <a href='$imgFile' target='one' >
                         <img src='$imgFile' width='300' />
-                        $eol $cnt) $photoname $eol </a> $aspect $eol
+                        $eol $cnt)$sourcestatus $photoname $eol </a> $aspect $eol
                 <a href='/fix/?task=sourcereject&filename=$photoname&why=reject'
                         target='reject' > reject All versions photo 
                         </a>$eol
