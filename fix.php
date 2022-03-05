@@ -115,7 +115,7 @@ class freewheeling_fixit {
                     $msg .= freewheeling_fixit::sourcePush();
                     break;
                 case "sourcereject":
-                    $msg .= freewheeling_fixit::sourceReject("","");
+                    $msg .= freewheeling_fixit::sourceReject( "", "" );
                     break;
                 case "sourceset":
                     $msg .= freewheeling_fixit::SourceSetUseFromPhotos();
@@ -885,16 +885,28 @@ class freewheeling_fixit {
                 $msg .= " &nbsp; <a href='/fix/?task=rename&filename=$photoname&newname=$newphotoname' target='check' > becomes  $newphotoname </a> ";
             }
         } // end foreach check
-        $msg .= "<form method='get' action='/fix/'>
+        $msg .= "<table><tr><td><form method='get' action='/fix/'>
         <input type='hidden' id='photoname' name='photoname' value='$photoname' />
             <input type='text' id='partial' name='partial' value='$partial' />
             <input type='hidden' id='task' name='task' value='filelike' />
-            <input type='submit' value='' />
-            &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 
+            <input type='submit' value='go search' />
+            </form></td><td align='left' valign='bottom'>
             <a href='/fix/?task=deleteonephoto&photoname=$partial&why=duplicate' > delete $partial</a>
-            </form>";
+           ";
         if ( empty( $partial ) )
-            return $msg;
+            return "</tr></table>$msg";
+
+        $sqlExisting = "select * from $rrw_photos where photoname like '%$partial%'";
+        $recs = $wpdbExtra->get_resultsA( $sqlExisting );
+        if ( 4 < $wpdbExtra->num_rows ) {
+            $msg .= "found " . $wpdbExtra->num_rows . " that match";
+        } else {
+            foreach ( $recs as $rec ) {
+                $photoname = $rec[ "photoname" ];
+                $msg .= "&nbsp; &nbsp; &nbsp; " . $photoname;
+            }
+        }
+        $msg .= "</tr></table>";
 
         // lets look
 
@@ -902,7 +914,8 @@ class freewheeling_fixit {
                 "searchname, sourceFullname" ) as $sort ) {
             $msg .= "<hr> <strong>sorted by $sort</strong> $eol";
             $sqlFind = "
-                select sourcefullname, searchname, aspect from $rrw_source 
+                select sourcefullname, searchname, aspect, sourcestatus
+                from $rrw_source 
                 where sourcefullname like '%$partial%' 
                 or sourceFullname like '%$partial%' 
                 order by $sort ";
@@ -911,7 +924,7 @@ class freewheeling_fixit {
             $msg .= "Found " . $wpdbExtra->num_rows . " records like '$partial' $eol";
 
             $msg .= "<table>$eol" . rrwFormat::HeaderRow(
-                "On local machine", "aspect", "upload", "" );
+                "Status", "On local machine", "aspect", "upload", "" );
             $color = rrwUtil::colorswap();
             $display = "";
             foreach ( $recs as $rec ) {
@@ -923,6 +936,7 @@ class freewheeling_fixit {
                     continue;
                 $sourcefullname = $rec[ "sourcefullname" ];
                 $aspect = $rec[ "aspect" ];
+                $status = $rec[ "sourcestatus" ];
                 $link = "<a href='/fix/?task=sourcepush&photoname=$photoname"
                     . "&sourcefullname=$sourcefullname$dev' > change dire</a> ";
                 if ( strncmp( "d:", $sourcefullname, 2 ) == 0 ) {
@@ -937,7 +951,7 @@ class freewheeling_fixit {
 
                 $imgFile = "http://127.0.0.1" . substr( $sourcefullname, 2 );
                 $sourcefullnameDisplay = "<a href='$imgFile' target='127'>$sourcefullname</a>";
-                $msg .= rrwFormat::CellRow( $color,
+                $msg .= rrwFormat::CellRow( $color, $status,
                     $sourcefullnameDisplay, $aspect, $sourceuploadLink, $link );
                 $display .= "<div class='rrwDinoItem' >
                         <a href='$imgFile' target='one' >
@@ -990,17 +1004,17 @@ class freewheeling_fixit {
         return $msg;
     } // end functin sourcepush()
 
-    private static function sourceReject( $filename, $why) {
+    private static function sourceReject( $filename, $why ) {
         // delete sll version of this photo form the usable collection
         global $eol, $errorBeg, $errorEnd;
         $msg = "";
 
         if ( empty( $filename ) ) {
             $filename = rrwPara::String( "filename" );
-            if(empty($filename))
+            if ( empty( $filename ) )
                 return "$msg $errorBeg E#713 source reject missing name $errorEnd";
         }
-        if (empty("why"))
+        if ( empty( "why" ) )
             $why = "duplicate";
         $photoname = self::removeJpgDire( $filename );
         if ( empty( $photoname ) )
@@ -1156,7 +1170,7 @@ class freewheeling_fixit {
             $msg .= "</table>\n";
             $msg .= "<strong> ------------ available images ------ </strong$eol
           <div class='rrwDinoGrid' >" . $display . "</div>";
-            $msg .= self::filelike(array());
+            $msg .= self::filelike( array() );
         } catch ( Exception $ex ) {
             $msg .= "E#401 " . $ex->getMessage() . "<p> $sql </p> ";
         }
