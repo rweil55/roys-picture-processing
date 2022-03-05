@@ -25,7 +25,7 @@ class uploadProcessDire {
 
             if ( !empty( $uploadshortname ) ) {
                 $msg .= self::ProcessOneFile( $uploadshortname );
-                $photoname = strToLower($uploadshortname);
+                $photoname = strToLower( $uploadshortname );
                 $cntUploaded = 1;
             } else {
                 // not a single file request. walk the directory
@@ -44,14 +44,14 @@ class uploadProcessDire {
                         continue; // ignore directories
                     if ( $debug )$msg .= "found $uploadshortname in the diretory search $eol";
                     $msg .= self::ProcessOneFile( $uploadshortname );
-                    $photoname = strToLower($uploadshortname);
+                    $photoname = strToLower( $uploadshortname );
                     $cntUploaded++;
                     break;
                 } // end while
 
             } // end  if (! empty($uploadentry))
             if ( 1 == $cntUploaded ) {
-                $photoname = substr($photoname, 0, -4 );
+                $photoname = substr( $photoname, 0, -4 );
                 if ( $debug )$msg .= "DisplayOne( array( \"photoname\" => $photoname ) ) $eol";
                 $msg .= freeWheeling_DisplayOne::DisplayOne(
                     array( "photoname" => $photoname ) );
@@ -97,25 +97,41 @@ class uploadProcessDire {
             throw new RuntimeException( "file name can consist of only
                 letters, numbers, and spaces" );
         // --------------------------- deal with database entry
-        if ( $debug )$msg .= "photoname just matchs $photoname $eol";
+        $Data = array(
+            "filename" => $photoname,
+            "highresShortname" => $entry,
+            "uploaddate" => date( "Y-m-d H:i" ),
+            /* all others default to blank */
+        );
+        $remoteDre = rrwPara::String( "remotedire" );
+        if ( !empty( $remotedire ) )
+            $Data[ "Direonp" ] = $remotedire;
+
         $sqlRec = "select * from $rrw_photos 
                         where photoname = '$photoname'";
         $recs = $wpdbExtra->get_resultsA( $sqlRec );
+
         if ( 1 == $wpdbExtra->num_rows ) {
-            // have meta data
-            $sqldate = "update $rrw_photos set uploaddate = now() 
-                                where photoname ='$photoname' ";
-            $cnt = $wpdbExtra->query( $sqldate );
+            // have meta data, update it   
+            if ( $debug )$msg .= rrwUtil::print_r( $Data, true,
+                "updating $photoname $eol" );
+            $key = array( "photoname" => $photoname );
+            $cnt = $wpdbExtra->update( $rrw_photos, $Data, $key );
+            if ( 1 != $cnt ) {
+                $err = "$errorBeg E#706 update no change $errorEnd";
+                $msg .= rrwUtil::print_r( $Data, true, $err );
+            }
         } else {
             // no meta data
-            $insertData = array(
-                "photoname" => $photoname,
-                "filename" => $photoname,
-                "highresShortname" => $entry,
-                "uploaddate" => date( "Y-m-d H:i" ),
-                /* all others default to blank */
-            );
-            $wpdbExtra->insert( $rrw_photos, $insertData );
+            $Data[ "photoname" ] = $photoname;
+            $Data[ "photographer" ] = "Mary Shaw";
+            if ( $debug )$msg .= rrwUtil::print_r( $Data, true,
+                "inserting $photoname $eol" );
+            $cnt = $wpdbExtra->insert( $rrw_photos, $Data );
+            if ( 1 != $cnt ) {
+                $err = "$errorBeg E#706 insert fails $errorEnd";
+                $msg .= rrwUtil::print_r( $Data, true, $err );
+            }
         }
 
         $sqlRec = "select * from $rrw_photos 
@@ -123,17 +139,7 @@ class uploadProcessDire {
         $recs = $wpdbExtra->get_resultsA( $sqlRec );
         $recOld = $recs[ 0 ];
         $photographer = $recOld[ "photographer" ];
-        if ( empty( $photographer ) ) {
-            $photographer = "Mary Shaw";
-            $sqlArtist = "update $rrw_photos set Photographer = '$photographer'
-                        where photoname = '$photoname' ";
-            $cnt = $wpdbExtra->query( $sqlArtist );
-            $sqlRec = "select * from $rrw_photos 
-                        where photoname = '$photoname'";
-            $recs = $wpdbExtra->get_resultsA( $sqlRec );
-            $recOld = $recs[ 0 ];
 
-        }
 
         $msg .= self::MakeImakeImages( $sourceFile, $photographer );
 
@@ -174,7 +180,7 @@ class uploadProcessDire {
             $extension = $fileSplit[ 'extension' ];
             $basename = $fileSplit[ 'basename' ];
             $photoname = $fileSplit[ 'filename' ];
-            $photoname = strToLower($photoname);
+            $photoname = strToLower( $photoname );
             $FullfileHighRes = "$highresPath/$basename";
             $fullfileThumb = "$thumbPath/$photoname" . "_tmb.jpg";
             $fullFilePhoto = "$photoPath/$photoname" . "_cr.jpg";

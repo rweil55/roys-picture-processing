@@ -11,7 +11,7 @@
  * Text Domain: Roys-picture-processng
  * Domain Path: /translation
  
-  * Version: 2.0.78
+  * Version: 2.0.79
  */
 // disable direct access
 ini_set( "display_errors", true );
@@ -382,7 +382,11 @@ function pushToImage( $filename, $item, $value ) {
         $itemname = str_replace( "_tmb", "", $itemname );
         // copyright and comment may be stored as an arrray
 
-        $comment = "$basename -- $oldValue -> $newValue";
+        if (is_array($newValue))
+            $newDisplay = rrwUtil::print_r($newValue, true, "array");
+        else
+            $nameDisplay = $newValue;
+        $comment = "$basename -- $oldValue -> $newDisplay";
         $msg .= rrwUtil::InsertIntoHistory( $itemname, $comment );
         if ( $debugExif )$msg .= "History writin $comment $eol ----- $eol";
     } // end try

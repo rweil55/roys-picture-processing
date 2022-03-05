@@ -1145,15 +1145,18 @@ class freewheeling_fixit {
                         <img src='$imgFile' width='300' />
                         $eol $cnt) $photoname $eol </a> $aspect $eol
                 <a href='/fix/?task=sourcereject&filename=$photoname&why=reject'
-                        target='reject' > reject photo 
-                        </a></div>";
+                        target='reject' > reject All versions photo 
+                        </a>$eol
+                <a href='/fix/?task=sourcereject&filename=$photoname&why=reject'
+                        target='use' > clean status 
+                        </a>
+                        </div>";
                 }
             } // end for each record 
             $msg .= "</table>\n";
             $msg .= "<strong> ------------ available images ------ </strong$eol
           <div class='rrwDinoGrid' >" . $display . "</div>";
-            //           $msg .= rrwUtil::print_r( $missngsource[ 0 ], true, "one recod" );
-            //           $msg .= rrwUtil::print_r( $missngsource[ 0 ], true, "one recod" );
+            $msg .= self::filelike(array());
         } catch ( Exception $ex ) {
             $msg .= "E#401 " . $ex->getMessage() . "<p> $sql </p> ";
         }
