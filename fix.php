@@ -1005,8 +1005,9 @@ class freewheeling_fixit {
     } // end functin sourcepush()
 
     private static function sourceReject( $filename, $why ) {
-        // delete sll version of this photo form the usable collection
+        // update sll version of this photo form the usable collection
         global $eol, $errorBeg, $errorEnd;
+        global $wpdbExtra, $rrw_source;
         $msg = "";
 
         if ( empty( $filename ) ) {
@@ -1014,13 +1015,23 @@ class freewheeling_fixit {
             if ( empty( $filename ) )
                 return "$msg $errorBeg E#713 source reject missing name $errorEnd";
         }
-        if ( empty( "why" ) )
-            $why = "duplicate";
+        if ( empty( $why ) ) {
+            $why = rrwPara::String( "why" );
+            if ( empty( $why ) )
+                $why = "duplicate";
+        }
         $photoname = self::removeJpgDire( $filename );
         if ( empty( $photoname ) )
             return "E#711 No photo name given to source Reject $eol";
         foreach ( self::photonameEndings() as $end ) {
-            $msg .= self::DeleteOnePhotoname( "$photoname$end", $why );
+            if ( "use" == $why ) {
+                $cnt = $wpdbExtra->query( "update $rrw_source 
+                        set sourcestatus  = '$why'
+                        where searchname = '$photoname$end'" );
+                $msg .= "update $cnt for $photoname$end $eol";
+            } else {
+                $msg .= self::DeleteOnePhotoname( "$photoname$end", $why );
+            }
         }
         return $msg;
     }
@@ -1161,8 +1172,8 @@ class freewheeling_fixit {
                 <a href='/fix/?task=sourcereject&filename=$photoname&why=reject'
                         target='reject' > reject All versions photo 
                         </a>$eol
-                <a href='/fix/?task=sourcereject&filename=$photoname&why=reject'
-                        target='use' > clean status 
+                <a href='/fix/?task=sourcereject&filename=$photoname&why=use'
+                        target='reject' > clean status 
                         </a>
                         </div>";
                 }
