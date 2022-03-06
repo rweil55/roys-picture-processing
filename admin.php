@@ -119,7 +119,7 @@ class freewhilln_Administration_Pictures {
             $iiWhere = strpos($sqlWhere, "where");
             $sqlWhere = substr($sqlWhere, $iiWhere + 5);
             
-            $msg.= self::SQLcount("possible adds", $sqlWhere, $rrw_source,15);
+            $msg.= self::SQLcount("possible adds", $sqlWhere, $rrw_source,16);
             
             $msg .= "$cntKeywords distinct keywords$eol";
             //  -----------------------------------------------   column 2

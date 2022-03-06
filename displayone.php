@@ -35,7 +35,7 @@ class freeWheeling_DisplayOne {
             $answer = $wpdbExtra->query( $sqlAccess );
             if ( "nokey" == $photoname ) {
                 $sqlNoKey = "select filename from $rrw_photos  where not filename in 
-                (select distinct keywordFilename from $rrw_keywords )";
+                 (select distinct keywordFilename from $rrw_keywords )";
                 $recNokey = $wpdbExtra->get_resultsA( $sqlNoKey );
                 if ( 0 == $wpdbExtra->num_rows )
                     return "There are no photos with out keywords

@@ -223,7 +223,7 @@ class freewheeling_fixit {
         $msg = " ";
 
         $sqlMissingExif = "
-            select filename FROM $rrw_photos where originalexif = ''
+            select photoname FROM $rrw_photos where originalexif = ''
             and status = 'use'
             ";
         $recs = $wpdbExtra->get_resultsA( $sqlMissingExif );
@@ -598,14 +598,9 @@ class freewheeling_fixit {
         global $rrw_photos, $rrw_source;
         $msg = "";
 
-        $sql = "select $fields from $rrw_source where sourcestatus = 'use' and
-                    (sourcefullname like '%w-pa-trails%' or
-                     sourcefullname like '%ytrek%' ) and 
-                    not searchname in (select photoname from $rrw_photos)";
-        $sql = "select * from $rrw_source where sourcestatus = '' and
-                    (sourcefullname like '%w-pa-trails%' or
-                     sourcefullname like '%ytrek%' ) and
-                     searchname like '%-s'";
+        $sql = "select * from $rrw_source where sourcestatus = '' and " . 
+            " (sourcefullname like '%w-pa-trails%' or" . 
+            " sourcefullname like '%ytrek%' ) and searchname like '%-s'";
         
         return $sql;
     }
@@ -614,7 +609,8 @@ class freewheeling_fixit {
         global $eol;
         $msg = "";
         $sql = self::addsearch( "sourceFullname" ) .
-        " order by searchname, sourceFullname limit 15"; // a sql to find addtional files to add
+        " order by searchname, sourceFullname limit 17"; // a sql to find addtional files to add
+        print "addlist:sql: $sql $eol";
         $msg .= self::rrwFormatDisplayPhotos( $sql,
             "photos that might be uploaded", 20 );
         return $msg;
@@ -661,7 +657,7 @@ class freewheeling_fixit {
                 $why = "duplicate";
         }
         if ( $debug )$msg .= "called DeleteOnePhotoname( $photoname, $why ) $eol";
-        $sql = "delete from $rrw_photos where photoname ='$photoname'";
+        $sql = "delete from $rrw_photoname ='$photoname'";
         $answer = $wpdbExtra->query( $sql );
         $msg .= "Deleted $answer photo record, &nbsp";
 
@@ -802,8 +798,8 @@ class freewheeling_fixit {
         $enddate = new DateTime( $enddate );
         $enddate = $enddate->format( "Y-m-d" );
         $update = " DATE_FORMAT(uploaddate, '%Y-%m-%d') ";
-        $sql = "select direonp, filename, photostatus from $rrw_photos where 
-    '$startdate' <= $update and $update < '$enddate'"; // missng source
+        $sql = "select direonp, filename, photostatus " .
+            "from $rrw_photos where '$startdate' <= $update and $update < '$enddate'"; // missng source
         print( "<!-- sql is $sql -->\n" );
         $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
             "photos uploaded between $startdate and less than $enddate" );
@@ -988,7 +984,7 @@ class freewheeling_fixit {
         if ( empty( $photoname ) || empty( $sourcefullname ) )
             throw new Exception( "$msg $errorBeg 
                     E#657 missing photoname or sourceFullPath dire $errorEnd" );
-        $sqlExist = "select * from $rrw_photos where searchname = '$photoname'";
+        $sqlExist = "select * from $rrw_photos wheresearchname = '$photoname'";
         $wpdbExtra->query( $sqlExist );
         if ( 0 == $wpdbExtra->num_rows ) {
             $msg .= "creating a new record, 
@@ -1014,7 +1010,7 @@ class freewheeling_fixit {
         return $msg;
     } // end functin sourcepush()
 
-    private static function sourceReject( $filename, $why ) {
+    public static function sourceReject( $filename, $why ) {
         // update sll version of this photo form the usable collection
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_source;
@@ -1258,7 +1254,7 @@ class freewheeling_fixit {
         $msg .= self::checkAndRename( "$highresPath/{$photoname}.jpg",
             "$highresPath/{$newname}.jpg" );
         //  ------------------------------------------------- things in rrw_photos
-        $sqlExist = "select photoname from $rrw_photos where photoname = '$newname'";
+        $sqlExist = "select photoname from $rrw_photos wherephotoname = '$newname'";
         $recExists = $wpdbExtra->get_resultsA( $sqlExist );
         if ( 0 != $wpdbExtra->num_rows )
             $msg .= "$errorBeg E#420 file $newname is already in the photo table,
@@ -1393,7 +1389,7 @@ class freewheeling_fixit {
 
         $msg .= SetConstants( "updateDiretoryOnFileMatch" );
         $msg .= direReport( "direonp", "with blank DireOnP" );
-        $sql = "select Filename from $rrw_photos where direonp = '' ";
+        $sql = "select Filename from $rrw_photos wheredireonp = '' ";
         $msg .= "$sql $eol ";
         $recs = $wpdbExtra->get_resultsA( $sql );
         $cntrecs = $wpdbExtra->num_rows;
@@ -1459,7 +1455,7 @@ class freewheeling_fixit {
         } // end looping thru the source list
         $msg .= "</table> $eol";
         $msg .= direReport( "direonp", "with blank DireOnP" ) . $eol . $eol;
-        $sqlEmpty = "select filename, photo_id from $rrw_photos where direonp = '' 
+        $sqlEmpty = "select filename, photo_id from $rrw_photos wheredireonp = '' 
             and filename like '%_ms%'
             order by substring(filename,7,5) ";
         $recEmptys = $wpdbExtra->get_resultsA( $sqlEmpty );

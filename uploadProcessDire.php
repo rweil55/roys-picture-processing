@@ -75,7 +75,9 @@ class uploadProcessDire {
         if ( $debug )$msg .= "$entry, ";
         $sourceFile = "$uploadPath/$entry"; // in uplosd dire
         // ------new ----------------------------  validate photoname
-
+        if (! file_exists($sourceFile))
+            throw new Exception ("$msg $errorBeg E#718 processOneFile( $entry )
+                     file not found in upload $errorEnd");
         $mime_type = mime_content_type( $sourceFile );
         switch ( $mime_type ) {
             case 'image/jpeg':
@@ -139,9 +141,11 @@ class uploadProcessDire {
         $recs = $wpdbExtra->get_resultsA( $sqlRec );
         $recOld = $recs[ 0 ];
         $photographer = $recOld[ "photographer" ];
-
+        
+        $msg .= freewheeling_fixit::sourceReject($photoname, "use");
 
         $msg .= self::MakeImakeImages( $sourceFile, $photographer );
+        
 
         // meta date exists make it consistant with the EXIF
         $msg .= freewheeling_fixit::fixAssumeDatabaseCorrect( $recOld );
