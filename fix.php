@@ -25,9 +25,7 @@ class freewheeling_fixit {
 
         try {
             $msg .= "<!-- before allow -->\n";
-            if ( rrwUtil::notAllowedToEdit( "fix things" ) )
-                throw new Exception( "$msg E#694 not allowed" );
-            $msg .= "<!-- before set constatnts -->\n";
+             $msg .= "<!-- before set constatnts -->\n";
             $msg .= SetConstants( "updateDiretoryOnFileMatch" );
             $task = rrwUtil::fetchparameterString( "task" );
             $msg .= "<!-- task == $task -->\n";
@@ -41,8 +39,9 @@ class freewheeling_fixit {
                 default:
                     break;
             }
-            $msg .= self::checkForLogIn( "fix task '$task' " );
-
+           if ( rrwUtil::notAllowedToEdit( "fix things" ) )
+                throw new Exception( "$msg E#694 not allowed" );
+   
             switch ( $task ) {
                 case "add":
                     $msg .= freewheeling_fixit::addphotos();
@@ -183,22 +182,6 @@ class freewheeling_fixit {
             $msg .= "$errorBeg E#495 " . $ex->getMessage() . $errorEnd;
         }
         return $msg;
-    }
-
-    public static function checkForLogIn( $errMessage = "" ) {
-        // throw error is user isnot allowed to edit
-        global $eol, $errorBeg, $errorEnd;
-        $msg = "";
-
-        if ( current_user_can( 'edit_posts' ) )
-            return $msg;
-        $bt = debug_backtrace();
-        $caller = array_shift( $bt );
-        $file = $caller[ 'file' ];
-        $line = $caller[ 'line' ];
-        throw new Exception( "$msg $errorBeg $errMessage 
-                    permission has not been granted,
-                    you need to be logged in to do this.  $errorEnd" );
     }
 
     private static function copymeta() {

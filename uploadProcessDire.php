@@ -105,9 +105,9 @@ class uploadProcessDire {
             "uploaddate" => date( "Y-m-d H:i" ),
             /* all others default to blank */
         );
-        $remoteDre = rrwPara::String( "remotedire" );
-        if ( !empty( $remotedire ) )
-            $Data[ "Direonp" ] = $remotedire;
+        $remotefile = rrwPara::String( "remotefile" );
+        if ( !empty( $remotefile ) )
+            $Data[ "Direonp" ] = $remotefile;
 
         $sqlRec = "select * from $rrw_photos 
                         where photoname = '$photoname'";
