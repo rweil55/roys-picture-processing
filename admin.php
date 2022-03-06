@@ -108,10 +108,7 @@ class freewhilln_Administration_Pictures {
                     target='list' >
                     distinct photographers</a> used of $PhotogTotalCnt 
                     in the photo tables $eol";
-            $msg .= "$cntMore approximately wpatrails, ytrek
-                    <a href='/fix?task=addlist' target='list'>
-                        photos to be added</a> $eol";
-            $sqlWhere =  " sourcestatus = 'use' and 
+             $sqlWhere =  " sourcestatus = '' and 
                         ( sourcefullname like '%w-pa-trails%' or
                           sourcefullname like '%ytrek%' ) and 
                      not searchname in (select photoname from $rrw_photos)";

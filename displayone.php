@@ -183,14 +183,10 @@ class freeWheeling_DisplayOne {
             </td></tr>
             </table>     
             
-            <strong>Source Directory:</strong>";
-            if ( empty( $dironp ) ) {
-                $msg .= "Search: 
-                <a href='/fix/?task=filelike&partial=$photoname&photoname=$photoname' >$photoname</a>";
-            } else {
-                $msg .= $direonp;
-            }
-            $msg .= "                
+            <strong>Source Directory:</strong>$direonp &nbsp; 
+                 [ Search: 
+                <a href='/fix/?task=filelike&partial=$photoname&photoname=$photoname' >$photoname</a> ] 
+                
                 [ <a href='http://127.0.0.1/pict/sub.php?direname=$direonp'
                 target='submit' > new picture file</a> ] 
                 [ <a href='/display-one-photo/?photoname=nokey'> 
