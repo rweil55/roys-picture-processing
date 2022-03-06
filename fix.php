@@ -151,7 +151,7 @@ class freewheeling_fixit {
        <a href='/fix/?task=forceOneExif' > force One database to match exif </a>$eol 
        <a href='/fix/?task=rename' > rename a photo </a>$eol 
    <strong>File consistancy</strong>$eol
-      <a href='/fix/?task=highresmissing' > high resolution image
+      <a href='/fix/?task=highresmissing' target='admin'> high resolution image
                                             missing </a>$eol 
       <a href='/fix/?task=photomissing' > photo information missing</a>$eol 
       <a href='/fix/?task=filesmissing' > highres missng _cr, _tmb </a>$eol 
@@ -225,29 +225,103 @@ class freewheeling_fixit {
 
         $dirlistRes = self::getFileList( $highresPath );
         $dirlist_cr = self::getFileList( $photoPath );
-        $dirlist_cr = self::getFileList( $photoPath );
+        $dirlist_tmb = self::getFileList( $thumbPath );
+        $datalist = self::getDatabaseList();
+
+$msg .= rrwUtil::print_r( $dirlistRes, true, "Data ist " );
+        $lists = array(
+            "Database" => $datalist,
+            "High Resolution" => $dirlistRes,
+            "display photo" => $dirlist_cr,
+            "Thumbnail" => $dirlist_tmb,
+        );
+
+        $msg .= self::compareLists( "Database", $datalist,
+            "High Resolution", $dirlistRes );
+        $msg .= self::compareLists( "Database", $datalist,
+            "display photo", $dirlist_cr ,"_cr" );
+       $msg .= self::compareLists( "Database", $datalist,
+            "Thumbnail", $dirlist_tmb, "_tmb" );
+       $msg .= self::compareLists( "High Resolution", $dirlistRes,
+            "Database", $datalist );
+        $msg .= self::compareLists( "High Resolution", $dirlistRes,
+                                    "display photo", $dirlist_cr, "_cr");
+        $msg .= self::compareLists( "High Resolution", $dirlistRes,
+                    "Thumbnail", $dirlist_tmb, "_tmb");
+           return $msg;
+    } // end filemissing
+    private static function compareLists( $name1, $list1, $name2, $list2,
+        $ending = "" ) {
+        global $eol, $errorBeg, $errorEnd;
+        $msg = "";
+
+        $msg .= "<strong>There are $name1 images and 
+                        no matching $name2 images </strong>$eol";
+        $cntFound = 0;
+        foreach ( $list1 as $file => $fileFull ) {
+            $iiDot = strpos( $file, "." );
+            if ( false !== $iiDot )
+                $file = substr( $file, 0, $iiDot ) . $ending . substr( $file, $iiDot );
+            if ( !array_key_exists( $file, $list2 ) ) {
+                $msg .= "Compare --$file--";
+                $displayFull = self::removeHost( $fileFull );
+                $displayPhoto = self::removeHost( $file );
+                $msg .= "$displayFull $name1 is not in $name2 $displayPhoto";
+                $msg .= self::addcreate_searchlink( $file ) . $eol;
+                $cntFound++;
+            }
+        }
+        $msg .= "Found $cntFound $eol";
+        
+              $msg .= "<strong>There are $name2 images and 
+                        no matching $name1 images </strong>$eol";
+        $cntFound = 0;
+        foreach ( $list2 as $file => $fileFull ) {
+            $iiDot = strpos( $file, "." );
+            $file = str_replace ($ending, "", $file);
+            if ( !array_key_exists( $file, $list1 ) ) {
+                $msg .= "Compare --$file--";
+                $displayFull = self::removeHost( $fileFull );
+                $displayPhoto = self::removeHost( $file );
+                $msg .= "$displayFull $name2 is not in $name1 $displayPhoto";
+                $msg .= self::addcreate_searchlink( $file ) . $eol;
+                $cntFound++;
+            }
+        }
+        $msg .= "Found $cntFound $eol";
+        return $msg;
+    } // end coparelists
+    /*
+        return $msg;
 
         $msg .= "<strong>There is high resolution image, 
                     but no display (_cr) image </strong><br>";
         $cntFound = 0;
         foreach ( $dirlistRes as $file => $fileFull ) {
             if ( !array_key_exists( $file, $dirlist_cr ) ) {
-                $msg .= "$fileFull is not in $photoPath ";
+                $displayFull = self::removeHost( $fileFull );
+                $displayPhoto = self::removeHost( $photoPath );
+                $msg .= "$displayFull is not in $displayPhoto/.._cr ";
                 $msg .= self::addcreate_searchlink( $file );
                 $cntFound++;
             }
         }
-        $msg .= "<strong>There are $cntFound isdisplay (_cr) image, 
+    } // end file missing
+    /*
+        $msg .= "<strong>$cntFound high resolution image </strong>$eol$eol
+                    <strong>There are (_cr) image, 
                     but no high resolution image </strong><br>";
         foreach ( $dirlist_cr as $file => $fileFull ) {
             if ( !array_key_exists( $file, $dirlistRes ) ) {
-                $msg .= "$fileFull is not in $highresPath ";
+             $displayFull = self::removeHost( $fileFull );
+                $displayhighresPath = self::removeHost( $highresPath );
+                   $msg .= "$displayFull is not in $displayhighresPath ";
                 $msg .= self::addcreate_searchlink( $file );
             }
         }
         return $msg;
     }
-
+*/
     private static function highresmissing() {
         global $eol;
         global $wpdbExtra, $rrw_photos;
@@ -257,15 +331,15 @@ class freewheeling_fixit {
         $msg .= "<strong>There is meta data in the database, 
                     but no high resolution image </strong><br>";
         $dirlistRes = self::getFileList( $highresPath );
-        $sqlall = "select filename from $rrw_photos";
+        $sqlall = "select highresShortname from $rrw_photos";
         $recAlls = $wpdbExtra->get_resultsA( $sqlall );
         $cntMissng = 0;
         foreach ( $recAlls as $rec ) {
-            $filename = $rec[ "filename" ];
-            if ( !array_key_exists( "$filename.jpg", $dirlistRes ) ) {
-                $msg .= "$filename.jpg is not in $highresPath,
-                but we have <a href='/display-one-photo?photoname=$filename' >
-                photo information </a>$eol ";
+            $highresShortname = strToLower( $rec[ "highresShortname" ] );
+            if ( !array_key_exists( "$highresShortname", $dirlistRes ) ) {
+                $msg .= "$highresShortname is not in $highresPath, but we have " .
+                "<a href='/display-one-photo?photoname=$highresShortname' " .
+                " target ='displayone' > photo information </a>$eol ";
                 $cntMissng++;
             }
         }
@@ -292,15 +366,13 @@ class freewheeling_fixit {
         }
         $cntFound = 0;
         foreach ( $dirlistRes as $highres => $fullfilename ) {
-            $filename = str_replace( "$highresPath/", "", $highres );
-            $highresTest = str_ireplace( ".jpg", "", $filename );
-            $highresTest = strtolower( $highresTest );
+            $highresTest = self::removeJpgDire( $highres );
             if ( !array_key_exists( $highresTest, $photolist ) ) {
                 $msg .= "<a href='/display-one-photo?photoname=$highresTest' >
-                $highresTest</a> is not in the photo table,
-                but we have a high resolution image ";
+                $highres</a> is  a high resolution image, 
+                        but not in the photo database ";
                 $msg .= " [ " . self::updateeRenameLink( $highresTest ) . " ] ";
-                $msg .= " [ " . self::addcreate_searchlink( $filename ) . " ] ";
+                $msg .= " [ " . self::addcreate_searchlink( $highres ) . " ] ";
                 $cntFound++;
             }
         }
@@ -313,16 +385,28 @@ class freewheeling_fixit {
         global $eol, $errorBeg, $errorEnd;
         $msg = "";
 
-        $iislash = strrev( $filefullname, "/" );
-        if ( false !== $iiSlash )
-            $filename = substr( $filefullname, 0, $iiSlash );
-        else
-            $filename = $filefullname;
-
-        $msg .= "<a href='/fix/?task=reload&fullfilename=$filefullname' 
+        $photoname = self::removeJpgDire( "$filefullname" );
+        $msg .= " [ <a href='/fix/?task=filelike&photoname=$photoname'
+                        target='reject' > find matches </a> ] ";
+        if ( file_exists( $filefullname ) )
+            $msg .= " [ <a href='/fix/?task=reload&fullfilename=$filefullname' 
                     target='create' > create meta</a> 
-                    <strong>$photoname</strong> $eol ";
+                    <strong>$photoname</strong> ] $eol ";
         return $msg;
+    }
+
+    private static function linkTo127upload( $sourcefile ) {
+
+        $host = $_SERVER[ 'HTTP_HOST' ];
+        if ( strpos( $host, "dev" ) !== false )
+            $dev = "&dev=1";
+        else
+            $dev = "&dev=0";
+        $photoname = self::removejpgDire( $sourcefile );
+        $link = "<a href='http://127.0.0.1/pict/sub.php?task=pushtoupload$dev" .
+        "&sourcefile=$sourcefile&photname=$photoname'  >
+                    create entry $photoname</a> ";
+        return $link;
     }
 
     private static function reload( $attr ) {
@@ -335,14 +419,15 @@ class freewheeling_fixit {
         $fullFilename = rrwPara::String( "fullfilename" );
         if ( empty( $fullFilename ) )
             throw new Exception( "$msg $errorBeg E#669 missing filename $errorEnd" );
+        $photoname = self::removeJpgDire( $fullFilename );
         $iislash = strrpos( $fullFilename, "/" );
-        $filename = substr( $fullFilename, $iislash + 1 );
-        $uploadfullname = "$uploadPath/$filename";
+        $Highresname = substr( $fullFilename, $iislash );
+        $uploadfullname = "$uploadPath/$Highresname";
         // move the file
-        if ( $debug )$msg .= "= rename( $highresPath/$filename, $uploadfullname $eol ";
-        $answer = rename( "$highresPath/$filename", $uploadfullname );
+        if ( $debug )$msg .= "= rename( $highresPath/$Highresname, $uploadfullname $eol ";
+        $answer = rename( "$highresPath/$Highresname", $uploadfullname );
         if ( $debug )$msg .= "lets process upload dire$eol";
-        $attr = array( "uploadshortname" => $filename );
+        $attr = array( "uploadshortname" => $Highresname );
         if ( $debug )$msg .= rrwUtil::print_r( $attr, true, "parameters to upload" );
         $msg .= uploadProcessDire::upload( $attr );
         return $msg;
@@ -576,7 +661,7 @@ class freewheeling_fixit {
         */
     }
 
-    public static function addsearch( $which="" ) {
+    public static function addsearch( $which = "" ) {
         global $eol;
         global $rrw_photos, $rrw_source;
         $msg = "";
@@ -636,13 +721,13 @@ class freewheeling_fixit {
         $debug = false;
 
         $why = rrwUtil::fetchParameterString( "why" );
-        if ( empty( $wny ) )
+        if ( empty( $why ) )
             $why = "because";
-        $filename = rrwUtil::fetchParameterString( "del2" );
-        if ( $debug )$msg .= "into delete photo $filename $eol";
-        $msg .= "task = deleteing the Photo <strong>$filename</strong> $eol ";
+        $photoname = rrwUtil::fetchParameterString( "del2" );
+        if ( $debug )$msg .= "into delete photo $photoname $eol";
+        $msg .= "task = deleteing the Photo <strong>$photoname</strong> $eol ";
         $del3 = rrwUtil::fetchParameterString( "del3" );
-        if ( strcmp( $filename, $del3 ) != 0 ) {
+        if ( strcmp( $photoname, $del3 ) != 0 ) {
             $msg .= "input parameters do not match. photo not deleted";
             return $msg;;
         }
@@ -941,14 +1026,14 @@ class freewheeling_fixit {
             $recs = $wpdbExtra->get_resultsA( $sqlFind );
             $msg .= "Found " . $wpdbExtra->num_rows . " records like '$partial' $eol";
 
-            $msg .= "<table>$eol" . rrwFormat::HeaderRow( 
+            $msg .= "<table>$eol" . rrwFormat::HeaderRow(
                 "Status", "On local machine", "aspect", "upload", "" );
             $color = rrwUtil::colorswap();
             $display = "";
             $cnt = 0;
             foreach ( $recs as $rec ) {
                 $color = rrwUtil::colorswap( $color );
-                $cnt ++;
+                $cnt++;
 
                 $newphotoname = $rec[ "searchname" ];
                 $ext = substr( $newphotoname, -3 );
@@ -961,10 +1046,7 @@ class freewheeling_fixit {
                     . "&sourcefullname=$sourcefullname$dev' > change dire</a> ";
                 if ( strncmp( "d:", $sourcefullname, 2 ) == 0 ) {
                     $sourcefile = "d:" . substr( $sourcefullname, 2 );
-                    $sourceuploadLink = "
-                    <a href='http://127.0.0.1/pict/sub.php?task=pushtoupload$dev" .
-                    "&sourcefile=$sourcefile&photname=$photoname'  >
-                    create entry $newphotoname</a> ";
+                    $sourceuploadLink = self::linkTo127upload( $sourcefile );
                 } else {
                     $sourceuploadLink = "";
                 }
@@ -1048,7 +1130,7 @@ class freewheeling_fixit {
                 $cnt = $wpdbExtra->query( "update $rrw_source 
                         set sourcestatus  = '$why'
                         where searchname = '$photoname$end'" );
-                $msg .= "update $cnt for $photoname$end $eol";
+                //          $msg .= "update $cnt for $photoname$end $eol";
             } else {
                 $msg .= self::DeleteOnePhotoname( "$photoname$end", $why );
             }
@@ -1062,24 +1144,38 @@ class freewheeling_fixit {
     private static function removeJpgDire( $filename ) {
         $iiSlash = strrpos( $filename, "/" );
         if ( false !== $iiSlash )
-            $filename = substr( $filename, 0, $iislash );
+            $filename = substr( $filename, 0, $iiSlash );
         $iiDot = strrpos( $filename, "." );
         if ( false !== $iiDot )
             $filename = substr( $filename, 0, $iiDot );
         $filename = strToLower( $filename );
         return $filename; // realy the stripped done photoname
     }
-    private static function removeEndingsJpgDire( $filename ) {
-        $photname = self::removeJpgDire( $filename );
+    private static function removeEndingsJpgDire( $photoname ) {
+        global $eol;
+
+        $debug = false;
+        if ( $debug ) print "removeEndingsJpgDire:namein: $photoname";
+        $photoname = self::removeJpgDire( $photoname );
+        if ( $debug ) print ", after jpgdire: $photoname";
         // not perfrect, order matters
         foreach ( array( "_cr" => 3, "_tmp" => 4, "-s" => 2, "-w" => 2, "-b" => 2 ) as $remove => $cnt ) {
-            $end = substr( $filename, -$cnt );
-            if ( $remove == $end )
-                $photoname = substr( $filename, 0, -$cnt );
+            $end = substr( $photoname, -$cnt );
+            if ( $remove == $end ) {
+                $photoname = substr( $photoname, 0, -$cnt );
+                if ( $debug ) print ", found $remove-$cnt $photoname";
+            }
         }
+        if ( $debug ) print ", return $photoname $eol";
         return $photoname;
     }
 
+    private static function removeHost( $filename ) {
+        $filename = str_replace( "-dev/", "/", $filename );
+        $filename = str_replace( "/home/pillowan/www-shaw-weil-pictures", "", $filename );
+        return $filename;
+        return $filename;
+    }
     private static function listing() {
         global $eol;
         global $rrw_photos, $rrw_source, $rrw_keywords;
@@ -1172,10 +1268,7 @@ class freewheeling_fixit {
                                         target='list'  > $valu </a>";
                             break;
                         case 'create entry':
-                            $valu = $sourceuploadLink = "
-                    <a href='http://127.0.0.1/pict/sub.php?task=pushtoupload$dev" .
-                            "&sourcefile=$sourcefile&photname=$photoname'  >
-                    create entry $newphotoname</a> ";
+                            $valu = self::linkTo127upload( $sourcefile );
                             break;
                         case "sourcefullname":
                             $imgFile = "http://127.0.0.1" . substr( $valu, 2 );
@@ -1254,10 +1347,13 @@ class freewheeling_fixit {
             return "$msg $errorBeg E#712 updateRename missng photoname $errorEnd";
         if ( empty( $newname ) ) {
             // no new name supplied, Assume remove endings
-            $newname = removeEndingsFromPhotname( $photoname );
+            $newname = self::removeEndingsJpgDire( $photoname );
         }
         $photoname = self::removeJpgDire( $photoname );
         $newname = self::removeJpgDire( $newname );
+        if ( $photoname == $newname )
+            return "$msg $errorBeg E#720 $photoname = $newname, 
+                    rename not neccessary $errorEnd";
         //  ---------------------------------------------- move three files
         $msg .= self::checkAndRename( "$photoPath/${photoname}.jpg",
             "$photoPath/{$newname}.jpg" );
@@ -1268,7 +1364,7 @@ class freewheeling_fixit {
         $msg .= self::checkAndRename( "$highresPath/{$photoname}.jpg",
             "$highresPath/{$newname}.jpg" );
         //  ------------------------------------------------- things in rrw_photos
-        $sqlExist = "select photoname from $rrw_photos wherephotoname = '$newname'";
+        $sqlExist = "select photoname from $rrw_photos where photoname = '$newname'";
         $recExists = $wpdbExtra->get_resultsA( $sqlExist );
         if ( 0 != $wpdbExtra->num_rows )
             $msg .= "$errorBeg E#420 file $newname is already in the photo table,
@@ -1842,6 +1938,24 @@ class freewheeling_fixit {
                                 target='one' > $photoname </a>";
     }
 
+    public static function getDatabaseList() {
+        // returns an array, key = filename, value= full path to file
+        global $rrw_photos, $wpdbExtra;
+        $list = array();
+        $sqlall = "select highresShortname filename, direonp,highresShortname from $rrw_photos";
+        $recAlls = $wpdbExtra->get_resultsA( $sqlall );
+        foreach ( $recAlls as $recAll ) {
+            $filename = $recAll[ "filename" ];
+            $direonp = $recAll[ "direonp" ];
+            $highresShortname = $recAll[ "highresShortname" ];
+            if ( empty( $direonp ) )
+                $direonp = $highresShortname;
+            $filename = strToLower( $filename );
+            $list[ $filename ] = strToLower( $direonp );
+        }
+        ksort( $list );
+        return $list;
+    }
     public static function getFileList( $dire ) {
         // returns an array, key = filename, value= full path to file
         $files = array();
@@ -1853,7 +1967,8 @@ class freewheeling_fixit {
                 break;
             if ( !is_file( "$dire/$entry" ) )
                 continue;
-            $files[ $entry ] = "$dire/$entry";
+            $entry = strToLower( $entry );
+            $files[ $entry ] = strToLower( "$dire/$entry" );
         }
         ksort( $files );
         return $files;

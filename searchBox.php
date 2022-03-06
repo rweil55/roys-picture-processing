@@ -52,7 +52,7 @@ class rrwPictures_searchBox {
 
     private static function adminNavBar() {
         // common routinue to putput the pictures administrators admin bar
-        if ( current_user_can( 'edit_posts' ) ) {
+         if ( rrwUtil::AllowedToEdit( "update", "", false ) ) {
             $exifUrl = "/wp-content/plugins/roys-picture-processng/Exif/html";
             $exifList = "https://devpictures.shaw-weil.com/wp-content/plugins/roys-picture-processng/Exif/html/TagNames/EXIF.html";
             $msg = "
@@ -62,7 +62,7 @@ class rrwPictures_searchBox {
             [ <a href='/upload' target='admin' >process upload </a> ]
             [ <a href='$exifUrl' target='one' >EXIF description </a> ]
             [ <a href='$exifList' target='one' >EXIF description </a> ]
-            [ <a href='/display-one-photo/?photoname=nokey'  >no key words </a> ]
+            [ <a href='/display-one-photo/?photoname=nokey' taarget='one' >no key words </a> ]
             
             </p>\n ";
         } else
