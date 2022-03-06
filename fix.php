@@ -1030,7 +1030,7 @@ class freewheeling_fixit {
             if ( empty( $why ) )
                 $why = "duplicate";
         }
-        $photoname = self::removeJpgDire( $filename );
+        $photoname = self::removeEndingsJpgDire( $filename );
         if ( empty( $photoname ) )
             return "E#711 No photo name given to source Reject $eol";
         foreach ( self::photonameEndings() as $end ) {
