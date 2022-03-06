@@ -604,7 +604,8 @@ class freewheeling_fixit {
                     not searchname in (select photoname from $rrw_photos)";
         $sql = "select * from $rrw_source where sourcestatus = '' and
                     (sourcefullname like '%w-pa-trails%' or
-                     sourcefullname like '%ytrek%' )";
+                     sourcefullname like '%ytrek%' ) and
+                     searchname like '%-s'";
         
         return $sql;
     }
@@ -612,9 +613,9 @@ class freewheeling_fixit {
         // display a list of field that might added
         global $eol;
         $msg = "";
-        $sql = freewheeling_fixit::addsearch( "sourceFullname" ) .
-        " order by searchname, sourceFullname"; // a sql to find addtional files to add
-        $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
+        $sql = self::addsearch( "sourceFullname" ) .
+        " order by searchname, sourceFullname limit 15"; // a sql to find addtional files to add
+        $msg .= self::rrwFormatDisplayPhotos( $sql,
             "photos that might be uploaded", 20 );
         return $msg;
     }
@@ -854,6 +855,7 @@ class freewheeling_fixit {
         global $highresUrl, $highresPath;
         $msg = "";
 
+        $debug=true;
         $host = $_SERVER[ 'HTTP_HOST' ];
         if ( strpos( $host, "dev" ) !== false )
             $dev = "&dev=1";
@@ -862,6 +864,10 @@ class freewheeling_fixit {
 
         $partial = rrwPara::String( "partial", $attr );
         $photoname = rrwPara::String( "photoname", $attr );
+        
+        if ($debug) $msg .= "filelike:photoname: $photoname, partial $partial $eol";
+        if (empty($partial))
+            $partial = $photoname;
         if ( empty( $photoname ) )
             $highresShortname = "$partial.jpg";
         else
@@ -1056,10 +1062,10 @@ class freewheeling_fixit {
     private static function removeEndingsJpgDire( $filename ) {
         $photname = self::removeJpgDire( $filename );
         // not perfrect, order matters
-        foreach ( array( "_cr" => 3, "_tmp=>4", "-s" => 2, "-w" => 2, "-b" => 2 ) as $remove => $cnt ) {
-            $end = substr( $photname, -$cnt );
+        foreach ( array( "_cr" => 3, "_tmp" =>4, "-s" => 2, "-w" => 2, "-b" => 2 ) as $remove => $cnt ) {
+            $end = substr( $filename, -$cnt );
             if ( $remove == $end )
-                $photoname = substr( $photoname, 0, -$cnt );
+                $photoname = substr( $filename, 0, -$cnt );
         }
         return $photoname;
     }
@@ -1112,9 +1118,10 @@ class freewheeling_fixit {
             $msg .= "<strong>There are $missngsourceCnt $desvripton</strong> $eol";
             $cnt = 0;
             if ( 0 == $missngsourceCnt )
-                return $msg;
+                return "$msg E#717 $sql $eol ";
             $color = rrwUtil::colorSwap();
             $msg .= "$eol <table><tr> \n";
+            $msg .= rrwFormat::CellHeader( "count");
             foreach ( $missngsource[ 0 ] as $name => $valu ) { 
                 $msg .= rrwFormat::CellHeader( $name );
             }
@@ -1126,8 +1133,9 @@ class freewheeling_fixit {
                 $cnt++;
                 if ( $cnt > $limit ) {
                     $remain = $totalCnt - $limit;
-                    throw new Exception( "$msg $errorBeg E#498 limit of $limit reached,
-                            there are $remain more $eol" );
+                    $msg .= " $errorBeg E#498 limit of $limit reached,
+                            there are $remain more $eol";
+                    break;
                 }
                 $color = rrwUtil::colorSwap( $color );
                 $msg .= "<tr style='background-color:$color;' >\n";
@@ -1138,7 +1146,7 @@ class freewheeling_fixit {
                 $msg .= rrwFormat::Cell( "$cnt $sourcestatus " );
                 foreach ( $recset as $name => $valu ) {
                     $imgfile = "";
-                    switch ( $name ) {
+                    switch ( strToLower($name )) {
                         case 'photoname':
                         case "searchname":
                             $photoname = $valu;
@@ -1174,6 +1182,7 @@ class freewheeling_fixit {
                 } // end foreach itrm n the a record.
                 $msg .= "</tr>";
                 if ( !empty( $imgFile ) ) {
+                    $photonameStripped = self::removeEndingsJpgDire($photoname);
                     $display .= "<div class='rrwDinoItem' >
                         <a href='$imgFile' target='one' >
                         <img src='$imgFile' width='300' />
@@ -1183,6 +1192,9 @@ class freewheeling_fixit {
                         </a>$eol
                 <a href='/fix/?task=sourcereject&filename=$photoname&why=use'
                         target='reject' > clean status 
+                        </a> 
+                        <a href='/fix/?task=filelike&photoname=$photonameStripped'
+                        target='reject' > find matches 
                         </a>
                         </div>";
                 }

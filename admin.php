@@ -115,6 +115,9 @@ class freewhilln_Administration_Pictures {
                         ( sourcefullname like '%w-pa-trails%' or
                           sourcefullname like '%ytrek%' ) and 
                      not searchname in (select photoname from $rrw_photos)";
+            $sqlWhere = freewheeling_fixit::addsearch("");
+            $iiWhere = strpos($sqlWhere, "where");
+            $sqlWhere = substr($sqlWhere, $iiWhere + 5);
             
             $msg.= self::SQLcount("possible adds", $sqlWhere, $rrw_source,15);
             
