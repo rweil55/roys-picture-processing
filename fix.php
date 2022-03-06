@@ -657,7 +657,7 @@ class freewheeling_fixit {
                 $why = "duplicate";
         }
         if ( $debug )$msg .= "called DeleteOnePhotoname( $photoname, $why ) $eol";
-        $sql = "delete from $rrw_photoname ='$photoname'";
+        $sql = "delete from $rrw_photos where photoname ='$photoname'";
         $answer = $wpdbExtra->query( $sql );
         $msg .= "Deleted $answer photo record, &nbsp";
 
