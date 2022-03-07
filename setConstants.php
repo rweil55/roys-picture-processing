@@ -9,6 +9,7 @@ global $uploadPath;
 global $gallery;
 global $freewheel_table_prefix;
 global $picrureCookieName;
+global $httpSource;
 
 
 error_reporting( E_ALL | E_STRICT );
@@ -18,6 +19,8 @@ try {
     $errorBeg = "<span style='color:red;' >";
     $errorEnd = "</span>$eol";
 
+    $httpSource = "http://128.2.184.148";
+    $httpSource = "http://127.0.0.1";
     $gallery = "/home/pillowan/www-shaw-weil-pictures-dev/wp-content/gallery/testing";
     $picrureCookieName = "picture_visit_ip_time";
 

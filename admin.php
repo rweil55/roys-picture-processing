@@ -15,6 +15,7 @@ class freewhilln_Administration_Pictures {
         global $eol;
         global $photoUrl, $photoPath, $thumbUrl, $thumbPath, $highresUrl, $highresPath;
         global $displaykey;
+        global $httpSource;
         ini_set( "display_errors", true );
         $msg = "";
         try {
@@ -200,7 +201,7 @@ Too upload new photos.
 <ul>
     <!--    
  	<li>  A) Place big file in the c:\temp\pictures folder. </li>
-    <li>  B) Run the local <a href='//127.0.0.1/shawweil/pictures/appendcopyright.pl' >append copyright routine</a>   </li> -->
+    <li>  B) Run the local <a href='$httpSource/shawweil/pictures/appendcopyright.pl' >append copyright routine</a>   </li> -->
     <li> A) Upload the large format photo via the <a href='/submission' >submission form </a></li>
     <li> B) Update the list of <a href='/notindatabase.php' target='list' >photos not in the database</a> </li>
     <li> C) Click the link to <a href='/search.php?submit=Photos+Without+any+keyword'

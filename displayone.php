@@ -116,8 +116,7 @@ class freeWheeling_DisplayOne {
         </script>
         ";
             // End of display data section
-
-            if ( !current_user_can( 'edit_posts' ) )
+            if (rrwUtil::notAllowedToEdit ("update, $photographer", false))
                 return $msg;
 
             $msg .= "<hr>";
@@ -186,8 +185,8 @@ class freeWheeling_DisplayOne {
             <strong>Source Directory:</strong>$direonp &nbsp; 
                  [ Search: 
                 <a href='/fix/?task=filelike&partial=$photoname&photoname=$photoname' >$photoname</a> ] 
-                
-                [ <a href='http://127.0.0.1/pict/sub.php?direname=$direonp'
+            
+                [ <a href='$httpSource/pict/sub.php?direname=$direonp'
                 target='submit' > new picture file</a> ] 
                 [ <a href='/display-one-photo/?photoname=nokey'> 
                         Next no keywords</a>]

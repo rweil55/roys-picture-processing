@@ -5,6 +5,7 @@ class freewheeling_displayPhotos {
         global $wpdbExtra, $rrw_photos;
         global $photoUrl, $photoPath, $thumbUrl, $thumbPath,
         $highresUrl, $highresPath;
+        global $selectDisplay; // a user readable of the selection citeris
         $msg = "";
 
         $debugProgress = false;
@@ -21,7 +22,8 @@ class freewheeling_displayPhotos {
         if ( empty( $sqlFind ) )
             return "$eol $msg - No Selection made $eol ";
         $recFiles = $wpdbExtra->get_resultsA( $sqlFind );
-        $msg .= " -- found " . $wpdbExtra->num_rows . " photos to display. Click photo to enlage. ";
+        $msg .= " -- found " . $wpdbExtra->num_rows . " photos,  $selectDisplay. ";
+        if( $wpdbExtra->num_rows > 0 )$msg .= " Click photo to enlage. ";
         if ( $debugProgress )$msg .= "$eol $sqlFind $eol";
         $msg .= "
     <ul class='rrwPhotoGrid' role='list'>
@@ -29,6 +31,7 @@ class freewheeling_displayPhotos {
         $trailermsg = "";
         foreach ( $recFiles as $recFile ) {
             $photoname = $recFile[ "photoname" ];
+            $photographer = $recFile[ "photographer" ];
             $thumbname = "{$photoname}_tmb.jpg";
             $imageTmb = "$thumbUrl/$thumbname";
             //   $msg .= "image file is at imageTmb $eol ";;
@@ -42,7 +45,7 @@ class freewheeling_displayPhotos {
                 $msg .= "
                 <img src='$imageTmb' alt='thumb nail image' $meta[3]
                 onclick='openOnePhotopage(\"$photoname\")' />";
-                if ( current_user_can( "edit_posts" ) )
+                if ( rrwUtil::AllowedToEdit( "update", "$photographer", false ) )
                     $msg .= "<br /><span class='rrwCaption'> $photoname</span>";
             }
             $msg .= "</li>";
@@ -65,33 +68,48 @@ class freewheeling_displayPhotos {
     private static function buildSql( $attr ) {
         global $rrw_keywords, $rrw_photos;
         global $eol;
+        global $selectDisplay; // a user readable of the selection citeris
 
         $debug = false;
+        $debugOutput = false;
         $msg = "";
 
+        $selectDisplay = "";
         if ( $debug ) print "query " . $_SERVER[ 'QUERY_STRING' ] . $eol;
         if ( $debug ) print rrwUtil::print_r( $_POST, true, "_POST" );
         $searchdropdown = rrwPara::String( "searchdropdown", $attr );
-        if ( $debug ) print "found searchdropdown of $searchdropdown $eol";
-        if ( strpos( $searchdropdown, "random" ) !== false ) {
-            $sql = "SELECT photoname FROM $rrw_photos
-                        where photostatus = 'use' order by rand() limit 21";
-            return $sql;
-        }
-        // not a request for random images
-        if ( !empty( $searchdropdown ) ) {
-            $sqlSearch = "select keywordfilename photoname from $rrw_keywords 
-                where keyword = '$searchdropdown' ";
-            if ( !empty( $trail ) ) {
-                $sqlSearch .= " and trail = '$trail' ";
-            }
-            if ( $debug ) print " passing  sqlSearch $eol";
-            return $sqlSearch;
-        }
         $trail = trim( rrwPara::String( "trail", $attr ) );
         if ( $debug ) print "trail = $trail $eol";
         if ( "Any Trail" == $trail )
             $trail = "";
+
+        if ( $debug ) print "found searchdropdown of $searchdropdown $eol";
+        // case of random selection
+        if ( strpos( $searchdropdown, "random" ) !== false ) {
+            $limit = 21;
+            $sql = "SELECT photoname, photographer FROM $rrw_photos
+                        where photostatus = 'use' order by rand() limit $limit";
+            if ( $debugOutput ) print "case random - $sql $eol";
+            $selectDisplay = "Selection: $limit random photos ";
+            return $sql;
+        }
+        // not a request for random images
+        if ( !empty( $searchdropdown ) ) {
+            // case of dropdown selection
+            if ( $debug ) print "trail= $trail, searchdropdown= $searchdropdown$eol";
+
+            $sqlSearch = " select photoname, photographer from $rrw_photos
+                where photoname in (
+                select keywordfilename from $rrw_keywords 
+                where keyword = '$searchdropdown' )";
+            $selectDisplay = " with keyword $searchdropdown ";
+            if ( !empty( $trail ) ) {
+                $selectDisplay .= " and trail name = $trail";
+                $sqlSearch .= " and trail_name = '$trail' ";
+            }
+            if ( $debugOutput ) print "case dropdown - $sqlSearch $eol";
+            return $sqlSearch;
+        }
 
         $directory = rrwUtil::fetchparameterString( "directory", $attr );
         $photoname = rrwUtil::fetchparameterString( "photoname", $attr );
@@ -111,19 +129,23 @@ class freewheeling_displayPhotos {
                 "direonp" => $directory,
                 "photoname" => $photoname,
             ) as $field => $item ) {
-            if ( !empty( $item ) )
+            if ( !empty( $item ) ) {
                 $where .= " $field like '%$item%' or";
+                $selectDisplay .= " $field = $item or ";
+            }
+            if ( $debug ) print "$field - $item -- $where ";
         }
+        $selectDisplay = substr( $selectDisplay, 0, -3 );
         if ( $debug ) print "Where = $where $eol";
         if ( "or" == substr( $where, -2, 2 ) )
             $where = substr( $where, 0, strlen( $where ) - 2 );
-        $sql = "select photoname from $rrw_photos 
+        $sql = "select photoname, photographer from $rrw_photos 
                 where $where 
                 and photostatus = 'use'  ";
         if ( $debug ) print "$sql $eol ";
         if ( empty( $where ) )
             return ""; // no searchitems found
-        if ( $debug ) print "Final sql = $sql $eol ";
+        if ( $debugOutput ) print "case multi search = $sql $eol ";
         return $sql;
     } // function buildSql()
 } // end class

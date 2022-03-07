@@ -67,7 +67,6 @@ class freewheeling_fixit {
                 case "deletephoto":
                     $msg .= freewheeling_fixit::deletePhoto();
                     break;
-
                 case "duplicatephoto":
                     $msg .= freewheeling_fixit::setUseStatus( "duplicate" );
                     break;
@@ -396,6 +395,7 @@ $msg .= rrwUtil::print_r( $dirlistRes, true, "Data ist " );
     }
 
     private static function linkTo127upload( $sourcefile ) {
+        global $httpSource;
 
         $host = $_SERVER[ 'HTTP_HOST' ];
         if ( strpos( $host, "dev" ) !== false )
@@ -403,7 +403,7 @@ $msg .= rrwUtil::print_r( $dirlistRes, true, "Data ist " );
         else
             $dev = "&dev=0";
         $photoname = self::removejpgDire( $sourcefile );
-        $link = "<a href='http://127.0.0.1/pict/sub.php?task=pushtoupload$dev" .
+        $link = "<a href='$httpSource/pict/sub.php?task=pushtoupload$dev" .
         "&sourcefile=$sourcefile&photname=$photoname'  >
                     create entry $photoname</a> ";
         return $link;
@@ -946,6 +946,7 @@ $msg .= rrwUtil::print_r( $dirlistRes, true, "Data ist " );
         global $eol;
         global $wpdbExtra, $rrw_source, $rrw_photos;
         global $highresUrl, $highresPath;
+        global $httpSource;
         $msg = "";
 
         $debug = true;
@@ -1051,7 +1052,7 @@ $msg .= rrwUtil::print_r( $dirlistRes, true, "Data ist " );
                     $sourceuploadLink = "";
                 }
 
-                $imgFile = "http://127.0.0.1" . substr( $sourcefullname, 2 );
+                $imgFile =$httpSource . substr( $sourcefullname, 2 );
                 $sourcefullnameDisplay = "<a href='$imgFile' target='127'>$sourcefullname</a>";
                 $msg .= rrwFormat::CellRow( $color, "$cnt $status",
                     $sourcefullnameDisplay, $aspect, $sourceuploadLink, $link );
@@ -1214,6 +1215,7 @@ $msg .= rrwUtil::print_r( $dirlistRes, true, "Data ist " );
     private static function rrwFormatDisplayPhotos( $sql, $desvripton, $limit = 100 ) {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra;
+        global $httpSource;
         $msg = "";
         error_reporting( E_ALL | E_STRICT );
 
@@ -1271,7 +1273,7 @@ $msg .= rrwUtil::print_r( $dirlistRes, true, "Data ist " );
                             $valu = self::linkTo127upload( $sourcefile );
                             break;
                         case "sourcefullname":
-                            $imgFile = "http://127.0.0.1" . substr( $valu, 2 );
+                            $imgFile = $httpSource . substr( $valu, 2 );
                             break;
                         case "aspect":
                             $aspect = $valu;
