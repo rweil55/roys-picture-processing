@@ -39,7 +39,7 @@ class freewheeling_fixit {
                 default:
                     break;
             }
-            if ( rrwUtil::notAllowedToEdit( "fix things" ) )
+            if ( rrwUtil::notAllowedToEdit( "fix things" ,"", true) )
                 throw new Exception( "$msg E#694 not allowed" );
 
             switch ( $task ) {
