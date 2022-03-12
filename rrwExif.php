@@ -631,6 +631,7 @@ class rrwExif {
             case "COMPUTED":
                 return "COMPUTED"; // 0xbc81
             default:
+                debug_print_backtrace(0,3);
                 throw new Exception( "$errorBeg E#484 Invalid Tag Nameof '$text' $errorEnd" );
         }
         // assert never  get here.
@@ -798,11 +799,11 @@ class rrwExif {
             $output_file = "$testPath/output.jpg";
             $input_file = "$testPath/input.jpg";
             $tag = self::convertText2EeixID( "desc" ); // works
-            $tag = self::convertText2EeixID( "copyright" ); // works on a2=4
-            $tag = self::convertText2EeixID( "keyword" ); // works
-            $tag = self::convertText2EeixID( "desc" ); // works
-            $tag = self::convertText2EeixID( "keyword" ); // fails
-            $tag = self::convertText2EeixID( "copyright" ); // works
+            $tag = self::convertText2EeixID( "Copyright" ); // works on a2=4
+            $tag = self::convertText2EeixID( "Keywords" ); // works
+            $tag = self::convertText2EeixID( "ImageDescription" ); // works
+            $tag = self::convertText2EeixID( "keywords" ); // fails
+            $tag = self::convertText2EeixID( "copyright" ); // fails
             $argv = array( "self::rrwPHPel",
                 //       "-d",
                 $input_file,
