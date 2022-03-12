@@ -141,12 +141,18 @@ class rrwExif {
         else
             $filename = $photoname;
         $tmpfname = str_replace( "jpg", "_copyright.jpg", $filename );
-        if ($debugExif) $msg .= "filename $filename $eol tempname $tmpfname $eol";
-        if (! file_exists($filename))
-            throw new Exception ("$msg $errorBeg E#741 file $flename does not exist $errorEnd", -741);
-        
+        if ( $debugExif )$msg .= "filename $filename $eol tempname $tmpfname $eol";
+        if ( !file_exists( $filename ) )
+            throw new Exception( "$msg $errorBeg E#741 file $flename does not exist $errorEnd", -741 );
+
         $msg .= self::changeItem( $filename, $tmpfname, $item, $value );
-    
+        if ( !file_exits( $tmpfname ) ) {
+            sleep( 1 );
+            if ( file_exists( $tmpfname ) )
+                throw new Exception( "$msg $errorBeg E#745 temp file not there 
+                                    $errorEnd" );
+        }
+
         $sizeOld = filesize( $filename );
         $sizeNew = filesize( $tmpfname );
         if ( $debugExif )$msg .= rrwExif::dumpMeta( $filename, $tmpfname );
@@ -555,7 +561,7 @@ class rrwExif {
                         $desc = new PelEntryAscii( PelTag::IMAGE_DESCRIPTION, $newValue );
                         break;
                     case "DateTime":
-                        $desc = new PelEntryByte( PelTag::DATE_TIME, $newValue );  
+                        $desc = new PelEntryByte( PelTag::DATE_TIME, $newValue );
                         break;
                     case "Artist":
                         if ( $debug )$msg .= "trying new PelTag::ARTIST(  $eol";
@@ -631,7 +637,7 @@ class rrwExif {
             case "COMPUTED":
                 return "COMPUTED"; // 0xbc81
             default:
-                debug_print_backtrace(0,3);
+                debug_print_backtrace( 0, 3 );
                 throw new Exception( "$errorBeg E#484 Invalid Tag Nameof '$text' $errorEnd" );
         }
         // assert never  get here.
