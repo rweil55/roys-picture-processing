@@ -146,7 +146,7 @@ class rrwExif {
             throw new Exception( "$msg $errorBeg E#741 file $flename does not exist $errorEnd", -741 );
 
         $msg .= self::changeItem( $filename, $tmpfname, $item, $value );
-        if ( !file_exits( $tmpfname ) ) {
+        if ( !file_exists( $tmpfname ) ) {
             sleep( 1 );
             if ( file_exists( $tmpfname ) )
                 throw new Exception( "$msg $errorBeg E#745 temp file not there 
