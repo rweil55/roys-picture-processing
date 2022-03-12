@@ -555,7 +555,7 @@ class rrwExif {
                         $desc = new PelEntryAscii( PelTag::IMAGE_DESCRIPTION, $newValue );
                         break;
                     case "DateTime":
-                        $desc = new PelEntryByte( PelTag::DATETIME, $newValue );
+                        $desc = new PelEntryByte( PelTag::DATE_TIME, $newValue );
                         break;
                     case "Artist":
                         if ( $debug )$msg .= "trying new PelTag::ARTIST(  $eol";
