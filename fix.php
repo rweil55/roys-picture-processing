@@ -39,7 +39,7 @@ class freewheeling_fixit {
                 default:
                     break;
             }
-            if ( rrwUtil::notAllowedToEdit( "fix things" ,"", true) )
+            if ( rrwUtil::notAllowedToEdit( "fix things", "", true ) )
                 throw new Exception( "$msg E#694 not allowed" );
 
             switch ( $task ) {
@@ -56,7 +56,7 @@ class freewheeling_fixit {
                     $msg .= freewheeling_fixit::badCopyright();
                     break;
                 case "copymeta":
-                    $msg .= freewheeling_fixit::copymeta();
+                    $msg .= rrwExif::copymeta();
                     break;
                 case "copyrightfix":
                     $msg .= freewheeling_fixit::copyrightfix();
@@ -134,7 +134,7 @@ class freewheeling_fixit {
                     $msg .= freewheeling_fixit::test();
                     break;
                 case "testpel":
-                    $msg .= testpel();
+                    $msg .= rrwExif::testpel();
                     break;
                 default:
                     $msg .= "task=$task$eol
@@ -183,21 +183,6 @@ class freewheeling_fixit {
         return $msg;
     }
 
-    private static function copymeta() {
-        global $highresPath;
-        $msg = "";
-        //        $msg .= SetConstants( "copyMeta" );
-
-
-        $fileIn = "$highresPath/IMGP3723.jpg";
-        $fileout = "$highresPath/IMGP3723_clean.jpg";
-        $msg .= FreewheelingCommon::copyMeta( $fileIn, $fileout );
-        $msg .= "did it";
-        return $msg;
-
-
-    }
-
     private static function exifMissing() {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_photographers, $rrw_photos;
@@ -227,7 +212,7 @@ class freewheeling_fixit {
         $dirlist_tmb = self::getFileList( $thumbPath );
         $datalist = self::getDatabaseList();
 
-$msg .= rrwUtil::print_r( $dirlistRes, true, "Data ist " );
+        $msg .= rrwUtil::print_r( $dirlistRes, true, "Data ist " );
         $lists = array(
             "Database" => $datalist,
             "High Resolution" => $dirlistRes,
@@ -238,16 +223,16 @@ $msg .= rrwUtil::print_r( $dirlistRes, true, "Data ist " );
         $msg .= self::compareLists( "Database", $datalist,
             "High Resolution", $dirlistRes );
         $msg .= self::compareLists( "Database", $datalist,
-            "display photo", $dirlist_cr ,"_cr" );
-       $msg .= self::compareLists( "Database", $datalist,
+            "display photo", $dirlist_cr, "_cr" );
+        $msg .= self::compareLists( "Database", $datalist,
             "Thumbnail", $dirlist_tmb, "_tmb" );
-       $msg .= self::compareLists( "High Resolution", $dirlistRes,
+        $msg .= self::compareLists( "High Resolution", $dirlistRes,
             "Database", $datalist );
         $msg .= self::compareLists( "High Resolution", $dirlistRes,
-                                    "display photo", $dirlist_cr, "_cr");
+            "display photo", $dirlist_cr, "_cr" );
         $msg .= self::compareLists( "High Resolution", $dirlistRes,
-                    "Thumbnail", $dirlist_tmb, "_tmb");
-           return $msg;
+            "Thumbnail", $dirlist_tmb, "_tmb" );
+        return $msg;
     } // end filemissing
     private static function compareLists( $name1, $list1, $name2, $list2,
         $ending = "" ) {
@@ -271,13 +256,13 @@ $msg .= rrwUtil::print_r( $dirlistRes, true, "Data ist " );
             }
         }
         $msg .= "Found $cntFound $eol";
-        
-              $msg .= "<strong>There are $name2 images and 
+
+        $msg .= "<strong>There are $name2 images and 
                         no matching $name1 images </strong>$eol";
         $cntFound = 0;
         foreach ( $list2 as $file => $fileFull ) {
             $iiDot = strpos( $file, "." );
-            $file = str_replace ($ending, "", $file);
+            $file = str_replace( $ending, "", $file );
             if ( !array_key_exists( $file, $list1 ) ) {
                 $msg .= "Compare --$file--";
                 $displayFull = self::removeHost( $fileFull );
@@ -454,7 +439,7 @@ $msg .= rrwUtil::print_r( $dirlistRes, true, "Data ist " );
             if ( false === $copyRight || empty( $copyRight ) )
                 throw new Exception( "$errorBeg E#865 missing Author or author copyright $errorEnd $sqlPhoto $eol " );
             $fileFull = "$photoPath/$filename" . "_cr.jpg";
-            //      $msg .= pushToImage( $fileFull, "copyright", $copyRight );
+            //      $msg .= rrwExif::rrwExif::pushToImage( $fileFull, "Copyright", $copyRight );
             $sqlUpdate = "update $rrw_photos set copyright = '$copyRight' 
                         where filename = '$filename'";
             $cnt = $wpdbExtra->query( $sqlUpdate );
@@ -510,8 +495,8 @@ $msg .= rrwUtil::print_r( $dirlistRes, true, "Data ist " );
         $photoname = rrwUtil::fetchparameterString( "photoname" );
         $file1 = "$highresPath/$photoname.jpg";
         $file2 = "$photoPath/${photoname}_cr.jpg";
-        $exif1 = rrw_exif_read_data( $file1 );
-        $exif2 = rrw_exif_read_data( $file2 );
+        $exif1 = rrwExif::rrw_exif_read_data( $file1 );
+        $exif2 = rrwExif::rrw_exif_read_data( $file2 );
         $display1 = rrwUtil::print_r( $exif1, true, "${photoname}.jpg" );
         $display2 = rrwUtil::print_r( $exif2, true, "${photoname}_cr.jpg" );
         $msg .= "<table>" . rrwFormat::headerRow( $file1, $file2 ) .
@@ -1052,7 +1037,7 @@ $msg .= rrwUtil::print_r( $dirlistRes, true, "Data ist " );
                     $sourceuploadLink = "";
                 }
 
-                $imgFile =$httpSource . substr( $sourcefullname, 2 );
+                $imgFile = $httpSource . substr( $sourcefullname, 2 );
                 $sourcefullnameDisplay = "<a href='$imgFile' target='127'>$sourcefullname</a>";
                 $msg .= rrwFormat::CellRow( $color, "$cnt $status",
                     $sourcefullnameDisplay, $aspect, $sourceuploadLink, $link );
@@ -1674,8 +1659,9 @@ $msg .= rrwUtil::print_r( $dirlistRes, true, "Data ist " );
             $databaseCopyright = $rec[ "copyright" ];
             $datebasePhotoDate = $rec[ "PhotoDate" ];
             $databasePhotographer = $rec[ "photographer" ];
+            $databaseTrail = $rec[ "trail_name" ];
             $databaseKeyword =
-                freeWheeling_DisplayOne::GetkkeywordList( $photoname );
+                freeWheeling_DisplayOne::GetkkeywordUnLinkedList( $photoname );
             $databaseHeight = $rec[ "height" ];
             $databaseWidth = $rec[ "width" ];
             $fullFile = "$photoPath/$photoname" . "_cr.jpg";
@@ -1689,7 +1675,7 @@ $msg .= rrwUtil::print_r( $dirlistRes, true, "Data ist " );
             // --------------------------------------------- exif
             // https://exiftool.org/TagNames/EXIF.html list most tags
             try {
-                $fileExif = rrw_exif_read_data( $fullFile );
+                $fileExif = rrwExif::rrw_exif_read_data( $fullFile );
             } // end try
             catch ( Exception $ex ) {
                 throw new Exception( "$msg E#469 " . $ex->getMessage() . " while        reading exif of '$fullFile' in fixAssumeExifCorrect " );
@@ -1707,9 +1693,10 @@ $msg .= rrwUtil::print_r( $dirlistRes, true, "Data ist " );
                 $copyrightDefault = $wpdbExtra->get_var( $sqlDefault );
                 if ( 1 == $wpdbExtra - num_recs ) {
                     $databaseCopyright = $copyrightDefault; // found it
-                    $sqlUpdate = "sql update $rrw_photos 
+                    $sqlUp = "update $rrw_photos 
                             set Copyright = '$copyrightDefault'
                             where photoname = '$photoname' ";
+                    $wpdbExtra->query( $sqlUp );
                 }
             }
             // ---------------------------- ------------------ copyright
@@ -1723,7 +1710,7 @@ $msg .= rrwUtil::print_r( $dirlistRes, true, "Data ist " );
             if ( empty( $fileCopyRight ) && empty( $databaseCopyright ) )
             ; // do nothing
             elseif ( empty( $fileCopyRight ) && !empty( $databaseCopyright ) ) {
-                $msg .= pushToImage( $photoname, "copyright", $databaseCopyright );
+                $msg .= rrwExif::pushToImage( $photoname, "Copyright", $databaseCopyright );
                 $fileCopyRight = $databaseCopyright;
             }
             elseif ( !empty( $fileCopyRight ) && empty( $databaseCopyright ) ) {
@@ -1734,7 +1721,7 @@ $msg .= rrwUtil::print_r( $dirlistRes, true, "Data ist " );
                     $sqlUpdate[ "copyright" ] = $fileCopyRight;
                     $databaseCopyright = $fileCopyRight;
                 } else {
-                    $msg .= pushToImage( $photoname, "copyright", $databaseCopyright );
+                    $msg .= rrwExif::pushToImage( $photoname, "Copyright", $databaseCopyright );
                     $fileCopyRight = $databaseCopyright;
                 }
             }
@@ -1749,7 +1736,7 @@ $msg .= rrwUtil::print_r( $dirlistRes, true, "Data ist " );
             if ( empty( $fileArtist ) && empty( $databasePhotographer ) )
             ; // do nothing
             elseif ( empty( $fileArtist ) && !empty( $databasePhotographer ) ) {
-                $msg .= pushToImage( $photoname, "artist", $databasePhotographer );
+                $msg .= rrwExif::pushToImage( $photoname, "Artist", $databasePhotographer );
                 $fileArtist = $databasePhotographer;
             }
             elseif ( !empty( $fileArtist ) && empty( $databasePhotographer ) ) {
@@ -1761,27 +1748,37 @@ $msg .= rrwUtil::print_r( $dirlistRes, true, "Data ist " );
                         $sqlUpdate[ "photographer" ] = $fileArtist;
                         $databasePhotographer = $fileArtist;
                     } else {
-                        $msg .= pushToImage( $photoname, "artist", $databasePhotographer );
+                        $msg .= rrwExif::pushToImage( $photoname, "Artist", $databasePhotographer );
                         $fileArtist = $databasePhotographer;
                     }
                 } // end diff test
             $sofar = "phtographer";
             //  --------------------------------------------- datetime
             $FileDateTime = self::getPhotoDateTime( $fileExif );
-            if ( empty( $FileDateTime ) && empty( $datebasePhotoDate ) )
-            ; // do nothing
-            elseif ( empty( $FileDateTime ) && !empty( $datebasePhotoDate ) ) {
-                $msg .= pushToImage( $photoname, "datetimeoriginal", $datebasePhotoDate );
+            $debugDate = false;
+            if ( empty( $FileDateTime ) && empty( $datebasePhotoDate ) ) {
+                if ($debugDate) $msg .= "I#741 no dates available $eol "; 
+                // do nothing
+            } elseif ( empty( $FileDateTime ) && !empty( $datebasePhotoDate ) ) {
+                 if ($debugDate)$msg .= "I#741 no photo date,but have database $datebasePhotoDate $eol ";
+                if ( strpos( $datebasePhotoDate, "1800" ) !== false ) {
+                     if ($debugDate)$msg .= "I741 a real date, pudh it to photo $eol";
+                    $msg .= rrwExif::pushToImage( $photoname, "DateTimeOriginal", $datebasePhotoDate );
+                }
                 $FileDateTime = datebasePhotoDate;
             } elseif ( !empty( $FileDateTime ) && empty( $datebasePhotoDate ) ) {
+                 if ($debugDate)$msg .= "I#741 have photo $FileDateTime,but have database date $eol ";
                 $sqlUpdate[ "PhotoDate" ] = $FileDateTime;
                 $datebasePhotoDate = $FileDateTime;
             } elseif ( $datebasePhotoDate != $FileDateTime ) { // both have data
+                 if ($debugDate)$msg .= "I#741  photo $FileDateTime, not equal database $datebasePhotoDate $eol ";
                 if ( $exifCorrect ) {
+                     if ($debugDate)$msg .= "I#741 update database $eol";
                     $sqlUpdate[ "PhotoDate" ] = $fileArtist;
                     $datebasePhotoDate = $fileArtist;
                 } else {
-                    $msg .= pushToImage( $photoname, "datetimeoriginal", $datebasePhotoDate );
+                     if ($debugDate)$msg .= "I#741 update database $eol";
+                    $msg .= rrwExif::pushToImage( $photoname, "DateTimeOriginal", $datebasePhotoDate );
                     $fileArtist = $datebasePhotoDate;
                 }
             }
@@ -1800,33 +1797,21 @@ $msg .= rrwUtil::print_r( $dirlistRes, true, "Data ist " );
             $keywordname = "Description";
             $keywordname = "description";
             $keywordname = "comment";
-            $keywordname = "ImageDescription";
             $keywordname = "keyword";
             $keywordname = "keywords";
+            $keywordname = "ImageDescription";
 
-            //       $keywordName = "";
-            if ( array_key_exists( "ImageDescription", $fileExif ) ) {
-                $fileKeywords = $fileExif[ "ImageDescription" ];
-                $keywordname = "ImageDescription";
-            }
-            if ( array_key_exists( "XPKeywords", $fileExif ) ) {
-                $fileKeywords = $fileExif[ "XPKeywords" ];
-                $keywordname = "XPKeywords";
-            }
-            if ( array_key_exists( "keyword", $fileExif ) ) {
-                $fileKeywords = $fileExif[ "keyword" ];
-                $keywordname = "keyword";
-            }
-            if ( array_key_exists( "keywords", $fileExif ) ) {
-                $fileKeywords = $fileExif[ "keywords" ];
-                $keywordname = "keywords";
-            }
             if ( $debugKeywords )$msg .= "fileKeywords - $fileKeywords $eol";
             if ( $debugKeywords )$msg .= "databaseKeyword - $databaseKeyword $eol";
             if ( empty( $fileKeywords ) && empty( $databaseKeyword ) )
             ; // do nothing
             elseif ( empty( $fileKeywords ) && !empty( $databaseKeyword ) ) {
-                $msg .= pushToImage( $photoname, $keywordname, $databaseKeyword );
+
+                $newDescription = "$databaseTrail, " .
+                "photographer: $databasePhotographer," .
+                " Keyword: $databaseKeyword, " .
+                    "https://pictures.shaw-weil.com/display-one-photo/?photoname=$photoname.jpg";
+                $msg .= rrwExif::pushToImage( $photoname, $keywordname, $newDescription );
                 $fileKeywords = $databaseKeyword;
             } elseif ( !empty( $fileKeywords ) && empty( $databaseKeyword ) ) {
                 // removed from db  $sqlUpdate[ "photoKeyword" ] = $fileKeywords;
@@ -1837,7 +1822,7 @@ $msg .= rrwUtil::print_r( $dirlistRes, true, "Data ist " );
                         // $sqlUpdate[ "photoKeyword" ] = $fileKeywords;
                         $databaseKeyword = $fileKeywords;
                     } else {
-                        $msg .= pushToImage( $photoname, "datetimeoriginal", $databaseKeyword );
+                        $msg .= rrwExif::pushToImage( $photoname, "DateTimeOriginal", $databaseKeyword );
                         $fileKeywords = $databaseKeyword;
                     }
                 }
@@ -1859,7 +1844,7 @@ $msg .= rrwUtil::print_r( $dirlistRes, true, "Data ist " );
             }
             $sofar = "fixAssumeExifCorrect is done";
         } catch ( Exception $ex ) {
-            $msg .= "$msg E#440 in fixAssumeExifCorrect:$sofar: " .
+            $msg .= "$msg E#440 in fixAssumeExifCorrect: $sofar: " .
             $ex->getMessage() . $eol;
         }
         return $msg;
@@ -1873,6 +1858,7 @@ $msg .= rrwUtil::print_r( $dirlistRes, true, "Data ist " );
             // -----------------------------------------------------------  datetime
             // return the photo data in the formst YYYY-MM-DD
             // or return blank
+            $debugDate = false;
             $pictureDate = "1800-01-01"; // date not present in photo
             if ( !is_array( $fileExif ) )
                 return $pictureDate;

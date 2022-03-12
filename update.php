@@ -91,7 +91,7 @@ class freeWheeling_DisplayUpdate {
         try {
             ini_set( "display_errors", true );
             error_reporting( E_ALL | E_STRICT );
-            if ( "trail_name" == $itemName )
+            if ( "trail_namexxx" == $itemName )
                 $dubigCompare = true;
             else
                 $dubigCompare = false;
@@ -108,7 +108,7 @@ class freeWheeling_DisplayUpdate {
             $msg .= rrwUtil::InsertIntoHistory( $photoname, $hisCom );
             // rrw_photo has one field updated, deal with the related.
             if ( "copyright" == $itemName ) {
-                $msg .= pushToImage( $photoname, "copyright", $newValue );
+                $msg .= pushToImage( $photoname, "Copyright", $newValue );
             } elseif ( "photodate" == $itemName ) {
                 $msg .= "$errorBeg E#701 date inside photo not updated $errorEnd";
             } elseif ( "photographer" == $itemName ) {

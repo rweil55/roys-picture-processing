@@ -42,7 +42,7 @@ class PelIllegalFormatException extends PelException
      */
     public function __construct($type)
     {
-        // debug_print_backtrace ();
+   //    debug_print_backtrace (0,2);
        parent::__construct('Unknown format: 0x%X', $type);
     }
 }

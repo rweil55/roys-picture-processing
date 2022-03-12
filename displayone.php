@@ -215,7 +215,7 @@ class freeWheeling_DisplayOne {
                </form>";
             if ( file_exists( $fullfilename1 ) ) {
                 try {
-                    $meta = rrw_exif_read_data( $fullfilename1 );
+                    $meta = rrwExif::rrw_exif_read_data( $fullfilename1 );
                 } // end try
                 catch ( Exception $ex ) {
                     $msg .= $ex->getMessage() . "$errorBeg  E#668 error loading the exif for '$fullfilename1' $errorEnd";
@@ -345,7 +345,7 @@ class freeWheeling_DisplayOne {
 
         # -------------------- keywords
         $msg .= "<strong>Existing keywords:</strong>\n" .
-        self::GetkkeywordList( $photoname );
+        self::GetkkeywordLinkedList( $photoname );
 
         $msg .= "$eol<strong>Identifiable People:</strong>" . $recset[ "people" ] . "
 <div id='missedClassifi' onclick='openMissedClassifi(this,$photoname);'>
@@ -355,10 +355,10 @@ class freeWheeling_DisplayOne {
 
     } // end display table
 
-    public static function GetkkeywordList( $photoname ) {
+    public static function GetkkeywordUnLinkedList( $photoname ) {
         global $eol;
         global $wpdbExtra, $rrw_keywords;
-        $msg = "";
+        $output = "";
 
         $sqlkey = "select keyword from $rrw_keywords 
                         where keywordfilename = '$photoname'";
@@ -371,10 +371,31 @@ class freeWheeling_DisplayOne {
             //        $http = "/search.php?keyword=$keyWordItem";
             //       $msg .= "<a href='" . htmlspecialchars( $http ) .
             //       "'>" . $keyWordItem . ",</a>";
-            $msg .= " <a onclick='onClickKeyword(\"$keyWordItem\");' >
+            $output .= "$keyWordItem, ";
+        }
+        $output = substr($output,0, -2); 
+        return $output;
+        
+    } public static function GetkkeywordLinkedList( $photoname ) {
+        global $eol;
+        global $wpdbExtra, $rrw_keywords;
+        $output = "";
+
+        $sqlkey = "select keyword from $rrw_keywords 
+                        where keywordfilename = '$photoname'";
+        $recKeys = $wpdbExtra->get_resultsA( $sqlkey );
+        foreach ( $recKeys as $reckey ) {
+            $keyWordItem = $reckey[ "keyword" ];
+            $keyWordItem = trim( $keyWordItem );
+            if ( empty( $keyWordItem ) )
+                continue;
+            //        $http = "/search.php?keyword=$keyWordItem";
+            //       $msg .= "<a href='" . htmlspecialchars( $http ) .
+            //       "'>" . $keyWordItem . ",</a>";
+            $output .= " <a onclick='onClickKeyword(\"$keyWordItem\");' >
                         $keyWordItem, </a> ";
         }
-        return $msg;
+        return $output;
     }
 
     public static function listbox2( $db, $table, $field, $oldvalue, $sortField ) {
