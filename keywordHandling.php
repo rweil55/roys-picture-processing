@@ -71,29 +71,5 @@ class keywordHandling {
         if ( $debug )$msg .= "keywordList: $keywordList $eol";
         if ( $debug )$msg .= "commalist: $commalist $eol";
         return array( $msg, $keywordList );
-    }
-
-/*    public static function keyword2photo( $filename ) {
-        global $wpdbExtra, $phhotoDB, $rrw_keywords, $rrw_photos;
-        global $eol, $errorBeg, $errorEnd;
-        $debug = false;
-        $msg = "";
-
-        $sqlkeyList = "select distinct keyword from $rrw_keywords 
-                    where  keywordfilename = '$filename' order by keyword ";
-        if ( $debug )$msg .= "$sqlkeyList $eol";
-        $keyList = "";
-        $recset_query = $wpdbExtra->get_resultsA( $sqlkeyList );
-        foreach ( $recset_query as $rec ) {
-            $keyList .= trim( $rec[ "keyword" ] ) . ", ";
-        }
-        $keyList = substr( $keyList, 0, -2 ); // remove last comma
-        $sql = "update $rrw_photos set photokeyword = '$keyList' 
-                    where filename  = '$filename' ";
-        if ( $debug )$msg .= "keyword2photo: $sql $eol";
-        $wpdbExtra->query( $sql );
-        return $msg;
-    } // end 
-*/
-    
+    }    
 } // end class

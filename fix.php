@@ -1169,7 +1169,12 @@ class freewheeling_fixit {
 
         $sqlWhere = rrwUtil::fetchparameterString( "where" );
         $table = rrwUtil::fetchparameterString( "table" );
-        $limit = rrwPara::String( "limit" );
+        $limit = rrwPara::Number( "limit" );
+        $startAt = rrwPara::Number( "startat" );
+        if ( 0 == $limit )
+            $limit = 20;
+        $limit += $startAt;
+
         $sqlWhere = str_replace( "xxy", "'", $sqlWhere );
         $sqlWhere = htmlspecialchars_decode( $sqlWhere );
         $description = rrwUtil::fetchparameterString( "description" );
@@ -1193,11 +1198,11 @@ class freewheeling_fixit {
         if ( !empty( $limit ) )
             $sql .= " limit $limit ";
         $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
-            "photos wih no $description" );
+            "photos wih no $description", $startAt );
         return $msg;
     }
 
-    private static function rrwFormatDisplayPhotos( $sql, $desvripton, $limit = 100 ) {
+    private static function rrwFormatDisplayPhotos( $sql, $desvripton, $startAt = 0 ) {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra;
         global $httpSource;
@@ -1205,7 +1210,7 @@ class freewheeling_fixit {
         error_reporting( E_ALL | E_STRICT );
 
         try {
-            print( "<!-- sql request is \n\n$sql\n\n -->\n" );
+            print( "<!-- sql request is \n\n$sql\n, start = $startAt\n\n -->\n" );
             $missngsource = $wpdbExtra->get_resultsA( $sql );
             $missngsourceCnt = $wpdbExtra->num_rows;
             $msg .= "<strong>There are $missngsourceCnt $desvripton</strong> $eol";
@@ -1224,12 +1229,9 @@ class freewheeling_fixit {
             $display = "";
             foreach ( $missngsource as $recset ) {
                 $cnt++;
-                if ( $cnt > $limit ) {
-                    $remain = $totalCnt - $limit;
-                    $msg .= " $errorBeg E#498 limit of $limit reached,
-                            there are $remain more $eol";
-                    break;
-                }
+                if ( $cnt < $startAt )
+                    continue;
+
                 $color = rrwUtil::colorSwap( $color );
                 $msg .= "<tr style='background-color:$color;' >\n";
                 if ( array_key_exists( "sourcestatus", $recset ) )
@@ -1289,7 +1291,13 @@ class freewheeling_fixit {
                         </div>";
                 }
             } // end for each record 
+
             $msg .= "</table>\n";
+            if ( $cnt < $totalCnt ) {
+                $remain = $totalCnt - $cnt;
+                $msg .= "$errorBeg E#498 limit of reached,
+                            there are $remain more $eol";
+            }
             $msg .= "<strong> ------------ available images ------ </strong$eol
           <div class='rrwDinoGrid' >" . $display . "</div>";
             $msg .= self::filelike( array() );
@@ -1754,7 +1762,7 @@ class freewheeling_fixit {
                 } // end diff test
             $sofar = "phtographer";
             //  --------------------------------------------- datetime
-             $FileDateTime = self::getPhotoDateTime( $fileExif );
+            $FileDateTime = self::getPhotoDateTime( $fileExif );
             $debugDate = false;
             if ( empty( $FileDateTime ) && empty( $datebasePhotoDate ) ) {
                 if ( $debugDate )$msg .= "I#741 no dates available $eol ";

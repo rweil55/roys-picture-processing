@@ -11,8 +11,8 @@ class DisplayTrails {
         sortdefault( "trailName" );
         seqname( "trailName" );
         columns( "Trail Name", "trailName", 69 );
-        columns( "Trail Sort", "trail_sort", 69 );
-        columns( "Corridor", "corridor", 69 );
+        columns( "Trail Short Name", "trail_short_name", 69 );
+        DropDownSelf( "Corridor", "corridor", 69 );
          
         if ( empty( $action ) ) {
             $msg .= listdata();

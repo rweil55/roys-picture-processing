@@ -240,8 +240,8 @@ Too upload new photos.
         $query = str_replace( "'", "xxy", $sqlWhere );
         $msg .= "$cnt photos with no 
             <a href='/fix/?task=listing&amp;where=$query" .
-        "&amp;description=$description&amp;table=$tablein&amp;limit=$limit' >
-            $description</a>";
+        "&amp;description=$description&amp;table=$tablein&amp;limit=$limit" .
+            "&amp;startat=0' > $description</a>";
         if ( !empty( Trim( $description ) ) )
             $msg .= $eol;
         return $msg;
