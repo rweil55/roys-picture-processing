@@ -1754,9 +1754,7 @@ class freewheeling_fixit {
                 } // end diff test
             $sofar = "phtographer";
             //  --------------------------------------------- datetime
-            2008: 09: 01 18: 2. ..
-                1234567890123456
-            $FileDateTime = self::getPhotoDateTime( $fileExif );
+             $FileDateTime = self::getPhotoDateTime( $fileExif );
             $debugDate = false;
             if ( empty( $FileDateTime ) && empty( $datebasePhotoDate ) ) {
                 if ( $debugDate )$msg .= "I#741 no dates available $eol ";
