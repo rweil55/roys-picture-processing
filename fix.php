@@ -1774,7 +1774,7 @@ class freewheeling_fixit {
                 $datePH = new Datetime( $datebasePhotoDate );
                 $dateDB = new DateTime( $FileDateTime );
                 $dateDiff = $datePH->diff( $dateDB );
-                if ( abs( $dateDiff->day ) > 1 ) { // more than one day difference
+                if ( abs( $dateDiff->days ) > 1 ) { // more than one day difference
                     if ( $debugDate )$msg .= "I#741  photo $FileDateTime, not equal database $datebasePhotoDate $eol ";
                     if ( $exifCorrect ) {
                         if ( $debugDate )$msg .= "I#741 update database $eol";
