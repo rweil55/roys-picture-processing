@@ -1754,33 +1754,40 @@ class freewheeling_fixit {
                 } // end diff test
             $sofar = "phtographer";
             //  --------------------------------------------- datetime
+            2008: 09: 01 18: 2. ..
+                1234567890123456
             $FileDateTime = self::getPhotoDateTime( $fileExif );
             $debugDate = false;
             if ( empty( $FileDateTime ) && empty( $datebasePhotoDate ) ) {
-                if ($debugDate) $msg .= "I#741 no dates available $eol "; 
+                if ( $debugDate )$msg .= "I#741 no dates available $eol ";
                 // do nothing
             } elseif ( empty( $FileDateTime ) && !empty( $datebasePhotoDate ) ) {
-                 if ($debugDate)$msg .= "I#741 no photo date,but have database $datebasePhotoDate $eol ";
+                if ( $debugDate )$msg .= "I#741 no photo date,but have database $datebasePhotoDate $eol ";
                 if ( strpos( $datebasePhotoDate, "1800" ) !== false ) {
-                     if ($debugDate)$msg .= "I741 a real date, pudh it to photo $eol";
+                    if ( $debugDate )$msg .= "I741 a real date, pudh it to photo $eol";
                     $msg .= rrwExif::pushToImage( $photoname, "DateTimeOriginal", $datebasePhotoDate );
                 }
                 $FileDateTime = datebasePhotoDate;
             } elseif ( !empty( $FileDateTime ) && empty( $datebasePhotoDate ) ) {
-                 if ($debugDate)$msg .= "I#741 have photo $FileDateTime,but have database date $eol ";
+                if ( $debugDate )$msg .= "I#741 have photo $FileDateTime,but have database date $eol ";
                 $sqlUpdate[ "PhotoDate" ] = $FileDateTime;
                 $datebasePhotoDate = $FileDateTime;
-            } elseif ( $datebasePhotoDate != $FileDateTime ) { // both have data
-                 if ($debugDate)$msg .= "I#741  photo $FileDateTime, not equal database $datebasePhotoDate $eol ";
-                if ( $exifCorrect ) {
-                     if ($debugDate)$msg .= "I#741 update database $eol";
-                    $sqlUpdate[ "PhotoDate" ] = $fileArtist;
-                    $datebasePhotoDate = $fileArtist;
-                } else {
-                     if ($debugDate)$msg .= "I#741 update database $eol";
-                    $msg .= rrwExif::pushToImage( $photoname, "DateTimeOriginal", $datebasePhotoDate );
-                    $fileArtist = $datebasePhotoDate;
-                }
+            } else { // both have dates
+                $datePH = new Datetime( $datebasePhotoDate );
+                $dateDB = new DateTime( $FileDateTime );
+                $dateDiff = $datePH->diff( $dateDB );
+                if ( abs( $dateDiff->day ) > 1 ) { // more than one day difference
+                    if ( $debugDate )$msg .= "I#741  photo $FileDateTime, not equal database $datebasePhotoDate $eol ";
+                    if ( $exifCorrect ) {
+                        if ( $debugDate )$msg .= "I#741 update database $eol";
+                        $sqlUpdate[ "PhotoDate" ] = $fileArtist;
+                        $datebasePhotoDate = $fileArtist;
+                    } else {
+                        if ( $debugDate )$msg .= "I#741 update database $eol";
+                        $msg .= rrwExif::pushToImage( $photoname, "DateTimeOriginal", $datebasePhotoDate );
+                        $fileArtist = $datebasePhotoDate;
+                    }
+                } // end if (abs($dateDiff->day)
             }
 
             // -------------------------------------------- keywodes
@@ -1810,7 +1817,7 @@ class freewheeling_fixit {
                 $newDescription = "$databaseTrail, " .
                 "photographer: $databasePhotographer," .
                 " Keyword: $databaseKeyword, " .
-                    "https://pictures.shaw-weil.com/display-one-photo/?photoname=$photoname.jpg";
+                "https://pictures.shaw-weil.com/display-one-photo/?photoname=$photoname.jpg";
                 $msg .= rrwExif::pushToImage( $photoname, $keywordname, $newDescription );
                 $fileKeywords = $databaseKeyword;
             } elseif ( !empty( $fileKeywords ) && empty( $databaseKeyword ) ) {
