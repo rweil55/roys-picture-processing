@@ -148,12 +148,12 @@ class rrwExif {
         $msg .= self::changeItem( $filename, $tmpfname, $item, $value );
         if ( !file_exists( $tmpfname ) ) {
             sleep( 1 );
-            if ( file_exists( $tmpfname ) )
+            if ( ! file_exists( $tmpfname ) )
                 throw new Exception( "$msg $errorBeg E#745 temp file not there 
                                     $errorEnd" );
         }
 
-        $sizeOld = filesize( $filename );
+        $sizeOld = filesize( $filename ); 
         $sizeNew = filesize( $tmpfname );
         if ( $debugExif )$msg .= rrwExif::dumpMeta( $filename, $tmpfname );
         if ( abs( $sizeOld - $sizeNew ) > 500 ) {
