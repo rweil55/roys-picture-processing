@@ -113,7 +113,6 @@ class rrwExif {
 */
     function readexifItem( $filename, $item, & $msg ) {
         global $eol, $errorBeg, $errorEnd;
-        $debugExif = false;
         ini_set( "display_errors", true );
         error_reporting( E_ALL | E_STRICT );
         if ( !file_exists( $filename ) ) {
@@ -135,7 +134,8 @@ class rrwExif {
         global $eol, $errorBeg, $errorEnd;
         global $photoPath;
         $msg = "";
-        $debugExif = false;
+        $debugExif = rrwUtil::setDebug( "debugexif" );
+        $debugExifDumpMeta = rrwUtil::setDebug( "debugexifdumpmeta" );
         if ( false === strpos( $photoname, "home" ) )
             $filename = "$photoPath/$photoname" . "_cr.jpg";
         else
@@ -148,18 +148,19 @@ class rrwExif {
         $msg .= self::changeItem( $filename, $tmpfname, $item, $value );
         if ( !file_exists( $tmpfname ) ) {
             sleep( 1 );
-            if ( ! file_exists( $tmpfname ) )
+            if ( !file_exists( $tmpfname ) )
                 throw new Exception( "$msg $errorBeg E#745 temp file not there 
                                     $errorEnd" );
-        }
-
-        $sizeOld = filesize( $filename ); 
+        };
+        $sizeOld = filesize( $filename );
         $sizeNew = filesize( $tmpfname );
-        if ( $debugExif )$msg .= rrwExif::dumpMeta( $filename, $tmpfname );
+        if ( $debugExif || $debugExifDumpMeta )$msg .= rrwExif::dumpMeta( $filename, $tmpfname );
         if ( abs( $sizeOld - $sizeNew ) > 500 ) {
-            $msg .= " old size is $sizeOld, new size is $sizeNew,
-                    difference  (" . $sizenew - $sizeold . ") 
-                    is more than 500 please check$eol";
+            $diff = $sizeNew - $sizeOld;
+            $msg .= "$errorBeg E#748 old size is $sizeOld, new size is $sizeNew,
+                    difference  ($diff) 
+                    is more than 500 please check, perhaps thumb nail changed size $errorEnd";
+            $msg .= rrwExif::dumpMeta( $filename, $tmpfname );
         }
 
         unlink( $filename );
@@ -362,7 +363,7 @@ class rrwExif {
         ini_set( 'display_startup_errors', 1 );
         error_reporting( E_ALL | E_STRICT );
         $msg = "";
-        $debug = false;
+        $debug = rrwUtil::setDebug( "rrwphpel" );
         try {
             if ( $debug )$msg .= self::println( "--------------------- emter self::rrwPHPel $eol" );
             $prog = array_shift( $argv );
@@ -824,9 +825,12 @@ class rrwExif {
         $msg .= rrwExif::dumpMeta( $input_file, $output_file );
         return $msg;
     }
+    private function truncate( & $item, $key ) {
+        if ( strlen( $item ) > 120 )
+            $item = substr( $item, 0, 120 );
+    }
 
-    private static function dumpMeta( $file1 = "",
-        $file2 = "" ) {
+    private static function dumpMeta( $file1 = "", $file2 = "" ) {
         global $eol, $errorBeg, $errorEnd;
         global $testPath;
         $msg = "";
@@ -835,11 +839,10 @@ class rrwExif {
             $file1 = "$testPath/input.jpg";
         if ( "" == $file2 )
             $file2 = "$testPath/output.jpg";
+
         $temp1 = self::rrw_exif_read_data( $file1 );
         $temp1 = rrwUtil::print_r( $temp1, true, " file $file1" );
-        $iiComment = strpos( $temp1, "UserCommentEncoding" );
-        if ( $iiComment > 1 )
-            $temp1 = substr( $temp1, 0, $iiComment + 25 );
+        array_walk_recursive( $temp1, 'truncate' );
         $temp1size = filesize( $file1 );
         if ( !file_exists( $file2 ) ) {
             $msg .= "E#460 file does not exist $eol";
@@ -848,9 +851,7 @@ class rrwExif {
         } else {
             $temp2 = self::rrw_exif_read_data( $file2 );
             $temp2 = rrwUtil::print_r( $temp2, true, " file $file2" );
-            $iiComment = strpos( $temp2, "UserCommentEncoding" );
-            if ( $iiComment > 1 )
-                $temp2 = substr( $temp2, 0, $iiComment + 25 );
+            array_walk_recursive( $temp2, 'truncate' );
             $temp2size = filesize( $file2 );
         }
         $msg .= "<table>" . rrwFormat::HeaderRow( "$file1 - $temp1size
