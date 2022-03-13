@@ -232,6 +232,7 @@ Too upload new photos.
             $table = $rrw_photos;
         else
             $table = $tablein;
+        $startat = get_option ("sqlCount-$description", 0);
         $sql = "select count(*) from $table where $sqlWhere";
         if (! empty($limit))
             $sql .= " limit $limit";
@@ -241,7 +242,7 @@ Too upload new photos.
         $msg .= "$cnt photos with no 
             <a href='/fix/?task=listing&amp;where=$query" .
         "&amp;description=$description&amp;table=$tablein&amp;limit=$limit" .
-            "&amp;startat=0' > $description</a>";
+            "&amp;startat=$startat' > $description</a>";
         if ( !empty( Trim( $description ) ) )
             $msg .= $eol;
         return $msg;

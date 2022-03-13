@@ -1169,16 +1169,20 @@ class freewheeling_fixit {
 
         $sqlWhere = rrwUtil::fetchparameterString( "where" );
         $table = rrwUtil::fetchparameterString( "table" );
-        $limit = rrwPara::Number( "limit" );
+        $limitin = rrwPara::Number( "limit" );
         $startAt = rrwPara::Number( "startat" );
-        if ( 0 == $limit )
-            $limit = 20;
-        $limit += $startAt;
+        $description = rrwUtil::fetchparameterString( "description" );
+        if (0 != $startAt)
+            update_site_option ("sqlCount-$description", $startAt);
+        if ( 0 == $limitin)
+            $limitin = 20;
+        $limit = $limitin + $startAt;
+        $urlNext = "/fix/?task=listing&table=$table&limit=&limit&where=$sqlWhere" .
+                "&startat=$limit";
 
         $sqlWhere = str_replace( "xxy", "'", $sqlWhere );
         $sqlWhere = htmlspecialchars_decode( $sqlWhere );
-        $description = rrwUtil::fetchparameterString( "description" );
-        switch ( $table ) {
+       switch ( $table ) {
             case "$rrw_source":
                 $fields = "sourcefullname, searchname, 1 createentry, aspect, sourcestatus";
                 $orderby = "sourcefullname, searchname, aspect";
@@ -1198,11 +1202,12 @@ class freewheeling_fixit {
         if ( !empty( $limit ) )
             $sql .= " limit $limit ";
         $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
-            "photos wih no $description", $startAt );
+            "photos wih no $description", $startAt, $urlNext );
         return $msg;
     }
 
-    private static function rrwFormatDisplayPhotos( $sql, $desvripton, $startAt = 0 ) {
+    private static function rrwFormatDisplayPhotos( $sql, $desvripton, 
+                                                   $startAt = 0, $urlNext="" ) {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra;
         global $httpSource;
@@ -1300,7 +1305,8 @@ class freewheeling_fixit {
             }
             $msg .= "<strong> ------------ available images ------ </strong$eol
           <div class='rrwDinoGrid' >" . $display . "</div>";
-            $msg .= self::filelike( array() );
+            $msg .= self::filelike( array() ) . 
+                    " ] [ <a href='$urlNext' >Next group</a> $eol" ;
         } catch ( Exception $ex ) {
             $msg .= "E#401 " . $ex->getMessage() . "<p> $sql </p> ";
         }

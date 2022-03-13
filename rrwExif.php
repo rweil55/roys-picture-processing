@@ -143,7 +143,7 @@ class rrwExif {
         $tmpfname = str_replace( "jpg", "_copyright.jpg", $filename );
         if ( $debugExif )$msg .= "filename $filename $eol tempname $tmpfname $eol";
         if ( !file_exists( $filename ) )
-            throw new Exception( "$msg $errorBeg E#741 file $flename does not exist $errorEnd", -741 );
+            throw new Exception( "$msg $errorBeg E#741 file $filename does not exist $errorEnd", -741 );
 
         $msg .= self::changeItem( $filename, $tmpfname, $item, $value );
         if ( !file_exists( $tmpfname ) ) {
