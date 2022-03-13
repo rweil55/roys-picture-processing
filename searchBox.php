@@ -40,6 +40,7 @@ class rrwPictures_searchBox {
         if ( $tablecss )
             $msg .= "</td>\n<td> &nbsp; </td>\n<td class='rrwHeaderTDright' >";
         $msg .= "[ <a href='/'>Home</a> ] [ <a href='/quality/' >Quality</a> ]
+                 [ <a href='/privacy/'> Privacy</a>]
                  [ <a href='/webmaster-feedback/'> Feedback</a>]";
         if ( $tablecss )
             $msg .= "</td></tr>\n</table>\n";
