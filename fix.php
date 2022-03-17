@@ -1038,7 +1038,7 @@ class freewheeling_fixit {
                     $sourceuploadLink = self::linkTo127upload( $sourcefile );
                 } else {
                     $sourceuploadLink = "";
-                }
+                } 
                 
                 $imgFile = $httpSource . substr( $sourcefullname, 2 );
                 $sourcefullnameDisplay = "<a href='$imgFile' 
