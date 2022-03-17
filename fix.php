@@ -999,8 +999,9 @@ class freewheeling_fixit {
 
         // lets look
 
-        foreach ( array( "sourceFullname, searchname",
-                "searchname, sourceFullname" ) as $sort ) {
+        foreach ( array( "searchname, sourceFullname",
+                        "sourceFullname, searchname"
+                ) as $sort ) {
             $msg .= "<hr> <strong>sorted by $sort</strong> $eol";
             $sqlFind = "
                 select sourcefullname, searchname, aspect, sourcestatus

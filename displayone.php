@@ -116,7 +116,7 @@ class freeWheeling_DisplayOne {
         </script>
         ";
             // End of display data section
-            if (rrwUtil::notAllowedToEdit ("update, $photographer", false))
+            if ( rrwUtil::notAllowedToEdit( "update, $photographer", false ) )
                 return $msg;
 
             $msg .= "<hr>";
@@ -180,15 +180,23 @@ class freeWheeling_DisplayOne {
             <img src='$htmlfileref2' alt='small Trail Photo'
                     $thumbsize id='smallImage' />
             </td></tr>
-            </table>     
-            
-            <strong>Source Directory:</strong>$direonp &nbsp; 
-                 [ Search: 
-                <a href='/fix/?task=filelike&partial=$photoname&photoname=$photoname' >$photoname</a> ] 
-            
-                [ <a href='$httpSource/pict/sub.php?direname=$direonp'
-                target='submit' > new picture file</a> ] 
-                [ <a href='/display-one-photo/?photoname=nokey'> 
+            </table>   
+            <strong>Source Directory:</strong> &nbsp; 
+            ";
+            if ( empty( $direonp ) ) {
+                $msg .= "<input type='text' name='direonp' id='direonp' size='80px' />";
+            } else {
+                $onDriveD = substr( $direonp, 2 );
+                $msg .= "$direonp   
+                    <input type='hidden' name='direonp' id='direonp' 
+                        value='$direonp' /> &nbsp; 
+                  [ <a href='$httpSource/$onDriveD'
+                target='submit' > 127.0.0.1 picture </a> ] ";
+            }
+            $msg .= " [ Search: 
+                <a href='/fix/?task=filelike&partial=$photoname&photoname=$photoname' 
+                            >$photoname</a> ] 
+                   [ <a href='/display-one-photo/?photoname=nokey'> 
                         Next no keywords</a>]
         <input type='hidden' name='photoname' id='photoname' value='$photoname' />
         <br /><input type='submit' value=\"Commit all changes\" id='submit1' name='submit1' > ";
@@ -373,10 +381,11 @@ class freeWheeling_DisplayOne {
             //       "'>" . $keyWordItem . ",</a>";
             $output .= "$keyWordItem, ";
         }
-        $output = substr($output,0, -2); 
+        $output = substr( $output, 0, -2 );
         return $output;
-        
-    } public static function GetkkeywordLinkedList( $photoname ) {
+
+    }
+    public static function GetkkeywordLinkedList( $photoname ) {
         global $eol;
         global $wpdbExtra, $rrw_keywords;
         $output = "";
@@ -403,7 +412,10 @@ class freeWheeling_DisplayOne {
         global $wpdbExtra;
         $msg = "";
         $msg .= "\n\n<select name='$field'>
-        <option value='' disabled >Select the $field</option>\n";
+        <option value='' disabled ";
+        if ( "" == $oldvalue )
+            $msg .= " selected='selected' ";
+        $msg .= " >Select the $field</option>\n";
         $sql = "select $field from $table order by $sortField ";
         $recset_query = $wpdbExtra->get_resultsA( $sql );
         foreach ( $recset_query as $recset ) {

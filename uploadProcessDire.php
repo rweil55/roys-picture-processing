@@ -13,7 +13,7 @@ class uploadProcessDire {
         //      moves to the high_resoltion directory
         //
         $msg = "";
-        $debug = false;
+        $debug = rrwUtil::setDebug( "upload" );
 
         try {
             if ( $debug )$msg .= "uploadProcessDire ($uploadPath) $eol";
@@ -70,14 +70,14 @@ class uploadProcessDire {
         global $uploadPath;
         global $wpdbExtra, $rrw_photos;
         $msg = "";
-        $debug = false;
+        $debug = rrwUtil::setDebug( "onefile" );
 
         if ( $debug )$msg .= "$entry, ";
         $sourceFile = "$uploadPath/$entry"; // in uplosd dire
         // ------new ----------------------------  validate photoname
-        if (! file_exists($sourceFile))
-            throw new Exception ("$msg $errorBeg E#718 processOneFile( $entry )
-                     file not found in upload $errorEnd");
+        if ( !file_exists( $sourceFile ) )
+            throw new Exception( "$msg $errorBeg E#718 processOneFile( $entry )
+                     file not found in upload $errorEnd" );
         $mime_type = mime_content_type( $sourceFile );
         switch ( $mime_type ) {
             case 'image/jpeg':
@@ -141,11 +141,11 @@ class uploadProcessDire {
         $recs = $wpdbExtra->get_resultsA( $sqlRec );
         $recOld = $recs[ 0 ];
         $photographer = $recOld[ "photographer" ];
-        
-        $msg .= freewheeling_fixit::sourceReject($photoname, "use");
 
-        $msg .= self::MakeImakeImages( $sourceFile, $photographer );
-        
+        $msg .= freewheeling_fixit::sourceReject( $photoname, "use" );
+
+        $msg .= self::makeImages( $sourceFile, $photographer );
+
 
         // meta date exists make it consistant with the EXIF
         $msg .= freewheeling_fixit::fixAssumeDatabaseCorrect( $recOld );
@@ -161,16 +161,18 @@ class uploadProcessDire {
     } // end function processOneFile
 
 
-    private static function MakeImakeImages( $sourceFile, $photographer ) {
+    private static function makeImages( $sourceFile, $photographer ) {
         // assume the file is a temp location - gone when done
         global $eol, $errorBeg, $errorEnd;
         global $photoUrl, $photoPath, $thumbUrl, $thumbPath, $highresUrl, $highresPath;
         //      creates the _cr version with bottom line credit of photographer
         //      creates the thumbnail version
         //      moves to the high_resoltion directory
-        $debug = false;
         $msg = "";
+        $debug = rrwUtil::setDebug( "makeimage" );
+        $debugImageWork = rrwUtil::setDebug( "imagework" );
         try {
+            if ( $debug )$msg = "makeImages( $sourceFile, $photographer ) $eol";
             $desiredW = 200; #	force thumbnail width to this number
             $maxHeight = 700; // limit display mage to yhis number
             $h_botWhite = 20; #	height of the white bar at the bottom for copyright notice
@@ -208,7 +210,6 @@ class uploadProcessDire {
             if ( $debug )$msg .= "saved the source file in $FullfileHighRes $eol";
 
             //  ------------------------------------- got the file now process it
-            $debugImageWork = false;
             if ( !file_exists( $fontfile ) ) {
                 $msg .= "bad font $fontfile ";
                 throw new Exception( "$msg $errorBeg E#812 Problems with the font file $errorEnd" );
@@ -231,14 +232,16 @@ class uploadProcessDire {
                 $im_src->scaleImage( 200, 0 );
                 $im_src->writeImage( $fullfileThumb );
                 $im_src->destroy();
-
+                if ( $debugImageWork )$msg .= "Created thumpnail $fullfileThumb $eol";
                 $im_src = new Imagick();
                 $a = $im_src->getversion();
                 $im_src->readimage( $FullfileHighRes );
                 if ( $h_src > $maxHeight ) {
                     $im_src->scaleImage( 0, $maxHeight );
                 }
+                if ( $debugImageWork )$msg .= "Created internal image $eol";
                 if ( !empty( $photographer ) ) {
+                    if ( $debugImageWork )$msg .= "adding photographer $eol";
                     $text = "Photo by $photographer";
                     $h_new = $im_src->getImageHeight();
                     $w_new = $im_src->getImageWidth();
@@ -258,7 +261,6 @@ class uploadProcessDire {
                     $im_src->drawImage( $draw );
                     $draw->destroy();
                 }
-
                 $im_src->writeImage( $fullFilePhoto );
                 $im_src->destroy();
                 if ( $debugImageWork )$msg .= "made image $photoUrl/$photoname $eol

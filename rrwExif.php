@@ -144,7 +144,7 @@ class rrwExif {
         if ( $debugExif )$msg .= "filename $filename $eol tempname $tmpfname $eol";
         if ( !file_exists( $filename ) )
             throw new Exception( "$msg $errorBeg E#741 file $filename does not exist $errorEnd", -741 );
-
+         if ( $debugExif )$msg .= "changeItem( $filename, $tmpfname, $item, $value) $eol";
         $msg .= self::changeItem( $filename, $tmpfname, $item, $value );
         if ( !file_exists( $tmpfname ) ) {
             sleep( 1 );
@@ -363,7 +363,7 @@ class rrwExif {
         ini_set( 'display_startup_errors', 1 );
         error_reporting( E_ALL | E_STRICT );
         $msg = "";
-        $debug = rrwUtil::setDebug( "rrwphpel" );
+        $debug = rrwUtil::setDebug( "debugrrwphpel" );
         try {
             if ( $debug )$msg .= self::println( "--------------------- emter self::rrwPHPel $eol" );
             $prog = array_shift( $argv );
