@@ -90,7 +90,7 @@ class freewheeling_fixit {
                 case "highresmissing":
                     $msg .= self::highresmissing();
                     break;
-               case "photomissing":
+                case "photomissing":
                     $msg .= self::photomissing();
                     break;
                 case "reload":
@@ -391,7 +391,7 @@ class freewheeling_fixit {
         $link = "<a href='$httpSource/pict/sub.php?task=pushtoupload$dev" .
         "&sourcefile=$sourcefile&photname=$photoname'  >
                     create entry $photoname</a> ";
-         return $link;
+        return $link;
     }
 
     private static function reload( $attr ) {
@@ -1000,8 +1000,8 @@ class freewheeling_fixit {
         // lets look
 
         foreach ( array( "searchname, sourceFullname",
-                        "sourceFullname, searchname"
-                ) as $sort ) {
+                "sourceFullname, searchname"
+            ) as $sort ) {
             $msg .= "<hr> <strong>sorted by $sort</strong> $eol";
             $sqlFind = "
                 select sourcefullname, searchname, aspect, sourcestatus
@@ -1056,29 +1056,29 @@ class freewheeling_fixit {
         $msg .= rrwPicSubmission::displayform(); //uses photographer, photoname
         return $msg;
     }
-    
-/*     static public function fetchURL( $url ) {
-        global $eol, $errorBeg, $errorEnd;
-        $msg = "";
-        $debugJuturl = false;
-        if ( $debugJuturl );
-        $msg .= "calling curl inti  with $eol &nbsp; &nbsp; &nbsp; $url $eol";
 
-        $ch = curl_init( $url );
-        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
-        curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, 120 );
-        curl_setopt( $ch, CURLOPT_TIMEOUT, 120 );
-        $placesJson = curl_exec( $ch );
-        $curlError = curl_errno( $ch );
-        //          $msg .= "E#961 Curl error: $curlError $eol";
-        if ( $curlError != 0 ) {
-            $msg .= "$errorBeg E#960 Curl error: " . curl_error( $ch ) . $errorEnd;
-            $placeJson = "";
+    /*     static public function fetchURL( $url ) {
+            global $eol, $errorBeg, $errorEnd;
+            $msg = "";
+            $debugJuturl = false;
+            if ( $debugJuturl );
+            $msg .= "calling curl inti  with $eol &nbsp; &nbsp; &nbsp; $url $eol";
+
+            $ch = curl_init( $url );
+            curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+            curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, 120 );
+            curl_setopt( $ch, CURLOPT_TIMEOUT, 120 );
+            $placesJson = curl_exec( $ch );
+            $curlError = curl_errno( $ch );
+            //          $msg .= "E#961 Curl error: $curlError $eol";
+            if ( $curlError != 0 ) {
+                $msg .= "$errorBeg E#960 Curl error: " . curl_error( $ch ) . $errorEnd;
+                $placeJson = "";
+            }
+            curl_close( $ch );
+            return $placesJson;
         }
-        curl_close( $ch );
-        return $placesJson;
-    }
-*/
+    */
     private static function sourcePush( $attr = "" ) {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_photos;
@@ -1195,17 +1195,17 @@ class freewheeling_fixit {
         $limitin = rrwPara::Number( "limit" );
         $startAt = rrwPara::Number( "startat" );
         $description = rrwUtil::fetchparameterString( "description" );
-        if (0 != $startAt)
-            update_site_option ("sqlCount-$description", $startAt);
-        if ( 0 == $limitin)
+        if ( 0 != $startAt )
+            update_site_option( "sqlCount-$description", $startAt );
+        if ( 0 == $limitin )
             $limitin = 20;
         $limit = $limitin + $startAt;
         $urlNext = "/fix/?task=listing&table=$table&limit=&limit&where=$sqlWhere" .
-                "&startat=$limit";
+        "&startat=$limit";
 
         $sqlWhere = str_replace( "xxy", "'", $sqlWhere );
         $sqlWhere = htmlspecialchars_decode( $sqlWhere );
-       switch ( $table ) {
+        switch ( $table ) {
             case "$rrw_source":
                 $fields = "sourcefullname, searchname, 1 createentry, aspect, sourcestatus";
                 $orderby = "sourcefullname, searchname, aspect";
@@ -1216,7 +1216,7 @@ class freewheeling_fixit {
                 break;
             default:
                 $table = "$rrw_photos";
-                $fields = " photoname, trail_name, photographer, photostatus ";
+                $fields = " photoname, '1' search,  trail_name, photographer, photostatus ";
                 $orderby = " photoname, trail_name, photographer, photostatus ";
         }
         //  item is  trail_name, direonp
@@ -1229,8 +1229,8 @@ class freewheeling_fixit {
         return $msg;
     }
 
-    private static function rrwFormatDisplayPhotos( $sql, $desvripton, 
-                                                   $startAt = 0, $urlNext="" ) {
+    private static function rrwFormatDisplayPhotos( $sql, $desvripton,
+        $startAt = 0, $urlNext = "" ) {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra;
         global $httpSource;
@@ -1293,6 +1293,10 @@ class freewheeling_fixit {
                         case "aspect":
                             $aspect = $valu;
                             break;
+                        case "search":
+                            $valu = "<a href='fix/?task=filelike&partial=" .
+                            "$photoname&photoname=$photoname' target='search' > search<a>";
+                            break;
                         default:
                             // just plane $valu
                             break;
@@ -1328,8 +1332,8 @@ class freewheeling_fixit {
             }
             $msg .= "<strong> ------------ available images ------ </strong$eol
           <div class='rrwDinoGrid' >" . $display . "</div>";
-            $msg .= self::filelike( array() ) . 
-                    " ] [ <a href='$urlNext' >Next group</a> $eol" ;
+            $msg .= self::filelike( array() ) .
+            " ] [ <a href='$urlNext' >Next group</a> $eol";
         } catch ( Exception $ex ) {
             $msg .= "E#401 " . $ex->getMessage() . "<p> $sql </p> ";
         }
