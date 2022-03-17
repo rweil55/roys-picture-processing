@@ -123,8 +123,10 @@ class freeWheeling_DisplayOne {
             // --------------------------------------------------- update section
             // --------------------------------------------------- update section
             // --------------------------------------------------- update section
+            $server = $_SERVER['HTTP_HOST'];
             $msg .= "
-            <form action='/update' method='post' >
+            <form action='https://$server/update' method='post' >
+            <input type='hidden' name='allow' value='1' />
             <table><tr><td>
             ";
             if ( $debugPath )$msg .= "***** 4 *****displayOne:photoPath $photoPath <br/>";

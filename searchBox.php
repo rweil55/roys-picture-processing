@@ -52,18 +52,20 @@ class rrwPictures_searchBox {
     }
 
     private static function adminNavBar() {
+        $httpHost = "https://" . $_SERVER[ 'HTTP_HOST' ];
         // common routinue to putput the pictures administrators admin bar
-         if ( rrwUtil::AllowedToEdit( "update", "", false ) ) {
-            $exifUrl = "/wp-content/plugins/roys-picture-processng/Exif/html";
-            $exifList = "https://devpictures.shaw-weil.com/wp-content/plugins/roys-picture-processng/Exif/html/TagNames/EXIF.html";
+        if ( rrwUtil::AllowedToEdit( "update", "", false ) ) {
+            $exifUrl = "$httpHost/wp-content/plugins/roys-picture-processng/Exif/html";
+            $exifList = "$httpHost/wp-content/plugins/roys-picture-processng/Exif/html/TagNames/EXIF.html";
+
             $msg = "
-            <p>[ <a href='/admin' target='admin' >admin </a>]
-            [ <a href='/submission' target='admin' >submit photo </a> ]
+            <p>[ <a href='$httpHost/admin' target='admin' >admin </a>]
+            [ <a href='$httpHost/submission' target='admin' >submit photo </a> ]
             [ c:\_e &nbsp; php sub.php ]
-            [ <a href='/upload' target='admin' >process upload </a> ]
+            [ <a href='$httpHost/upload' target='admin' >process upload </a> ]
             [ <a href='$exifUrl' target='one' >EXIF description </a> ]
             [ <a href='$exifList' target='one' >EXIF description </a> ]
-            [ <a href='/display-one-photo/?photoname=nokey' taarget='one' >no key words </a> ]
+            [ <a href='$httpHost/display-one-photo/?photoname=nokey' taarget='one' >no key words </a> ]
             
             </p>\n ";
         } else

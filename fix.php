@@ -90,7 +90,7 @@ class freewheeling_fixit {
                 case "highresmissing":
                     $msg .= self::highresmissing();
                     break;
-                case "photomissing":
+               case "photomissing":
                     $msg .= self::photomissing();
                     break;
                 case "reload":
@@ -391,7 +391,7 @@ class freewheeling_fixit {
         $link = "<a href='$httpSource/pict/sub.php?task=pushtoupload$dev" .
         "&sourcefile=$sourcefile&photname=$photoname'  >
                     create entry $photoname</a> ";
-        return $link;
+         return $link;
     }
 
     private static function reload( $attr ) {
@@ -1056,7 +1056,29 @@ class freewheeling_fixit {
         $msg .= rrwPicSubmission::displayform(); //uses photographer, photoname
         return $msg;
     }
+    
+/*     static public function fetchURL( $url ) {
+        global $eol, $errorBeg, $errorEnd;
+        $msg = "";
+        $debugJuturl = false;
+        if ( $debugJuturl );
+        $msg .= "calling curl inti  with $eol &nbsp; &nbsp; &nbsp; $url $eol";
 
+        $ch = curl_init( $url );
+        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+        curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, 120 );
+        curl_setopt( $ch, CURLOPT_TIMEOUT, 120 );
+        $placesJson = curl_exec( $ch );
+        $curlError = curl_errno( $ch );
+        //          $msg .= "E#961 Curl error: $curlError $eol";
+        if ( $curlError != 0 ) {
+            $msg .= "$errorBeg E#960 Curl error: " . curl_error( $ch ) . $errorEnd;
+            $placeJson = "";
+        }
+        curl_close( $ch );
+        return $placesJson;
+    }
+*/
     private static function sourcePush( $attr = "" ) {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_photos;
