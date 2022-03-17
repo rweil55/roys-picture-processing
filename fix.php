@@ -388,8 +388,10 @@ class freewheeling_fixit {
         else
             $dev = "&dev=0";
         $photoname = self::removejpgDire( $sourcefile );
+        $sourceEncoded = urlencode($sourcefile);
+        $photonameEncoded = urlencode($photoname);
         $link = "<a href='$httpSource/pict/sub.php?task=pushtoupload$dev" .
-        "&sourcefile=$sourcefile&photname=$photoname'  >
+        "&sourcefile=$sourceEncoded&photname=$photonameEncoded'  >
                     create entry $photoname</a> ";
         return $link;
     }
@@ -1037,9 +1039,10 @@ class freewheeling_fixit {
                 } else {
                     $sourceuploadLink = "";
                 }
-
+                
                 $imgFile = $httpSource . substr( $sourcefullname, 2 );
-                $sourcefullnameDisplay = "<a href='$imgFile' target='127'>$sourcefullname</a>";
+                $sourcefullnameDisplay = "<a href='$imgFile' 
+                target='127'>$sourcefullname</a>";
                 $msg .= rrwFormat::CellRow( $color, "$cnt $status",
                     $sourcefullnameDisplay, $aspect, $sourceuploadLink, $link );
                 $display .= "<div class='rrwDinoItem' >
@@ -1294,8 +1297,10 @@ class freewheeling_fixit {
                             $aspect = $valu;
                             break;
                         case "search":
-                            $valu = "<a href='fix/?task=filelike&partial=" .
-                            "$photoname&photoname=$photoname' target='search' > search<a>";
+                            $photonameEncoded = urlencode($photoname);
+                            $url = "fix/?task=filelike&partial=" .
+                            "$photonameEncoded&photoname=$photonameEncoded";
+                          $valu = "<a href='$url' target='search' > search<a>";
                             break;
                         default:
                             // just plane $valu
