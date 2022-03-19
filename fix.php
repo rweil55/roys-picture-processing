@@ -1,13 +1,3 @@
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script>
-function gimmeFile(filename){
-    
-    alert (filename);
-     $.get(filename, function(data, status){
-    alert("Data: " + data + "\nStatus: " + status);
-  });
-}
-</script>
 <?php
 
 //require_once "rrw_util_inc.php";
@@ -1232,7 +1222,7 @@ class freewheeling_fixit {
         return $msg;
     }
 
-    private static function rrwFormatDisplayPhotos( $sql, $desvripton,
+    private static function rrwFormatDisplayPhotos( $sql, $description,
         $startAt = 0, $urlNext = "" ) {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra;
@@ -1244,7 +1234,7 @@ class freewheeling_fixit {
             print( "<!-- sql request is \n\n$sql\n, start = $startAt\n\n -->\n" );
             $missngsource = $wpdbExtra->get_resultsA( $sql );
             $missngsourceCnt = $wpdbExtra->num_rows;
-            $msg .= "<strong>There are $missngsourceCnt $desvripton</strong> $eol";
+            $msg .= "<strong>There are $missngsourceCnt $description</strong> $eol";
             $cnt = 0;
             if ( 0 == $missngsourceCnt )
                 return "$msg E#717 $sql $eol ";

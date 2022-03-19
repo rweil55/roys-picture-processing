@@ -144,7 +144,7 @@ class rrwExif {
         if ( $debugExif )$msg .= "filename $filename $eol tempname $tmpfname $eol";
         if ( !file_exists( $filename ) )
             throw new Exception( "$msg $errorBeg E#741 file $filename does not exist $errorEnd", -741 );
-         if ( $debugExif )$msg .= "changeItem( $filename, $tmpfname, $item, $value) $eol";
+        if ( $debugExif )$msg .= "changeItem( $filename, $tmpfname, $item, $value) $eol";
         $msg .= self::changeItem( $filename, $tmpfname, $item, $value );
         if ( !file_exists( $tmpfname ) ) {
             sleep( 1 );
@@ -552,6 +552,10 @@ class rrwExif {
                 $type = self::findTagtype( $tag );
                 if ( $debug )$msg .= self::println( "E#724 Adding new $tag of type $type with $newValue $eol " );
                 switch ( $type ) {
+                    case "Artist":
+                        if ( $debug )$msg .= "trying new PelTag::ARTIST(  $eol";
+                        $desc = new PelEntryAscii( PelTag::ARTIST, $newValue );
+                        break;
                     case "Copyright":
                         if ( $debug )$msg .= "trying new PelEntryCopyright( $newValue ); $eol";
                         $desc = new PelEntryAscii( PelTag::COPYRIGHT,
@@ -564,9 +568,9 @@ class rrwExif {
                     case "DateTime":
                         $desc = new PelEntryByte( PelTag::DATE_TIME, $newValue );
                         break;
-                    case "Artist":
-                        if ( $debug )$msg .= "trying new PelTag::ARTIST(  $eol";
-                        $desc = new PelEntryAscii( PelTag::ARTIST, $newValue );
+                    case "HostComputer":
+                        if ( $debug )$msg .= "trying new PelTag::HostComputer(  $eol";
+                        $desc = new PelEntryAscii( PelTag::HOSTCOMPUTER, $newValue );
                         break;
                     case "Keywords":
                         $msg .= "trying to make keyword entry $eol";
@@ -629,6 +633,8 @@ class rrwExif {
             case "DateTime":
             case "DateTimeOriginal":
                 return 0x0132; // Peltag::DATETIMEOROGINAL ;  // 0x0132 //  0x9003;
+            case "HostComputer":
+                return 0x013c;
             case "Keywords":
                 return 0x9c9e; // (WindowsXPKeywords)
             case "width":
@@ -922,6 +928,11 @@ class rrwExif {
         $msg = self::doOneItem( "Keywords", "some, keyword, multy word" );
         return $msg;
     }
+    private static function HostComputer() {
+        global $eol, $errorBeg, $errorEnd;
+        $msg = self::doOneItem( "HostComputer", "computer host" );
+        return $msg;
+    }
     private static function test1( $attr ) {
         global $eol, $errorBeg, $errorEnd;
         $msg = self::doOneItem( "Artist", "Roy Weil" );
@@ -1132,6 +1143,9 @@ class rrwExif {
             case "example_editDescription":
                 print "calling example_editDescription $eol";
                 $msg .= self::example_editDescription( " a new description" );
+                break;
+            case "HostComputer":
+                $msg.= self::HostComputer();
                 break;
             case "keyword":
                 $msg .= self::keyword();
