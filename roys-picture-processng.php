@@ -11,7 +11,7 @@
  * Text Domain: Roys-picture-processng
  * Domain Path: /translation
  
-  * Version: 2.1.21
+  * Version: 2.1.22
  */
 // disable direct access
 ini_set( "display_errors", true );
@@ -340,13 +340,14 @@ add_shortcode( "fix", array( "freewheeling_fixit", "fit_it" ) );
 add_shortcode( "fixtasklist", array( "fixTaskList", "showlist" ) );
 add_shortcode( "rrwPicSubmission", array( "rrwPicSubmission", "showForm" ) );
 add_shortcode( "upload", array( "uploadProcessDire", "upload" ) );
-add_shortcode( "testing",array("rrwExif", "test") );
+add_shortcode( "testingexif",array("rrwErrwExif", "test11") );
 
 require 'plugin_update_check.php';
-$MyUpdateChecker = new PluginUpdateChecker_2_0(
+$MyUpdateChecker  = new PluginUpdateChecker_2_0(
     'http://pluginserver.royweil.com/roys-picture-processng.php',
     __FILE__,
     'roys-very-picture-processng',
     1
 );
+
 ?>

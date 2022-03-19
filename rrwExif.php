@@ -42,75 +42,7 @@ use lsolesen\ pel\ PelWrongComponentCountException;
 require_once "pel-h.php";
 
 class rrwExif {
-    /*
-        public static function copyMeta( $filename, $outputPath ) {
-            global $eol, $errorBeg, $errorEnd;
-            $msg = "";
-            $debugExif = true;
-            ini_set( "displaoy_errors", true );
-            error_reporting( E_ALL | E_STRICT );
-            try {
-                if ( $debugExif )$msg .= "input file - $filename $eol 
-                                        output file - $outputPath $eol";
-                // pushto     
-                $contents = file_get_contents( $filename );
-                if ( $debugExif )$msg .= " got contents of $filename $eol";
-                $ss = strlen( $contents );
-                if ( $debugExif )$msg .= " contents size is $ss $eol";
-
-                $jpeg = $fileInMemory = new PelJpeg();
-                if ( $debugExif )$msg .= " new PelJpeg() worked  $eol";
-                $jpeg->loadfile( $filename );
-                if ( $debugExif )$msg .= " loadfile worked  $eol";
-                //       $exif = $jpeg->getExif();
-                if ( $debugExif )$msg .= " getExif worked  $eol";
-                $exif = exif_read_data( $filename, 0, true );
-                if ( $debugExif )$msg .= " exif_read_data worked  $eol";
-                if ( is_null( $exif ) )
-                    throw new Exceprion( "$errorBeg e#491 inputPel->getExif() failed $errorEnd" );
-                $cnt = 0;
-                foreach ( $exif as $key => $section ) {
-                    $cnt++;
-                    if ( $cnt > 50 )
-                        break;
-                    foreach ( $section as $name => $val ) {
-                        $cnt++;
-                        if ( $cnt > 50 )
-                            break;
-                        $msg .= "$key.$name: $val $eol";
-                    }
-                }
-                if ( $debugExif )$msg .= " display  $eol";
-                $jpeg->clearExif();
-                if ( $debugExif )$msg .= " clearExif worked  $eol";
-                $fileInMemory->savefile( $outputPath );
-                if ( $debugExif )$msg .= " save file worked  $eol";
-
-                return $msg;
-                /* fatial error in save
-                         if ( $debugExif )$msg .= " display  $eol";
-                            $exifNew = new PelExif();
-                            if ( $debugExif )$msg .= " new exif  worked  $eol";
-                            $jpeg->setExif( $exifNew );
-                            if ( $debugExif )$msg .= " setExif worked  $eol";
-                            $fileInMemory->savefile( $outputPath );
-                    */
-    /*
-            $resultr1 = $outputPath->setExif();
-            if ( $debugExif ) print "called setExif empty $eol ";
-            if ( is_null( $resultr1 ) )
-                throw new Exceprion( "$errorBeg e#492 outputPath->setExif() failed $errorEnd" );
-            $resullt2 = $outputPel->saveFile( $outputPath );
-
-            if ( $debugExif ) print "got exif$eol ";
-            if ( is_null( $resullt2 ) )
-                throw new Exceprion( "$errorBeg e#492 outputPel->saveFile(() failed $errorEnd" );
-        } catch ( Exception $ex ) {
-            $msg .= "E#400 xxx catch ";
-        }
-        return "$msg Meta copied from $filename $eol $outputPath $eol";
-    }
-*/
+   
     function readexifItem( $filename, $item, & $msg ) {
         global $eol, $errorBeg, $errorEnd;
         ini_set( "display_errors", true );
@@ -577,6 +509,13 @@ class rrwExif {
                         $desc = new PelEntryByte( PelTag::XP_KEYWORDS, $newValue );
                         $msg .= "created keyword entry $eol";
                         break;
+                    case "UserComment":
+                        $desc = new PelEntryAscii( PelTag::USERCOMMENT, $newValue );
+                        break;
+                     case "XPComment":
+                        $desc = new PelEntryAscii( PelTag::XPCOMMENT, $newValue );
+                        break;
+             
                     default:
                         throw new Exception( "E#488 Unknown self::findTagtype for $type" );
                         break;
@@ -643,6 +582,10 @@ class rrwExif {
                 return 0x0101; // 0xbc81
             case "COMPUTED":
                 return "COMPUTED"; // 0xbc81
+            case "UserComment":
+                return 0x9286;
+            case "XPComment":
+                return 0x9c9c;
             default:
                 debug_print_backtrace( 0, 3 );
                 throw new Exception( "$errorBeg E#484 Invalid Tag Nameof '$text' $errorEnd" );
@@ -949,6 +892,68 @@ class rrwExif {
         // not useful to us
 
     }
+   public static function test11($attr) {   
+       global $eol, $errorBeg, $errorEnd;
+        global $testPath;
+        $msg = "";
+        include "setConstants.php";
+        $testPath = "/home/pillowan/www-shaw-weil-pictures-dev/testphoto";
+        $output_file = "$testPath/output.jpg";
+        //       $msg .= rrwUtil::print_r( $attr, true, "I#739 atributes" );
+        $task = rrwPara::String( "task", $attr );
+        print "I#735 testing the task $task $eol";
+        if ( file_exists( $output_file ) )
+            unlink( $output_file );
+        switch ( $task ) {
+            case "artist":
+                $msg .= self::Artist();
+                break;
+            case "copyartist":
+                $msg .= self::CopyArtist();
+                break;
+            case "copycopy":
+                $msg .= self::copycopy();
+                break;
+            case "copyright":
+                $msg .= self::copyright();
+                break;
+            case "datetime":
+                $msg .= self::DateTime();
+                break;
+            case "description":
+                $msg .= self::description();
+                break;
+            case "dumpmeta":
+                $msg .= self::dumpmeta();
+                break;
+            case "example_editDescription":
+                print "calling example_editDescription $eol";
+                $msg .= self::example_editDescription( " a new description" );
+                break;
+            case "HostComputer":
+                $msg.= self::HostComputer();
+                break;
+            case "keyword":
+                $msg .= self::keyword();
+                break;
+            case "testpel":
+                $msg .= self::testpel();
+                break;
+            case "testpel2":
+                $msg .= self::testpel2();
+                break;
+            case "testpel3":
+                $msg .= self::testpel3();
+                break;
+            case "writeoutput":
+                $msg .= self::writeoutput();
+                break;
+            default:
+                $msg .= "$errorBeg task of '$task' was not found$errorEnd";
+                break;
+        } // end switch}
+       return $msg;
+   }
 
     private static function example_editDescription( $newValue ) {
         global $eol, $errorBeg, $errorEnd;
@@ -1106,67 +1111,5 @@ class rrwExif {
         $msg .= rrwExif::dumpMeta( $input, $output );
         return $msg;
     }
-    public static function test( $attr ) {
-        global $eol, $errorBeg, $errorEnd;
-        global $testPath;
-        $msg = "";
-        include "setConstants.php";
-        $testPath = "/home/pillowan/www-shaw-weil-pictures-dev/testphoto";
-        $output_file = "$testPath/output.jpg";
-        //       $msg .= rrwUtil::print_r( $attr, true, "I#739 atributes" );
-        $task = rrwPara::String( "task", $attr );
-        print "I#735 testing the task $task $eol";
-        if ( file_exists( $output_file ) )
-            unlink( $output_file );
-        switch ( $task ) {
-            case "artist":
-                $msg .= self::Artist();
-                break;
-            case "copyartist":
-                $msg .= self::CopyArtist();
-                break;
-            case "copycopy":
-                $msg .= self::copycopy();
-                break;
-            case "copyright":
-                $msg .= self::copyright();
-                break;
-            case "datetime":
-                $msg .= self::DateTime();
-                break;
-            case "description":
-                $msg .= self::description();
-                break;
-            case "dumpmeta":
-                $msg .= self::dumpmeta();
-                break;
-            case "example_editDescription":
-                print "calling example_editDescription $eol";
-                $msg .= self::example_editDescription( " a new description" );
-                break;
-            case "HostComputer":
-                $msg.= self::HostComputer();
-                break;
-            case "keyword":
-                $msg .= self::keyword();
-                break;
-            case "testpel":
-                $msg .= self::testpel();
-                break;
-            case "testpel2":
-                $msg .= self::testpel2();
-                break;
-            case "testpel3":
-                $msg .= self::testpel3();
-                break;
-            case "writeoutput":
-                $msg .= self::writeoutput();
-                break;
-            default:
-                $msg .= "$errorBeg task of '$task' was not found$errorEnd";
-        }
-        return $msg;
-    } // end test
-} // end class
-
+ }  // end class
 ?>

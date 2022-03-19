@@ -66,8 +66,12 @@ class freeWheeling_DisplayUpdate {
             // updat the keyword list
             $msg .= keywordHandling::remove( $photoname );
             $msg .= keywordHandling::insertList( $photoname, $keyWordList );
+    //        $msg .= "trying user comment $eol";
+    //         $msg .= pushToImage( $photoname, "XPComment", "host machine" );
+    //        $msg .= "tryidUserComment $eol";
 
-            $sqlCheck = "select * from $rrw_photos where photoname ='$photoname'"; 
+
+            $sqlCheck = "select * from $rrw_photos where photoname ='$photoname'";
             $rec = $wpdbExtra->get_resultsA( $sqlCheck );
             $msg .= freewheeling_fixit::fixAssumeDatabaseCorrect( $rec[ 0 ] );
             if ( $debug ) {
