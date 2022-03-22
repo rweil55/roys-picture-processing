@@ -101,10 +101,10 @@ class freewhilln_Administration_Pictures {
             $msg .= "$photorejectCnt photos rejected/duplicates $eol";
             $msg .= "$keyWithCnt distinct photos in the keyword database$eol";
             $msg .= self::EmptyCount( "direonp", "source file" );
-            $msg .= self::SQLcount("with load dates before 3/17", 
-                             "uploaddate < '2021-03-17' " );
-            $msg .= self::SQLcount("with load dates after 3/16", 
-                             "uploaddate > '2021-03-16' " );
+            $msg .= self::SQLcount("with load dates before 2002-03-24", 
+                             "uploaddate < '2022-03-14' " );
+            $msg .= self::SQLcount("with load dates after 2022-03-14'", 
+                             "uploaddate > '2022-03-14' " );
             $msg .= "$photogUsedCnt <a  href='/display-photographers/'
                     target='list' >
                     distinct photographers</a> used of $PhotogTotalCnt 
@@ -135,6 +135,8 @@ class freewhilln_Administration_Pictures {
                                  " from $rrw_photos )", $rrw_keywords);
             $msg .= self::EmptyCount( "copyright", "copyright" );
             $msg .= self::EmptyCount( "DireOnP", "source directory" );
+            $msg .= self::SQLcount("source like -s", 
+                                   "direonp = '' and filename like '%-s' ");
             $msg .= self::EmptyCount( "height", "height" );
             $msg .= self::EmptyCount( "width", "width" );
              $msg .= self::SQLcount(" mismatched keywords ",

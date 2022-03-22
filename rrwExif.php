@@ -1,4 +1,4 @@
-<?php
+G<?php
 
 ini_set( "display_errors", true );
 error_reporting( E_ALL | E_STRICT );
@@ -498,7 +498,7 @@ class rrwExif {
                         $desc = new PelEntryAscii( PelTag::IMAGE_DESCRIPTION, $newValue );
                         break;
                     case "DateTime":
-                        $desc = new PelEntryByte( PelTag::DATE_TIME, $newValue );
+                        $desc = new PelEntryAscii( PelTag::DATE_TIME, $newValue );
                         break;
                     case "HostComputer":
                         if ( $debug )$msg .= "trying new PelTag::HostComputer(  $eol";
