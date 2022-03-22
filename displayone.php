@@ -101,13 +101,21 @@ class freeWheeling_DisplayOne {
                 //      $aspect = $w_screen / $h_screen;
                 //      $adjust = $h_screen / $h_cr;
                 //      $w_desired = round( $w_cr * $adjust, 0 ) . "px";
-                $msg .= "<img src='$htmlfileref1' alt='Trail Photo'
+                $msg .= "<table><tr>
+                    <td align='left' width='400'>
+                        <img src='$htmlfileref1' alt='Trail Photo'
                         height='auto' width='$$w_screen' id='bigImage' />
-                        &nbsp; ";
-                $msg .= "<img src='$htmlfileref2' alt='small Trail Photo'
-                    $thumbsize id='smallImage' />$eol";
+                        &nbsp; </td>
+                    <td width=3px> </td>
+                    <td align='left' valign='center' width='200' >
+                        <img src='$htmlfileref2' alt='small Trail Photo'
+                    $thumbsize id='smallImage' /><br /><br />
+                    <a href = '$htmlfileref1' download=$photoname > 
+                    <img src ='/wp-content/download.png' width='200'></a>
+                    </td></tr></table> $eol";
                 //print "adjust = $adjust, width=$w_desired $eol";
             }
+
             $msg .= freeWheeling_DisplayOne::DisplayTableDataOne( $recset );
             $msg .= "
         <script type='javascript' >
