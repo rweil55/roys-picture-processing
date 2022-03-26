@@ -19,6 +19,7 @@ class freewhilln_Administration_Pictures {
         ini_set( "display_errors", true );
         $msg = "";
         try {
+            $loadDate = '2022-03-10';
             $setdisplaykey = rrwUtil::fetchparameterString( "setdisplaykey" );
             if ( "on" == $setdisplaykey )
                 $displaykey = true;
@@ -101,10 +102,10 @@ class freewhilln_Administration_Pictures {
             $msg .= "$photorejectCnt photos rejected/duplicates $eol";
             $msg .= "$keyWithCnt distinct photos in the keyword database$eol";
             $msg .= self::EmptyCount( "direonp", "source file" );
-            $msg .= self::SQLcount("with load dates before 2002-03-24", 
-                             "uploaddate < '2022-03-14' " );
-            $msg .= self::SQLcount("with load dates after 2022-03-14'", 
-                             "uploaddate > '2022-03-14' " );
+            $msg .= self::SQLcount("with load dates before $loadDate", 
+                             "uploaddate < '$loadDate' " );
+            $msg .= self::SQLcount("with load dates after $loadDate'", 
+                             "uploaddate >= '$loadDate' " );
             $msg .= "$photogUsedCnt <a  href='/display-photographers/'
                     target='list' >
                     distinct photographers</a> used of $PhotogTotalCnt 
@@ -136,7 +137,8 @@ class freewhilln_Administration_Pictures {
             $msg .= self::EmptyCount( "copyright", "copyright" );
             $msg .= self::EmptyCount( "DireOnP", "source directory" );
             $msg .= self::SQLcount("source like -s", 
-                                   "direonp = '' and filename like '%-s' ");
+                                   "uploaddate < '$loadDate' and 
+                                   filename like '%-s' ");
             $msg .= self::EmptyCount( "height", "height" );
             $msg .= self::EmptyCount( "width", "width" );
              $msg .= self::SQLcount(" mismatched keywords ",

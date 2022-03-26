@@ -173,7 +173,7 @@ class freeWheeling_DisplayOne {
             }
             $msg .= "
              [ <a href='/fix/?task=filelike&partial=$photoname&photoname=$photoname' >
-                    search High resolution</a> ] 
+                    search $photoname</a> ] 
             &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 
             [ <a href='/fix?task=deletephoto&del2=$photoname&del3=$photoname" .
             "&why=duplicate' > Remove duplicate photo </a> ] 
@@ -353,7 +353,7 @@ class freeWheeling_DisplayOne {
             "Photo Date: ", $recset[ "PhotoDate" ] );
         $msg .= rrwFormat::CellRow( "Photo Size ",
             "<a href='$photoUrl/{$photoname}_cr.jpg'>this - $sizeDisplay</a>,
-                High Resolution - $sizeHighres, ThumbNail - $sizeThumb " );
+               ThumbNail - $sizeThumb " );
         $msg .= "</table>";
         $copyRight = $recset[ "copyright" ];
         if ( empty( $copyRight ) )
