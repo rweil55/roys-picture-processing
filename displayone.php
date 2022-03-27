@@ -19,9 +19,9 @@ class freeWheeling_DisplayOne {
             $photoname = rrwUtil::fetchparameterString( "photoname", $attr );
             $photoname = str_replace( "_tmb", "", $photoname );
             $photoname = str_replace( ".jpg", "", $photoname );
-            if ( $debugPath )$msg .= "**** 1 ******displayOne:photoPath $photoPath <br/>";
+            if ( $debugPath )$msg .= "displayOne:photoPath $photoPath $eol";
             //	if thumbs is true them display thumbnail, else display fill size
-            if ( $debugPath )$msg .= " DisplayOne ($photoname )   ... ";
+            if ( $debugPath )$msg .= " DisplayOne ($photoname )   ... $eol ";
             $current_user = wp_get_current_user();
             if ( !( $current_user instanceof WP_User ) )
                 $ser = "Guest";
@@ -66,7 +66,7 @@ class freeWheeling_DisplayOne {
             $trail_name = $recset[ "trail_name" ];
             $uploaddate = $recset[ "uploaddate" ];
             $highresShortname = $recset[ "highresShortname" ];
-            if ( $debugPath )$msg .= "**** 5 ******displayOne:photoUrl $photoPath <br/>";
+            if ( $debugPath )$msg .= "displayOne:photoUrl $photoPath $eol";
             $htmlfileref1 = "$photoUrl/{$photoname}_cr.jpg";
             $fullfilename1 = "$photoPath/{$photoname}_cr.jpg";
             $htmlfileref2 = "$thumbUrl/{$photoname}_tmb.jpg";

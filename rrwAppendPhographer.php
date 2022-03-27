@@ -53,7 +53,7 @@ class AppendPhotographer {
             //  ------------------------------------- got the file now process it
             if ( !file_exists( $fontfile ) ) {
                 $msg .= "bad font $fontfile ";
-                throw new Exception( "$msg $errorBeg E#812 Problems with the font file $errorEnd" );
+                throw new Exception( "$msg $errorBeg E#811 Problems with the font file $errorEnd" );
             }
 
             // create new dimensions, keeping aspect ratio

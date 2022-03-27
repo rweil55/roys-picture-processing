@@ -38,12 +38,12 @@ try {
     $rrw_trails = $tablePrefix . "trails";
    
     $siteUrl = get_site_url();
-    $photoUrl = "$siteUrl/photos";
+    $photoUrl = "$siteUrl/wp-content/photos";
     $thumbUrl = "$photoUrl/thumbs";
     $highresUrl = "$photoUrl/high_resolution";
     $rejectUrl  = "$photoUrl/reject";
 
-    $photoPath = ABSPATH . "photos";
+    $photoPath = ABSPATH . "wp-content/photos";
     //       $photoPath = "/home/pillowan/www-shaw-weil-pictures/photos";
     $thumbPath = "$photoPath/thumbs";
     $highresPath = "$photoPath/high_resolution";

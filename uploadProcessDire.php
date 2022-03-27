@@ -131,7 +131,7 @@ class uploadProcessDire {
                 "inserting $photoname $eol" );
             $cnt = $wpdbExtra->insert( $rrw_photos, $Data );
             if ( 1 != $cnt ) {
-                $err = "$errorBeg E#706 insert fails $errorEnd";
+                $err = "$errorBeg E#712 insert fails $errorEnd";
                 $msg .= rrwUtil::print_r( $Data, true, $err );
             }
         }
