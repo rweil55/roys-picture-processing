@@ -72,10 +72,13 @@ class rrwExif {
             $filename = "$photoPath/$photoname" . "_cr.jpg";
         else
             $filename = $photoname;
+        if (!file_exists($filname)) {
+            $msg .= "$errorBeg E#719 pushToImage: $filename does not esist $errorEnd";
+            $msg .= rrwFormat::backtrace(3);
+            throw new Exception("$msg");
+        }
         $tmpfname = str_replace( "jpg", "_copyright.jpg", $filename );
         if ( $debugExif )$msg .= "filename $filename $eol tempname $tmpfname $eol";
-        if ( !file_exists( $filename ) )
-            throw new Exception( "$msg $errorBeg E#741 file $filename does not exist $errorEnd", -741 );
         if ( $debugExif )$msg .= "changeItem( $filename, $tmpfname, $item, $value) $eol";
         $msg .= self::changeItem( $filename, $tmpfname, $item, $value );
         if ( !file_exists( $tmpfname ) ) {
@@ -548,8 +551,8 @@ class rrwExif {
         } catch ( Exception $ex ) {
             $code = $ex->getCode();
             if ( 0 == $code )
-                $msg .= "$errorBeg E#400 main routine catch 
-                with no message $errorEnd";
+                $msg .= "$errorBeg E#400 rrwPel: routine catch with no message errorEnd
+                $eol rrwPHPel( $input, $output, $tag, $newValue) $eol";
             else
                 $msg .= "$errorBeg" . $ex->get_message() .
             "E#400 main routine catch $errorEnd"; // . 

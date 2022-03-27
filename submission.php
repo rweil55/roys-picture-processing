@@ -21,10 +21,10 @@ class rrwPicSubmission {
     private static function uploadfile() {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_photographers, $rrw_photos;
-        global $uploadPath, $highresPath;
+        global $uploadPath, $highresPath, $photoPath;
         $msg = "";
         $debug = false;
-
+    
         try {
             $debugsubmit = false;
             if ( $debugsubmit )$msg .= rrwUtil::print_r( $_FILES, true, "Files" );

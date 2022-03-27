@@ -48,7 +48,7 @@ try {
     $thumbPath = "$photoPath/thumbs";
     $highresPath = "$photoPath/high_resolution";
     $uploadPath = "$photoPath/upload";
-    $rejectPath = "$photoPath/reject";
+    $rejectPath = "$photoPath/reject"; 
  
 } catch ( Exception $ex ) {
     throw new Exception( "$errorBeg E#499 xxx SetConstants " . $ex->get_message() . $errorEnd );

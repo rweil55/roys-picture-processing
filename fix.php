@@ -1737,7 +1737,7 @@ class freewheeling_fixit {
             }
             // ---------------------------- ------------------ copyright
             //  note: order matters, older jpg will accept only one attribute
-            $sofar = "go for copyright";
+            $sofar = "About to process copyright";
             if ( array_key_exists( "Copyright", $fileExif ) )
                 $fileCopyRight = $fileExif[ "Copyright" ];
             else
@@ -1763,6 +1763,7 @@ class freewheeling_fixit {
             }
 
             //  -------------------------------------------- photographer
+             $sofar = "About to process Artist ";
             if ( array_key_exists( "Artist", $fileExif ) )
                 $fileArtist = $fileExif[ "Artist" ];
             else
@@ -1788,8 +1789,9 @@ class freewheeling_fixit {
                         $fileArtist = $databasePhotographer;
                     }
                 } // end diff test
-            $sofar = "phtographer";
+            $sofar = "done phtographer";
             //  --------------------------------------------- datetime
+            $sofar = "About to process dateTime";
             $FileDateTime = self::getPhotoDateTime( $fileExif );
             $debugDate = false;
             if ( empty( $FileDateTime ) && empty( $datebasePhotoDate ) ) {
@@ -1826,7 +1828,7 @@ class freewheeling_fixit {
 
             // -------------------------------------------- keywodes
             // more code needed here to get the file tags
-            $sofar = "keywrods";
+            $sofar = "About to process keywrods";
             $debugKeywords = false;
 
             $keywordname = "0x9c9e";
@@ -1868,7 +1870,7 @@ class freewheeling_fixit {
                     }
                 }
                 // --------------------------------- image height, image width
-            $sofar = "go for height, width";
+            $sofar = "About to process height, width";
             $imageheight = $fileExif[ "COMPUTED" ][ "Height" ];
             $imagewidth = $fileExif[ "COMPUTED" ][ "Width" ];
             if ( $databaseHeight != $imageheight )
