@@ -158,7 +158,6 @@ class uploadProcessDire {
             $widthThumb = 200; #	force thumbnail width to this number
             $heightMax = 768; // limit display mage to yhis number
             $widthMax = 1024;
-            $h_botWhite = 20; #	height of the white bar at the bottom for copyright notice
             $fileSplit = pathinfo( $sourceFile );
             if ( $debug )$msg .= rrwUtil::print_r( $fileSplit, true, "the file split" );
             $extension = $fileSplit[ 'extension' ];
@@ -181,10 +180,8 @@ class uploadProcessDire {
             // source exits or resize would have thrown error
             $msg .= self::resizeImage( /* do dispay image */
                 $sourceFile, $fullFilePhoto, $widthMax, $heightMax );
-            if ( !empty( $photographer ) ) {
+            if ( !empty( $photographer ) )
                 $msg .= self::nameToBottom( $fullFilePhoto, $photographer );
-                $msg .= rrwExif::pushToImage( $photoname, "Copyright", $databaseCopyright 
-            }
 
             // ----------------- move input image to save location
             if ( !rename( $sourceFile, $FullfileHighRes ) ) {
@@ -209,9 +206,9 @@ class uploadProcessDire {
     private static function nameToBottom( $sourceFile, $photographer ) {
         global $eol, $errorBeg, $errorEnd;
         $msg = "";
-        $debug = rrwPara::Boolean( "resizeToWidth" );
-        $debug = true;
+        $debug = rrwPara::Boolean( "nameToBottom" );
 
+        $h_bottom = 20; #	height of the white bar at the bottom for copyright notice
         $fontSize = 12; #	height of the copyright text
         $fontfile = "arial.ttf";
         $fontDire = "/home/pillowan/www-shaw-weil-pictures/wp-content/plugins/roys-picture-processng";
@@ -223,11 +220,11 @@ class uploadProcessDire {
         // use Imagick to add the name to the bottom
         $im_src = new Imagick();
         $im_src->readimage( $sourceFile );
-        if ( $debugImageWork )$msg .= "adding photographer $eol";
+        if ( $debug )$msg .= "adding photographer $eol";
         $text = "Photo by $photographer";
         $h_new = $im_src->getImageHeight();
         $w_new = $im_src->getImageWidth();
-        $h_new = $h_new + $h_botWhite;
+        $h_new = $h_new + $h_bottom;
         $im_src->extentImage( $w_new, $h_new, 0, 0 );
         $draw = new ImagickDraw();
         $draw->setStrokeColor( "#00000000" );
@@ -236,23 +233,21 @@ class uploadProcessDire {
         //   $draw->setFont( $fontfile );
         $draw->setFontSize( $fontSize );
         $metrics = $im_src->queryFontMetrics( $draw, $text );
-        $baseline = $h_new - ( ( $h_botWhite - $fontSize ) / 2 );
+        $baseline = $h_new - ( ( $h_bottom - $fontSize ) / 2 );
         $marginLeft = ( $w_new - $metrics[ "textWidth" ] ) / 2;
         $draw->annotation( $marginLeft, $baseline, $text );
         $im_src->drawImage( $draw );
         $draw->destroy();
-        $result = unlink( $fullFilePhoto );
-        $im_src->writeImage( $fullFilePhoto );
+        $result = unlink( $sourceFile );
+        $im_src->writeImage( $sourceFile );
         $im_src->destroy();
-        if ( $debugImageWork )$msg .= "
-                <img src='$photoUrl/$photoname" . "_cr.jpg'/> ";
         return $msg;
     } // end NameToBottom 
     /*
 
                      // use GD to add the name to the bottom
  
-                    $h_new = $h_cr + $h_botWhite;
+                    $h_new = $h_cr + $h_bottom;
                     $imgFinal = imagecreatetruecolor( $w_cr, $h_new );
                     if ( !imagecopy( $imgFinal, $img_copyright,
                             0, 0, 0, 0, $w_src, $h_cr ) )
@@ -286,7 +281,7 @@ class uploadProcessDire {
                     if ( $left < 2 )$left = 2;
                     $bot = $h_new - 3; # just barely off the bottom.
                     # black out the text just drawn, and redraw it centered on the visiable image
-                    $tmpHeight = $h_cr - $h_botWhite;
+                    $tmpHeight = $h_cr - $h_bottom;
                     if ( !imagefilledrectangle( $imgFinal, 0, $h_cr, $w_src, $h_new, $white ) )
                         throw new Exception( "imagefilledrectangle( imgFinal, 0, $h_cr, $w_src $h_new, $white ) " );
                     $bounds = imagettftext( $imgFinal, $fontSize, 0, $left, $bot, $black, $fontfile, $copyrightMsg );
@@ -330,27 +325,32 @@ class uploadProcessDire {
         $imgGDin = self::imageCreateFrom( $pathin );
         $w_cur = imagesx( $imgGDin );
         $h_cur = imagesy( $imgGDin );
-
+        if($debug) $msg .= "input size =  $w_max, $h_max $eol
+                            curent siz =  $w_cur. $h_cur $eol";
+        $w_scalefactor = $h_scalefactor = $scalefactor = "not set";
         if ( 0 >= $w_max && 0 >= $h_max ) {
             throw new Exception( "$msg $errorBeg E#639 resizeImage: 
             Invalid widths specified $w_max, $h_max  $errorEnd" );
-        } elseif ( 0 <= $h_max ) {
-            $scalefactor = $w_max / $w_cur;
-        } elseif ( 0 <= $w_max ) {
+        } elseif ( 0 >= $h_max ) {
+            ; // donothing w,0
+        } elseif ( 0 >= $w_max ) {
             $scalefactor = $h_max / $h_cur;
+            $w_max = round( $w_max * $scalefactor );
+            $h_max = 0;
         } else {
             $w_scalefactor = $w_max / $w_cur;
             $h_scalefactor = $h_max / $h_cur;
-            $scalefactor = max( $w_scalefactor, $h_scalefactor );
+            $scalefactor = min( $w_scalefactor, $h_scalefactor );
+            $w_max = floor( $w_cur * $scalefactor );
+            $h_max = 0;
         }
-        $w_max = $w_cur * $scalefactor;
-        $h_max = $h_cur * $scalefactor;
-        if ( $debug )$msg .= "resize scaled $w_cur, $h_cur to 
+        if ( $debug )
+            $msg .= "scales $w_scalefactor, $h_scalefactor used $scalefactor $eol resize scaled $w_cur, $h_cur to 
                                 $w_max, $h_max $eol";
-        $imgGDout = imagescale( $imgGDin, $w_max, $h_max );
+            $imgGDout = imagescale( $imgGDin, $w_max );
         if ( false === $imgGDout )
             throw new Exception( "$msg $errorBeg #651 failure in resize 
-                                        usine $scalefactor $errorEnd " );
+                                    using $w_max, $h_max $errorEnd " );
         $resultOut = imagejpeg( $imgGDout, $pathout, 100 );
         if ( false === $resultOut )
             throw new Exception( "E#651 failure in resize:write failed to
