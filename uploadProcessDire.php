@@ -310,7 +310,7 @@ class uploadProcessDire {
         global $eol, $errorBeg, $errorEnd;
         $msg = "";
         $debug = rrwPara::Boolean( "resize" );
-        $debug = true;
+        $debug = false;
 
         if ( !file_exists( $pathin ) ) {
             throw new Exception( "$errorBeg E#633 resizeToWidth:file: 

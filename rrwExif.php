@@ -554,7 +554,7 @@ class rrwExif {
         } catch ( Exception $ex ) {
             $code = $ex->getCode();
             if ( 0 == $code )
-                $msg .= "$errorBeg E#633 rrwPel: routine catch with no message #errorEnd
+                $msg .= "$errorBeg E#633 rrwPel: routine catch with no message $errorEnd
                 $eol rrwPHPel( $input, $output, $tag (" . dechex( $tag ) .
             "), $newValue) $eol";
             else
