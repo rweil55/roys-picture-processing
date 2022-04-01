@@ -47,7 +47,7 @@ class freeWheeling_DisplayUpdate {
             $sqlOld = "select * from $rrw_photos where photoname = '$photoname'";
             $recsold = $wpdbExtra->get_resultsA( $sqlOld );
             if ( 1 < $wpdbExtra->num_rows )
-                $msg .= "$errorBeg E#859 caution more than one photos 
+                $msg .= "$errorBeg E#858 caution more than one photos 
                             database. $errorEnd";
             if ( 0 == $wpdbExtra->num_rows )
                 throw new Exception( "$errorBeg no photo record found,
@@ -66,11 +66,9 @@ class freeWheeling_DisplayUpdate {
             // updat the keyword list
             $msg .= keywordHandling::remove( $photoname );
             $msg .= keywordHandling::insertList( $photoname, $keyWordList );
-    //        $msg .= "trying user comment $eol";
+            //        $msg .= "trying user comment $eol";
     //         $msg .= pushToImage( $photoname, "XPComment", "host machine" );
     //        $msg .= "tryidUserComment $eol";
-
-
             $sqlCheck = "select * from $rrw_photos where photoname ='$photoname'";
             $rec = $wpdbExtra->get_resultsA( $sqlCheck );
             $msg .= freewheeling_fixit::fixAssumeDatabaseCorrect( $rec[ 0 ] );
@@ -85,13 +83,11 @@ class freeWheeling_DisplayUpdate {
         }
         return $msg;
     } // end DisplayUpdate
-
     public static function compare( $itemName, $newValue, $rec ) {
         //compare old and new value, update if different
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_photos, $rrw_photographers, $rrw_keywords;
         $msg = "";
-
         try {
             ini_set( "display_errors", true );
             error_reporting( E_ALL | E_STRICT );

@@ -95,16 +95,15 @@ class rrwPicSubmission {
             }
 
             // see if metat data exists
-            $sqlexists = "select photographer from $rrw_photos
-                        where photoname = '$photoname' ";
+            $sqlexists = "select photographer, uploaddate
+                from $rrw_photos where photoname = '$photoname' ";
             $recs = $wpdbExtra->get_resultsA( $sqlexists );
             if ( 1 == $wpdbExtra->num_rows ) {
                 // have meta date, update it
                 if ( 'on' == $replacephoto ) {
                     $msg .= "Per your request existing photo will be replaced $eol";
                 } else {
-                    $dateMod = filemtime( $FullfileHighRes );
-                    $dateMod = date( "Y-M-d", $dateMod );
+                    $dateMod = $recs[0]["uploaddate"];
                     $msg .= "$errorBeg $eol E#814 $$highresShortname 
                     was uploaded previously on $dateMod. 
                     You must check the box to allow the replacement $errorEnd" ;
@@ -136,7 +135,7 @@ class rrwPicSubmission {
                 $msg .= rrwUtil::InsertIntoHistory( $photoname, "
                                         new photograper photographer" );
             }
-            // meta data now set, move the filw
+            // meta data now set, move the file
             if ( !move_uploaded_file(
                     $_FILES[ 'inputfile' ][ 'tmp_name' ], $Fullfileupload ) ) {
                 throw new RuntimeException( 'Failed to move uploaded file.' );
