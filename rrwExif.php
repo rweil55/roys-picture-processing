@@ -42,7 +42,7 @@ use lsolesen\ pel\ PelWrongComponentCountException;
 require_once "pel-h.php";
 
 class rrwExif {
-   
+
     function readexifItem( $filename, $item, & $msg ) {
         global $eol, $errorBeg, $errorEnd;
         ini_set( "display_errors", true );
@@ -72,10 +72,10 @@ class rrwExif {
             $filename = "$photoPath/$photoname" . "_cr.jpg";
         else
             $filename = $photoname;
-        if (!file_exists($filname)) {
+        if ( !file_exists( $filename ) ) {
             $msg .= "$errorBeg E#719 pushToImage: $filename does not esist $errorEnd";
-            $msg .= rrwFormat::backtrace(3);
-            throw new Exception("$msg");
+            $msg .= rrwFormat::backtrace( 3 );
+            throw new Exception( "$msg" );
         }
         $tmpfname = str_replace( "jpg", "_copyright.jpg", $filename );
         if ( $debugExif )$msg .= "filename $filename $eol tempname $tmpfname $eol";
@@ -84,12 +84,13 @@ class rrwExif {
         if ( !file_exists( $tmpfname ) ) {
             sleep( 1 );
             if ( !file_exists( $tmpfname ) )
-                throw new Exception( "$msg $errorBeg E#745 temp file not there 
-                                    $errorEnd" );
+                throw new Exception( "$msg $errorBeg E#745 changeItem did Not 
+                                produce  expected updated file $errorEnd" );
         };
         $sizeOld = filesize( $filename );
         $sizeNew = filesize( $tmpfname );
-        if ( $debugExif || $debugExifDumpMeta )$msg .= rrwExif::dumpMeta( $filename, $tmpfname );
+        if ( $debugExif || $debugExifDumpMeta )
+            $msg .= rrwExif::dumpMeta( $filename, $tmpfname );
         if ( abs( $sizeOld - $sizeNew ) > 500 ) {
             $diff = $sizeNew - $sizeOld;
             $msg .= "$errorBeg E#748 old size is $sizeOld, new size is $sizeNew,
@@ -360,7 +361,7 @@ class rrwExif {
              */
             if ( $debug )$msg .= "Reading file $input ...$eol";
             $buffer = file_get_contents( $input );
-            if ( $debug )$msg .= self::println( "got " . strlen( $buffer ) . "bytes from the files $eol" );
+            if ( $debug )$msg .= self::println( "got " . strlen( $buffer ) . " bytes from the files $eol" );
 
             $data = new PelDataWindow( $buffer );
             if ( $debug )$msg .= "got data $eol";
@@ -383,12 +384,14 @@ class rrwExif {
                  * simply remember that it is to ask the PelDataWindow for data when
                  * required.
                  */
+                if ( $debug )$msg .= "about to do a jpeg->load( data) $eol";
                 $jpeg->load( $data );
                 /*
                  * The PelJpeg object contains a number of sections, one of which
                  * might be our Exif data. The getExif() method is a convenient way
                  * of getting the right section with a minimum of fuzz.
                  */
+                if ( $debug )$msg .= "lets read the exif $eol";
                 $exif = $jpeg->getExif();
                 if ( $debug )$msg .= "got the exif $eol ";
 
@@ -515,10 +518,10 @@ class rrwExif {
                     case "UserComment":
                         $desc = new PelEntryAscii( PelTag::USERCOMMENT, $newValue );
                         break;
-                     case "XPComment":
+                    case "XPComment":
                         $desc = new PelEntryAscii( PelTag::XPCOMMENT, $newValue );
                         break;
-             
+
                     default:
                         throw new Exception( "E#488 Unknown self::findTagtype for $type" );
                         break;
@@ -547,12 +550,13 @@ class rrwExif {
             if ( $debug )$msg .= self::println( 'Writing file "%s".', $output );
             $file->saveFile( $output ) . $eol;
             if ( $debug )$msg .= self::println( "finished with test Pel $eol" );
-            if ( $debug )$msg .= self::println( "  -------------------------------- end PHPel  $eol" );
+            if ( $debug )$msg .= "  -------------------------- end PHPel  $eol" ;
         } catch ( Exception $ex ) {
             $code = $ex->getCode();
             if ( 0 == $code )
-                $msg .= "$errorBeg E#400 rrwPel: routine catch with no message errorEnd
-                $eol rrwPHPel( $input, $output, $tag, $newValue) $eol";
+                $msg .= "$errorBeg E#633 rrwPel: routine catch with no message #errorEnd
+                $eol rrwPHPel( $input, $output, $tag (" . dechex( $tag ) .
+            "), $newValue) $eol";
             else
                 $msg .= "$errorBeg" . $ex->get_message() .
             "E#400 main routine catch $errorEnd"; // . 
@@ -895,8 +899,8 @@ class rrwExif {
         // not useful to us
 
     }
-   public static function test11($attr) {   
-       global $eol, $errorBeg, $errorEnd;
+    public static function test11( $attr ) {
+        global $eol, $errorBeg, $errorEnd;
         global $testPath;
         $msg = "";
         include "setConstants.php";
@@ -934,7 +938,7 @@ class rrwExif {
                 $msg .= self::example_editDescription( " a new description" );
                 break;
             case "HostComputer":
-                $msg.= self::HostComputer();
+                $msg .= self::HostComputer();
                 break;
             case "keyword":
                 $msg .= self::keyword();
@@ -955,8 +959,8 @@ class rrwExif {
                 $msg .= "$errorBeg task of '$task' was not found$errorEnd";
                 break;
         } // end switch}
-       return $msg;
-   }
+        return $msg;
+    }
 
     private static function example_editDescription( $newValue ) {
         global $eol, $errorBeg, $errorEnd;
@@ -1114,5 +1118,5 @@ class rrwExif {
         $msg .= rrwExif::dumpMeta( $input, $output );
         return $msg;
     }
- }  // end class
+} // end class
 ?>

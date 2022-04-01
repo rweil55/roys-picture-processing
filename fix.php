@@ -378,8 +378,8 @@ class freewheeling_fixit {
         else
             $dev = "&dev=0";
         $photoname = self::removejpgDire( $sourcefile );
-        $sourceEncoded = urlencode($sourcefile);
-        $photonameEncoded = urlencode($photoname);
+        $sourceEncoded = urlencode( $sourcefile );
+        $photonameEncoded = urlencode( $photoname );
         $link = "<a href='$httpSource/pict/sub.php?task=pushtoupload$dev" .
         "&sourcefile=$sourceEncoded&photname=$photonameEncoded'  >
                     create entry $photoname</a> ";
@@ -1028,8 +1028,8 @@ class freewheeling_fixit {
                     $sourceuploadLink = self::linkTo127upload( $sourcefile );
                 } else {
                     $sourceuploadLink = "";
-                } 
-                
+                }
+
                 $imgFile = $httpSource . substr( $sourcefullname, 2 );
                 $sourcefullnameDisplay = "<a href='$imgFile' 
                 target='127'>$sourcefullname</a>";
@@ -1287,10 +1287,10 @@ class freewheeling_fixit {
                             $aspect = $valu;
                             break;
                         case "search":
-                            $photonameEncoded = urlencode($photoname);
+                            $photonameEncoded = urlencode( $photoname );
                             $url = "fix/?task=filelike&partial=" .
                             "$photonameEncoded&photoname=$photonameEncoded";
-                          $valu = "<a href='$url' target='search' > search<a>";
+                            $valu = "<a href='$url' target='search' > search<a>";
                             break;
                         default:
                             // just plane $valu
@@ -1743,13 +1743,12 @@ class freewheeling_fixit {
             else
                 $fileCopyRight = "";
             if ( $debugForce )$msg .= "file: $fileCopyRight , database: $databaseCopyright $eol";
-            if ( empty( $fileCopyRight ) && empty( $databaseCopyright ) )
-            ; // do nothing
-            elseif ( empty( $fileCopyRight ) && !empty( $databaseCopyright ) ) {
+            if ( empty( $fileCopyRight ) && empty( $databaseCopyright ) ) {
+                $msg .= ""; // do nothing
+            } elseif ( empty( $fileCopyRight ) && !empty( $databaseCopyright ) ) {
                 $msg .= rrwExif::pushToImage( $photoname, "Copyright", $databaseCopyright );
                 $fileCopyRight = $databaseCopyright;
-            }
-            elseif ( !empty( $fileCopyRight ) && empty( $databaseCopyright ) ) {
+            } elseif ( !empty( $fileCopyRight ) && empty( $databaseCopyright ) ) {
                 $sqlUpdate[ "copyright" ] = $fileCopyRight;
                 $databaseCopyright = $fileCopyRight;
             } elseif ( $databaseCopyright != $fileCopyRight ) { // both have data
@@ -1763,7 +1762,7 @@ class freewheeling_fixit {
             }
 
             //  -------------------------------------------- photographer
-             $sofar = "About to process Artist ";
+            $sofar = "About to process Artist ";
             if ( array_key_exists( "Artist", $fileExif ) )
                 $fileArtist = $fileExif[ "Artist" ];
             else
@@ -1890,6 +1889,7 @@ class freewheeling_fixit {
             $msg .= "$msg E#440 in fixAssumeExifCorrect: $sofar: " .
             $ex->getMessage() . $eol;
         }
+
         return $msg;
     } // end function fixAssumeExifCorrect
 
