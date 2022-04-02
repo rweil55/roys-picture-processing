@@ -37,12 +37,8 @@ class freewhilln_Administration_Pictures {
             $msg .= ( "<!-- sql is $sql -->\n" );
             $withKeysQuery = $wpdbExtra->get_resultsA( $sql );;
             $keyWithCnt = $wpdbExtra->num_rows;
-            $sql = "select filename from $rrw_photos where direonp = '' "; // missng source
-            $msg .= ( "<!-- sql is $sql -->\n" );
-            $missngsource = $wpdbExtra->get_var( $sql );;
-            $missngsourceCnt = $wpdbExtra->num_rows;
-            $sql = "select Filename from $rrw_photos 
-                        where Filename not in (
+            $sql = "select photoname from $rrw_photos 
+                        where photoname not in (
                                 select keywordFilename 
                                 from $rrw_keywords ) 
                                 and photostatus = 'use' "; // photo not in keyword
@@ -51,14 +47,14 @@ class freewhilln_Administration_Pictures {
             $keyMissingCnt = $wpdbExtra->num_rows;
             $keyMissingList = "";
             foreach ( $photoNokey as $recset ) {
-                $key = $recset[ "Filename" ];
+                $key = $recset[ "photoname" ];
                 $keyMissingList .= "<a href='/display-one-photo?photoname=$key'
                  target='one' > $key</a> &nbsp ";
             }
             // keyword not in photo
             $sql = "select keywordFilename from $rrw_keywords 
                             where keywordFilename not in (
-                                select Filename from $rrw_photos ) ";
+                                select photoname from $rrw_photos ) ";
             $msg .= ( "<!-- sql is $sql -->\n" );
             $KeyNoPhoto = $wpdbExtra->get_resultsA( $sql );;
             $photoMissingCnt = $wpdbExtra->num_rows;
@@ -137,7 +133,7 @@ class freewhilln_Administration_Pictures {
             $msg .= self::EmptyCount( "copyright", "copyright" );
             $msg .= self::EmptyCount( "DireOnP", "source directory" );
             $msg .= self::SQLcount( "~load before $loadDate and like -s",
-                "uploaddate < '$loadDate' and filename like '%-s' " );
+                "uploaddate < '$loadDate' and photoname like '%-s' " );
             $msg .= self::EmptyCount( "height", "height" );
             $msg .= self::EmptyCount( "width", "width" );
             $msg .= self::SQLcount( " mismatched keywords ",

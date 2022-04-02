@@ -515,6 +515,11 @@ class rrwExif {
                         $desc = new PelEntryByte( PelTag::XP_KEYWORDS, $newValue );
                         $msg .= "created keyword entry $eol";
                         break;
+                    case "TimeZoneOffset":
+                         $msg .= "trying to make TimeZoneOffset entry $eol";
+                        $desc = new PelEntryShort( PelTag::TIMEZONROFFSET, $newValue );
+                        $msg .= "created keyword TimeZoneOffset $eol";
+                        break;
                     case "UserComment":
                         $desc = new PelEntryAscii( PelTag::USERCOMMENT, $newValue );
                         break;
@@ -583,6 +588,8 @@ class rrwExif {
                 return 0x013c;
             case "Keywords":
                 return 0x9c9e; // (WindowsXPKeywords)
+            case "TimeZoneOffset":
+                return 0x882a;
             case "width":
                 return 0x0100; //"IMAGEWIDTH";  
             case "height":
@@ -894,11 +901,6 @@ class rrwExif {
         return $msg;
     }
 
-    function example_dirsort( $newdescription ) {
-        // rename files in a directory to matxhdte time
-        // not useful to us
-
-    }
     public static function test11( $attr ) {
         global $eol, $errorBeg, $errorEnd;
         global $testPath;

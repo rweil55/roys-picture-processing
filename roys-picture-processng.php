@@ -11,7 +11,7 @@
  * Text Domain: Roys-picture-processng
  * Domain Path: /translation
  
-  * Version: 2.1.33
+  * Version: 2.1.34
  */
 // disable direct access
 ini_set( "display_errors", true );
@@ -182,7 +182,8 @@ function pushToImage( $filename, $item, $value ) {
     
     $msg = rrwExif::pushToImage( $filename, $item, $value ) ;
     return $msg;
-    
+}
+ /*   
     
     global $eol, $errorBeg, $errorEnd;
     global $photoPath;
@@ -316,7 +317,7 @@ function pushToImage( $filename, $item, $value ) {
     }
     return $msg;
 }
-
+*/
 /* a printf() variant that appends a newline to the output. */
 function println( $fmt, $value = "" ) {
     global $eol;

@@ -126,7 +126,6 @@ class rrwPicSubmission {
                 // no meta data
                 $Insert = array(
                     "photographer" => $photographer,
-                    "filename" => $photoname,
                     "photoname" => $photoname,
                     "uploaddate" => date( "Y-m-d" ),
                     "highresShortname" => $highresShortname,

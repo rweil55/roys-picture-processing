@@ -998,14 +998,14 @@ class freewheeling_fixit {
 
         foreach ( array( "searchname, sourceFullname",
                 "sourceFullname, searchname"
-            ) as $sort ) {
-            $msg .= "<hr> <strong>sorted by $sort</strong> $eol";
+            ) as $orderby ) {
+            $msg .= "<hr> <strong>ordered by by $orderby</strong> $eol";
             $sqlFind = "
                 select sourcefullname, searchname, aspect, sourcestatus
                 from $rrw_source 
                 where sourcefullname like '%$partial%' 
                 or sourceFullname like '%$partial%' 
-                order by $sort ";
+                order by $orderby ";
 
             $recs = $wpdbExtra->get_resultsA( $sqlFind );
             $msg .= "Found " . $wpdbExtra->num_rows . " records like '$partial' $eol";
@@ -1113,15 +1113,15 @@ class freewheeling_fixit {
         return $msg;
     } // end functin sourcepush()
 
-    public static function sourceReject( $filename, $why ) {
+    public static function sourceReject( $photoname, $why ) {
         // update sll version of this photo form the usable collection
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_source;
         $msg = "";
 
-        if ( empty( $filename ) ) {
-            $filename = rrwPara::String( "filename" );
-            if ( empty( $filename ) )
+        if ( empty( $photoname ) ) {
+            $photoname = rrwPara::String( "photoname" );
+            if ( empty( $photoname ) )
                 return "$msg $errorBeg E#713 source reject missing name $errorEnd";
         }
         if ( empty( $why ) ) {
@@ -1129,7 +1129,7 @@ class freewheeling_fixit {
             if ( empty( $why ) )
                 $why = "duplicate";
         }
-        $photoname = self::removeEndingsJpgDire( $filename );
+        $photoname = self::removeEndingsJpgDire( $photoname );
         if ( empty( $photoname ) )
             return "E#711 No photo name given to source Reject $eol";
         foreach ( self::photonameEndings() as $end ) {
@@ -1499,7 +1499,7 @@ class freewheeling_fixit {
                 $msg .= rrwFormat::CellRow( $keyDisplay, $value );
             }
             $msg .= "</table> <hr weight=3>";
-            $sqlblank = "select filename from $rrw_photos 
+            $sqlblank = "select photoname from $rrw_photos 
                 where direonp = '' or direonp is null ";
             $msg .= "$sqlblank $eol ";
             $recs = $wpdbExtra->get_resultsA( $sqlblank );
@@ -1508,7 +1508,7 @@ class freewheeling_fixit {
 
             $msg .= "<table> ";
             foreach ( $recs as $rec ) {
-                $key = $rec[ "filename" ];
+                $key = $rec[ "photoname" ];
                 $keyDisplay = "<a href='http://pictures.shaw-weil.com/display-one-photo" .
                 "?photoname=$key' target='one' >$key</a>";
                 $msg .= rrwFormat::CellRow( $keyDisplay );
@@ -1531,14 +1531,14 @@ class freewheeling_fixit {
 
         $msg .= SetConstants( "updateDiretoryOnFileMatch" );
         $msg .= direReport( "direonp", "with blank DireOnP" );
-        $sql = "select Filename from $rrw_photos wheredireonp = '' ";
+        $sql = "select photoname from $rrw_photos wheredireonp = '' ";
         $msg .= "$sql $eol ";
         $recs = $wpdbExtra->get_resultsA( $sql );
         $cntrecs = $wpdbExtra->num_rows;
         $msg .= "Found $cntrecs photos not marched to directories of data $eol";
         $photos = array();
         foreach ( $recs as $rec )
-            array_push( $photos, $rec[ "Filename" ] );
+            array_push( $photos, $rec[ "photoname" ] );
         $sqlSource = "select searchname, sourceFullname from $rrw_source 
                     where sourcestatus = 'use'";
         $recPcs = $wpdbExtra->get_resultsA( $sqlSource );
@@ -1597,22 +1597,22 @@ class freewheeling_fixit {
         } // end looping thru the source list
         $msg .= "</table> $eol";
         $msg .= direReport( "direonp", "with blank DireOnP" ) . $eol . $eol;
-        $sqlEmpty = "select filename, photo_id from $rrw_photos wheredireonp = '' 
-            and filename like '%_ms%'
-            order by substring(filename,7,5) ";
+        $sqlEmpty = "select photoname, photo_id from $rrw_photos wheredireonp = '' 
+            and photoname like '%_ms%'
+            order by substring(photoname,7,5) ";
         $recEmptys = $wpdbExtra->get_resultsA( $sqlEmpty );
         $msg .= "</table>\n";
         foreach ( $recEmptys as $recEmpty ) {
-            $filename = $recEmpty[ "filename" ];
+            $photoname = $recEmpty[ "photoname" ];
             $photo_id = $recEmpty[ "photo_id" ];
-            if ( strpos( $filename, "_ms" ) === false ) {
+            if ( strpos( $photoname, "_ms" ) === false ) {
                 $newname = "";
             } else {
-                $newname = "dale0" . substr( $filename, 9, 1 ) . "-img00" .
-                substr( $filename, 11, 2 );
+                $newname = "dale0" . substr( $photoname, 9, 1 ) . "-img00" .
+                substr( $photoname, 11, 2 );
             }
             $c1 = "<form action='/fix?task=rename' method='post' >
-                <input type='text' value='$filename' name='filename'/>";
+                <input type='text' value='photoname' name='photoname'/>";
             $c2 = "<input type='text' value='$newname' name='new'/>";
             $c3 = "<input type='submit' value='rename' /> </form>";
             $c4 = "<a href='https://pictures.shaw-weil.com/display-one-photo?photoid=$photo_id' target='one' > $photo_id </a>";
@@ -1700,7 +1700,7 @@ class freewheeling_fixit {
         $debugForce = false;
         $sofar = "fixAssumeExifCorrect entry";
         try {
-            $photoname = $rec[ "filename" ];
+            $photoname = $rec[ "photoname" ];
             $databaseCopyright = $rec[ "copyright" ];
             $datebasePhotoDate = $rec[ "PhotoDate" ];
             $databasePhotographer = $rec[ "photographer" ];
@@ -1889,7 +1889,7 @@ class freewheeling_fixit {
             //  all the checks have been done, Any dtabase to update
             if ( count( $sqlUpdate ) > 0 ) { // now update the database
                 $answer = $wpdbExtra->update( $rrw_photos, $sqlUpdate,
-                    array( "filename" => $photoname ) );
+                    array( "photoname" => $photoname ) );
                 if ( $debugForce )$msg .= "had " . count( $sqlUpdate ) .
                 " to be updated in $answer record $eol";
             }
@@ -1979,25 +1979,25 @@ class freewheeling_fixit {
     }
 
     public static function getDatabaseList() {
-        // returns an array, key = filename, value= full path to file
+        // returns an array, key = photoname, value= full path to file
         global $rrw_photos, $wpdbExtra;
         $list = array();
-        $sqlall = "select highresShortname filename, direonp,highresShortname from $rrw_photos";
+        $sqlall = "select highresShortname photoname, direonp,highresShortname from $rrw_photos";
         $recAlls = $wpdbExtra->get_resultsA( $sqlall );
         foreach ( $recAlls as $recAll ) {
-            $filename = $recAll[ "filename" ];
+            $photoname = $recAll[ "photoname" ];
             $direonp = $recAll[ "direonp" ];
             $highresShortname = $recAll[ "highresShortname" ];
             if ( empty( $direonp ) )
                 $direonp = $highresShortname;
-            $filename = strToLower( $filename );
-            $list[ $filename ] = strToLower( $direonp );
+            $photoname = strToLower( $photoname );
+            $list[ $photoname ] = strToLower( $direonp );
         }
         ksort( $list );
         return $list;
     }
     public static function getFileList( $dire ) {
-        // returns an array, key = filename, value= full path to file
+        // returns an array, key = photoname, value= full path to file
         $files = array();
         $dh = opendir( $dire );
         if ( !is_resource( $dh ) )

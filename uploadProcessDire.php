@@ -91,7 +91,6 @@ class uploadProcessDire {
                 letters, numbers, and spaces" );
         // --------------------------- deal with database entry
         $Data = array(
-            "filename" => $photoname,
             "highresShortname" => $entry,
             "uploaddate" => date( "Y-m-d H:i" ),
             /* all others default to blank */

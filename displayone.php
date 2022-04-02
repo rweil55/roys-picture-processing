@@ -34,7 +34,7 @@ class freeWheeling_DisplayOne {
                 values ('$photoname', '$ip', '$user')";
             $answer = $wpdbExtra->query( $sqlAccess );
             if ( "nokey" == $photoname ) {
-                $sqlNoKey = "select filename from $rrw_photos  where not filename in 
+                $sqlNoKey = "select photoname from $rrw_photos  where not photoname in 
                  (select distinct keywordFilename from $rrw_keywords )";
                 $recNokey = $wpdbExtra->get_resultsA( $sqlNoKey );
                 if ( 0 == $wpdbExtra->num_rows )
@@ -42,7 +42,7 @@ class freeWheeling_DisplayOne {
                     [ <a href='/fix/?task=add'>find more </a> ]
                     [ <a href='/fix/?task=direonp'>missing source </a> ]
                             ";
-                $photoname = $recNokey[ 0 ][ "filename" ];
+                $photoname = $recNokey[ 0 ][ "photoname" ];
             }
             $sql = "Select * from $rrw_photos where photoname = '$photoname'";
             $msg .= ( "\n<!-- sql is $sql -->\n" );
@@ -55,7 +55,7 @@ class freeWheeling_DisplayOne {
                 return $msg;
             }
             $recset = $recset_query[ 0 ];
-            $photoname = $recset[ "filename" ];
+            $photoname = $recset[ "photoname" ];
             $photographer = $recset[ "photographer" ];
             $copyright = $recset[ "copyright" ];
             $PhotoDate = $recset[ "PhotoDate" ];
@@ -309,7 +309,7 @@ class freeWheeling_DisplayOne {
         global $eol;
         $msg = "";
 
-        $photoname = $recset[ "filename" ];
+        $photoname = $recset[ "photoname" ];
 
         if ( is_null( $recset[ "trail_name" ] ) ) {
             $trailDisplay = " & lt; & lt; Missing & gt; & gt;
