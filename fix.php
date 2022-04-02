@@ -380,9 +380,14 @@ class freewheeling_fixit {
         $photoname = self::removejpgDire( $sourcefile );
         $sourceEncoded = urlencode( $sourcefile );
         $photonameEncoded = urlencode( $photoname );
+        $bold = "<strong>";
+        $unbold = "</strong>";
+        if (false !== strpos($sourcefile, "contest") || 
+            false !== strpos($sourcefile, "show") )
+            $bold = $unbold = "";
         $link = "<a href='$httpSource/pict/sub.php?task=pushtoupload$dev" .
         "&sourcefile=$sourceEncoded&photname=$photonameEncoded'  >
-                    create entry $photoname</a> ";
+                    $bold create entry  $photoname $unbold</a> ";
         return $link;
     }
 
@@ -1283,6 +1288,10 @@ class freewheeling_fixit {
                         case "sourcefullname":
                             $imgFile = $httpSource . substr( $valu, 2 );
                             break;
+                        case "status":
+                            if (! empty($valu))
+                                $valu = "<strong>$valu</strong>";
+                            break;
                         case "aspect":
                             $aspect = $valu;
                             break;
@@ -1292,7 +1301,7 @@ class freewheeling_fixit {
                             "$photonameEncoded&photoname=$photonameEncoded";
                             $valu = "<a href='$url' target='search' > search<a>";
                             break;
-                        default:
+                       default:
                             // just plane $valu
                             break;
                     }
