@@ -1,5 +1,9 @@
 <?php
 class uploadProcessDire {
+    /*
+    *   nameToBottom( $sourceFile, $photographer ) 
+    *   resizeImage( $pathin, $pathout, $w_max, $h_max ) {
+    */
     public static function upload( $attr ) {
         global $eol, $errorBeg, $errorEnd;
         global $uploadPath;
@@ -202,7 +206,7 @@ class uploadProcessDire {
         return $msg;
     } // end makeFile
     //
-    private static function nameToBottom( $sourceFile, $photographer ) {
+    public static function nameToBottom( $sourceFile, $photographer ) {
         global $eol, $errorBeg, $errorEnd;
         $msg = "";
         $debug = rrwPara::Boolean( "nameToBottom" );
@@ -303,7 +307,7 @@ class uploadProcessDire {
         return $msg;
     } // end function MakeImakeImages 
 */
-    private static function resizeImage( $pathin, $pathout,
+    public static function resizeImage( $pathin, $pathout,
         $w_max, $h_max ) {
         global $eol;
         global $eol, $errorBeg, $errorEnd;
