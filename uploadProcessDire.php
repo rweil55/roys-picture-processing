@@ -1,9 +1,9 @@
 <?php
 class uploadProcessDire {
     /*
-    *   nameToBottom( $sourceFile, $photographer ) 
-    *   resizeImage( $pathin, $pathout, $w_max, $h_max ) {
-    */
+     *   nameToBottom( $sourceFile, $photographer ) 
+     *   resizeImage( $pathin, $pathout, $w_max, $h_max ) {
+     */
     public static function upload( $attr ) {
         global $eol, $errorBeg, $errorEnd;
         global $uploadPath;
@@ -328,14 +328,13 @@ class uploadProcessDire {
         $imgGDin = self::imageCreateFrom( $pathin );
         $w_cur = imagesx( $imgGDin );
         $h_cur = imagesy( $imgGDin );
-        if($debug) $msg .= "input size =  $w_max, $h_max $eol
+        if ( $debug )$msg .= "input size =  $w_max, $h_max $eol
                             curent siz =  $w_cur. $h_cur $eol";
         $w_scalefactor = $h_scalefactor = $scalefactor = "not set";
         if ( 0 >= $w_max && 0 >= $h_max ) {
             throw new Exception( "$msg $errorBeg E#639 resizeImage: 
             Invalid widths specified $w_max, $h_max  $errorEnd" );
-        } elseif ( 0 >= $h_max ) {
-            ; // donothing w,0
+        } elseif ( 0 >= $h_max ) {; // donothing w,0
         } elseif ( 0 >= $w_max ) {
             $scalefactor = $h_max / $h_cur;
             $w_max = round( $w_max * $scalefactor );
@@ -350,21 +349,21 @@ class uploadProcessDire {
         if ( $debug )
             $msg .= "scales $w_scalefactor, $h_scalefactor used $scalefactor $eol resize scaled $w_cur, $h_cur to 
                                 $w_max, $h_max $eol";
-            $imgGDout = imagescale( $imgGDin, $w_max );
+        $imgGDout = imagescale( $imgGDin, $w_max );
         if ( false === $imgGDout )
-            throw new Exception( "$msg $errorBeg #651 failure in resize 
+            throw new Exception( "$msg $errorBeg #658 failure in resize 
                                     using $w_max, $h_max $errorEnd " );
         $resultOut = imagejpeg( $imgGDout, $pathout, 100 );
         if ( false === $resultOut )
-            throw new Exception( "E#651 failure in resize:write failed to
-                $pathout $errorEnd" );
+            throw new Exception( "$msg $errorBeg E#657 failure in resize:write 
+                        failed to $pathout $errorEnd" );
         if ( $debug )$msg .= ", file succefully created $eol";
         return $msg;
     } // end resize 
     /*
             $imgGDout = imagescale( $img_in, $scalefactor );
             if ( false === $imgGDout )
-                throw new Exception( "E#651 failure in resize usine $scalefactor
+                throw new Exception( "E#669 failure in resize usine $scalefactor
                 as scale factor or $w_new/ $curWidth " );
             $resultOut = imagejpeg($imgGDout, $pathout);
             if (false === $resultOut)
@@ -377,6 +376,7 @@ class uploadProcessDire {
         } // end  resizeImage
       */
     private static function imageCreateFrom( $sourceFile ) {
+        global $eol, $errorBeg, $errorEnd;
         $mime_type = mime_content_type( $sourceFile );
         switch ( $mime_type ) {
             case "image/gif": //   gif -> jpg
