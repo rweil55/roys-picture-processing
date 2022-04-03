@@ -115,7 +115,7 @@ class uploadProcessDire {
                 $err = "$errorBeg E#706 update no change $errorEnd";
                 $msg .= rrwUtil::print_r( $Data, true, $err );
             }
-        } if ( 0 == $wpdbExtra->num_rows ) {
+        } elseif ( 0 == $wpdbExtra->num_rows ) {
             // no meta data
             $Data[ "photoname" ] = $photoname;
             $Data[ "photographer" ] = "Mary Shaw";
