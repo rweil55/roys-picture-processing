@@ -7,7 +7,6 @@ function changed() {
     var seperator = "";
      var eol = "<br />";
     var cntItems = 0;
-    
     console.log("trail '" + trail + "'");
     var sqlSelectTrail = "trail=" + trail;
     if (" Any Trail" == trail) {
@@ -17,7 +16,6 @@ function changed() {
         if (field.options[i].selected) {
             var valu = field.options[i].value;
         console.log("in loop value '" + valu + "'");
-        
             if (" Any Detail" == valu || "Any Detail" == valu) {
                 sqlSelectDetail = "";
                 break;
@@ -31,29 +29,29 @@ function changed() {
     console.log ("count " + cntItems + ", " + selectDisplay);
     if (0 == cntItems && "" == sqlSelectTrail)
         return true;
-    if (1 < cntItems) 
+    if (1 < cntItems)
         sqlSelectDetail = "( " + sqlSelectDetail + ")"; // multiple selected
-      
+     
     console.log("sqlSelectDetail '" + sqlSelectDetail + "'");
-   
+  
     var display = trail;
     if (display.length == 0){
         display = sqlSelectDetail;
     }else {
         display = display + " and " + sqlSelectDetail;
     }
-    
+   
     if (display.length == 0) {
         return true; // nothing selected
         }
-    
+   
     console.log (sqlSelectDetail);
     var place = document.getElementById("main");
     var selectionMsg = "Selection is " + display;
     place.innerHTML = selectionMsg + " -- One Moment " + eol;
     var loc = window.location;
     var host = loc.protocol + "//" + loc.host;
-    var winNew = host + "/displayphotos?nohead=1&session=" + session + 
+    var winNew = host + "/displayphotos?nohead=1&session=" + session +
         "&trail=" + trail + "&searchdropdown=" + sqlSelectDetail;
    console.log (winNew);
     jQuery.get(winNew,
@@ -64,14 +62,16 @@ function changed() {
     );
     return true;
 }
-
 function onClickKeyword (keyword) {
     var selectKey = document.getElementById("selection");
     selectKey.value = keyword;
     changed();
     return true;
 }
-
+function onClickCopy2Clip(xxzzy)  {
+    console.log (xxzzy);
+    navigator.clipboard.writeText(xxzzy);
+}
 function openOnePhotopage(photoname) {
     var loc = window.location;
     var host = loc.protocol + "//" + loc.host;

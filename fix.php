@@ -1021,7 +1021,7 @@ class freewheeling_fixit {
 
                 $newphotoname = $rec[ "searchname" ];
                 $ext = substr( $newphotoname, -3 );
-                if ( "PCD" == $ext )
+                if ( "PCD" == $ext ) 
                     continue;
                 $sourcefullname = $rec[ "sourcefullname" ];
                 $aspect = $rec[ "aspect" ];
@@ -1037,7 +1037,7 @@ class freewheeling_fixit {
 
                 $imgFile = $httpSource . substr( $sourcefullname, 2 );
                 $sourcefullnameDisplay = "<a href='$imgFile' 
-                target='127'>$sourcefullname</a>";
+                target='127'>$sourcefullname</a> <button id='btn' onclick='onClickCopy2Clip(\"got it\");' > copy</button> ";
                 $msg .= rrwFormat::CellRow( $color, "$cnt $status",
                     $sourcefullnameDisplay, $aspect, $sourceuploadLink, $link );
                 $display .= "<div class='rrwDinoItem' >

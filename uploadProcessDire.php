@@ -115,7 +115,7 @@ class uploadProcessDire {
                 $err = "$errorBeg E#706 update no change $errorEnd";
                 $msg .= rrwUtil::print_r( $Data, true, $err );
             }
-        } else {
+        } if ( 0 == $wpdbExtra->num_rows ) {
             // no meta data
             $Data[ "photoname" ] = $photoname;
             $Data[ "photographer" ] = "Mary Shaw";
@@ -126,6 +126,10 @@ class uploadProcessDire {
                 $err = "$errorBeg E#706 insert fails $errorEnd";
                 $msg .= rrwUtil::print_r( $Data, true, $err );
             }
+        } else {
+            $msg .= "$errorBeg E#679 found " . $wpdbExtra->num_rows . " of data 
+                    for $errorEnd $sqlRec $eol";
+            throw new Exception ($msg);
         }
         $sqlRec = "select * from $rrw_photos 
                         where photoname = '$photoname'";
