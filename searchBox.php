@@ -38,12 +38,14 @@ class rrwPictures_searchBox {
         $msg .= "[ <a href='/'>Home</a> ] [ <a href='/quality/' >Quality</a> ]
                  [ <a href='/privacy/'> Privacy</a>]
                  [ <a href='/webmaster-feedback/'> Feedback</a>]";
-        if (rrwUtil::AllowedToEdit( "search", "", false ) )
+        if (rrwUtil::AllowedToEdit( "search", "", false ) ) {
+            $hostUrl = $_SERVER['HTTP_HOST']; 
             $msg .= "</td><td>
-    <form action='https://devpictures.shaw-weil.com/displayphotos/' method='POST'
+    <form action='https://$hostUrl/displayphotos/' method='POST'
     height='13px' >
 <input type='text' name='photoname' id='searchphoto' value='' height='13px' />
 </form>";
+        }
         if ( $tablecss )
             $msg .= "</td></tr>\n</table>\n";
         $msg .= "</form>";
