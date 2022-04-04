@@ -26,8 +26,8 @@ class freeWheeling_DisplayUpdate {
             $direonp = str_replace('\\', '/', $direonp);
             $direonp = str_replace('\\', '/', $direonp);
             $direonp = str_replace('//', '/', $direonp);
-            if (false !== strpos(substr($direonp,-1))) {
-                $direonp .= "/$photoname.jpg"; // ends in slash, is dire
+            if (false !== strpos(substr($direonp,-1), "/")) {
+                $direonp .= "$photoname.jpg"; // ends in slash, is dire
             }
             
             list( $msgTemp, $keyWordList ) =
