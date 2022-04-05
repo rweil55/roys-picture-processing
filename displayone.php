@@ -174,11 +174,11 @@ class freeWheeling_DisplayOne {
             $msg .= "
              [ <a href='/fix/?task=filelike&partial=$photoname&photoname=$photoname' >
                     search $photoname</a> ] 
-            &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 
+            &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Delete this photo from the daabase
             [ <a href='/fix?task=deletephoto&del2=$photoname&del3=$photoname" .
-            "&why=duplicate' > Remove duplicate photo </a> ] 
+            "&why=duplicate' > Mark as Duplicate </a> ] 
             [ <a href='/fix?task=deletephoto&del2=$photoname&del3=$photoname" .
-            "&why=reject' > Reject photo </a> ] $eol
+            "&why=reject' > Mark as Rejected </a> ] $eol
             Location: <input type='text' name='location' size='50' 
                         value='$location'>" . "\n" .
             "<br><strong>People:</strong>
