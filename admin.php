@@ -90,6 +90,7 @@ class freewhilln_Administration_Pictures {
             $sqlKeyWordcnt = "select distinct keyword from $rrw_keywords";
             $recKeywords = $wpdbExtra->get_resultsA( $sqlKeyWordcnt );
             $cntKeywords = $wpdbExtra->num_rows;
+            $cntMissingImages = self::cntMissingImage( false );
             // --------------------------------------------------------- column 1
             $msg .= "<table><tr>
                     <td style='vertical-align:top'>\n
@@ -134,15 +135,18 @@ class freewhilln_Administration_Pictures {
             $msg .= self::EmptyCount( "DireOnP", "source directory" );
             $msg .= self::SQLcount( "~load before $loadDate and like -s",
                 "uploaddate < '$loadDate' and photoname like '%-s' " );
+            $msg .= "$cntMissingImages database entry missing the image$eol";
             $msg .= self::EmptyCount( "height", "height" );
             $msg .= self::EmptyCount( "width", "width" );
             $msg .= self::SQLcount( " mismatched keywords ",
                 "not keywordfilename in(
                         select photoname from $rrw_photos)", $rrw_keywords );
             $msg .= "
-            $cntKeywordDup duplicate  <a href='/fix?task=keyworddups' target='list'>
-                    photoName-Keywords </a> $eol
-            ";
+            $cntKeywordDup duplicate  <a href='/fix?task";
+            $msg .= self::SQLcount ("~parnoramas not label paramanrama",
+                    "height / width < .4 and not photoname in 
+                    (select keywordFilename from $rrw_keywords 
+                            where keyword = 'panorama' )");
             //  -------------------------------------------  column 3
             $msg .= "</td><td style='vertical-align:top'>
             <strong>Specilized search </strong>$eol " .
@@ -215,6 +219,36 @@ Too upload new photos.
         }
         return $msg;
     } // end function
+
+    public static function cntMissingImage( $showNames ) {
+        global $wpdbExtra, $rrw_photos, $photoPath;
+        global $eol;
+        $msg = "";
+
+        $image = array();
+        foreach ( new DirectoryIterator( $photoPath ) as $entry ) {
+            $filename = $entry->getfilename();
+            $image[$filename] = 1;
+        }
+   //     print rrwUtil::print_r($image, true, "image found");
+
+        $sqlData = "select photoname from $rrw_photos ";
+        $recPhotos = $wpdbExtra->get_resultsA( $sqlData );
+        $numMissing = 0;
+        foreach ( $recPhotos as $recPhoto ) {
+            $photoname = $recPhoto[ "photoname" ];
+            $filename = "{$photoname}_cr.jpg";
+            if ( !array_key_exists( $filename, $image ) ) {
+                $numMissing++;
+                if ( $showNames )
+                    $msg .= "missing image for 
+                    <a href='/display-one-photo?photoname=$photoname'
+                            targt= 'display'> $photoname </a>$eol";
+            }
+        }
+        $msg .= "$numMissing";
+        return $msg;
+    }
 
     private static function EmptyCount( $item, $description ) {
         $msg = "";

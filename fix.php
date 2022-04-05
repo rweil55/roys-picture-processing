@@ -51,6 +51,9 @@ class freewheeling_fixit {
                 case "copyrightfix":
                     $msg .= freewheeling_fixit::copyrightfix();
                     break;
+                case "datanoimage":
+                    $msg .= freewhilln_Administration_Pictures::cntMissingImage( true );
+                    break;
                 case "deleteonephoto":
                     $msg .= freewheeling_fixit::DeleteOnePhotoname( "", "" );
                     break;
@@ -60,8 +63,8 @@ class freewheeling_fixit {
                 case "duplicatephoto":
                     $msg .= freewheeling_fixit::setUseStatus( "duplicate" );
                     break;
-                case "exifmissing":
-                    $msg .= self::exifMissing();
+                case "extractexif":
+                    $msg .= self::extractexif();
                     break;
                 case "forcedatabase":
                     $msg .= freewheeling_fixit::forceDatabse2matchexif();
@@ -135,15 +138,17 @@ class freewheeling_fixit {
                                         'enddate' </a>$eol 
        <a href='/admin#delete' > delete photo - See admin </a>$eol 
        <a href='/fix/?task=duplicatephoto' > set duplicate photo flag </a>$eol 
-       <a href='/fix/?task=exifmissing' > photo with no exif data </a>$eol 
+       <a href='/fix/?task=extractexif' > extract exif to database </a>$eol 
        <a href='/fix/?task=forcedatabase' > force All database to match exif </a>$eol 
        <a href='/fix/?task=forceOneExif' > force One database to match exif </a>$eol 
        <a href='/fix/?task=rename' > rename a photo </a>$eol 
+       
    <strong>File consistancy</strong>$eol
       <a href='/fix/?task=highresmissing' target='admin'> high resolution image
                                             missing </a>$eol 
       <a href='/fix/?task=photomissing' > photo information missing</a>$eol 
       <a href='/fix/?task=filesmissing' > highres missng _cr, _tmb </a>$eol 
+      <a href='/fix/?task=datanoimage' > data entry with no image </a>$eol
        
    <strong>Copyright</strong>$eol
      <a href='/fix/?task=badcopyright' > copyright not begining with 
@@ -173,20 +178,46 @@ class freewheeling_fixit {
         return $msg;
     }
 
-    private static function exifMissing() {
+    private static function extractexif() {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_photographers, $rrw_photos;
         global $photoPath;
         $msg = " ";
 
-        $sqlMissingExif = "
-            select photoname FROM $rrw_photos where originalexif = ''
-            and status = 'use'
-            ";
+        $sqlEmpty = "update $rrw_photos set exif = '', width = -1, height = -1";
+        $wpdbExtra->query( $sqlEmpty );
+        $sqlMissingExif = "select photoname FROM $rrw_photos 
+                        where exif = '' and photostatus = 'use' ";
         $recs = $wpdbExtra->get_resultsA( $sqlMissingExif );
         $cntphotos = $wpdbExtra->num_rows;
-        $msg .= "
-            there are $cntphotos photos in use that have no exif data $eol ";
+        $msg .= " there are $cntphotos photos in use $eol ";
+        $cnt = 0;
+        foreach ( $recs as $rec ) {
+            $cnt++;
+            if ( $cnt > 1000 )
+                break;
+            $photoname = $rec[ "photoname" ];
+            $msg .= "$photoname, ";
+            $photoLoc = "$photoPath/{$photoname}_cr.jpg";
+            $exif = rrwExif::rrw_exif_read_data( $photoLoc );
+            if ( 2 == $cnt )
+                $msg .= rrwUtil::print_r( $exif, true, "esif" );
+
+            if ( !is_array( $exif ) ) {
+                $msg .= "$errorBeg E#688 bad exif for $photoLoc $errorEnd ";
+            } else {
+                $height = $exif[ "COMPUTED" ][ "Height" ];
+                $width = $exif[ "COMPUTED" ][ "Width" ];
+                $exifJson = json_encode( $exif );
+                $update = array( "exif" => $exifJson,
+                    "height" => $height,
+                    "width" => $width, );
+                $where = array( "photoname" => $photoname );
+                // $msg .= "$exifJson $eol";
+                $numRows = $wpdbExtra->update( $rrw_photos, $update, $where );
+                $msg .= $numrows;
+            }
+        }
         return $msg;
     }
 
@@ -382,8 +413,8 @@ class freewheeling_fixit {
         $photonameEncoded = urlencode( $photoname );
         $bold = "<strong>";
         $unbold = "</strong>";
-        if (false !== strpos($sourcefile, "contest") || 
-            false !== strpos($sourcefile, "show") )
+        if ( false !== strpos( $sourcefile, "contest" ) ||
+            false !== strpos( $sourcefile, "show" ) )
             $bold = $unbold = "";
         $link = "<a href='$httpSource/pict/sub.php?task=pushtoupload$dev" .
         "&sourcefile=$sourceEncoded&photname=$photonameEncoded'  >
@@ -1021,7 +1052,7 @@ class freewheeling_fixit {
 
                 $newphotoname = $rec[ "searchname" ];
                 $ext = substr( $newphotoname, -3 );
-                if ( "PCD" == $ext ) 
+                if ( "PCD" == $ext )
                     continue;
                 $sourcefullname = $rec[ "sourcefullname" ];
                 $aspect = $rec[ "aspect" ];
@@ -1289,7 +1320,7 @@ class freewheeling_fixit {
                             $imgFile = $httpSource . substr( $valu, 2 );
                             break;
                         case "status":
-                            if (! empty($valu))
+                            if ( !empty( $valu ) )
                                 $valu = "<strong>$valu</strong>";
                             break;
                         case "aspect":
@@ -1301,7 +1332,7 @@ class freewheeling_fixit {
                             "$photonameEncoded&photoname=$photonameEncoded";
                             $valu = "<a href='$url' target='search' > search<a>";
                             break;
-                       default:
+                        default:
                             // just plane $valu
                             break;
                     }

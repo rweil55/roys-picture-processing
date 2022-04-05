@@ -76,7 +76,7 @@ class rrwPictures_searchBox {
     }
     public static function pictureDisplayDropDownsql( $wpdbExtra, $table, $toBeUpdated, $sql, $currentvalue ) {
         global $eol;
-        if ( $toBeUpdated == "starticon xxx" )
+        if ( $toBeUpdated == "starticon " )
             $debugDisplayDropDownsql = true;
         else
             $debugDisplayDropDownsql = false;
