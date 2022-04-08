@@ -187,7 +187,7 @@ class freewheeling_fixit {
         $sqlEmpty = "update $rrw_photos set exif = '', width = -1, height = -1";
         $wpdbExtra->query( $sqlEmpty );
         $sqlMissingExif = "select photoname FROM $rrw_photos 
-                        where exif = '' and photostatus = 'use' ";
+                        where exif = '' "; //and photostatus = 'use' ";
         $recs = $wpdbExtra->get_resultsA( $sqlMissingExif );
         $cntphotos = $wpdbExtra->num_rows;
         $msg .= " there are $cntphotos photos in use $eol ";
