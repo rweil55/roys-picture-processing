@@ -182,26 +182,31 @@ class freewheeling_fixit {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_photographers, $rrw_photos;
         global $photoPath;
+        global $numberPhotosMax;
         $msg = " ";
+        $displayExif = 2 + $numberPhotosMax;
 
         $sqlEmpty = "update $rrw_photos set exif = '', width = -1, height = -1";
         $wpdbExtra->query( $sqlEmpty );
+        $sqlcnt = "select count(*) from $rrw_photos";
+        $cntUse = $wpdbExtra->get_var($sqlcnt);
         $sqlMissingExif = "select photoname FROM $rrw_photos 
                         where exif = '' "; //and photostatus = 'use' ";
         $recs = $wpdbExtra->get_resultsA( $sqlMissingExif );
         $cntphotos = $wpdbExtra->num_rows;
-        $msg .= " there are $cntphotos photos in use $eol ";
+        $msg .= " there are $cntUse photos in use out of $cntphotos. max = $numberPhotosMax $eol ";
         $cnt = 0;
         foreach ( $recs as $rec ) {
             $cnt++;
-            if ( $cnt > 1000 )
+            if ( $cnt > $numberPhotosMax )
                 break;
             $photoname = $rec[ "photoname" ];
-            $msg .= "$photoname, ";
+            $msg .= "<a href='/display-one-photo?photoname=$photoname' target='edit'
+                        >$photoname</a>, ";
             $photoLoc = "$photoPath/{$photoname}_cr.jpg";
             $exif = rrwExif::rrw_exif_read_data( $photoLoc );
-            if ( 2 == $cnt )
-                $msg .= rrwUtil::print_r( $exif, true, "esif" );
+            if ( $displayExif == $cnt )
+                $msg .= rrwUtil::print_r( $exif, true, "Exif for the second file read." );
 
             if ( !is_array( $exif ) ) {
                 $msg .= "$errorBeg E#688 bad exif for $photoLoc $errorEnd ";
