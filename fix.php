@@ -1245,6 +1245,10 @@ class freewheeling_fixit {
                 $orderby = "sourcefullname, searchname, aspect";
                 break;
             case "$rrw_keywords":
+                 $msg .= "$eol I#699 &nbsp; select * from $rrw_keywords 
+                    where keywordfilename in (
+                        select keywordfilename from $rrw_keywords where not keywordfilename in( select photoname from $rrw_photos) order by keywordfilename, keyword ) limit 20 $eol ";
+ 
                 $fields = "keywordfilename, keyword";
                 $orderby = "keywordfilename, keyword";
                 break;
@@ -1259,7 +1263,7 @@ class freewheeling_fixit {
         if ( !empty( $limit ) )
             $sql .= " limit $limit ";
         $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
-            "photos wih no $description", $startAt, $urlNext );
+            "photos wih $description", $startAt, $urlNext );
         return $msg;
     }
 

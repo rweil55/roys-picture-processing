@@ -91,6 +91,7 @@ class freewhilln_Administration_Pictures {
             $recKeywords = $wpdbExtra->get_resultsA( $sqlKeyWordcnt );
             $cntKeywords = $wpdbExtra->num_rows;
             $cntMissingImages = self::cntMissingImage( false );
+ 
             // --------------------------------------------------------- column 1
             $msg .= "<table><tr>
                     <td style='vertical-align:top'>\n
@@ -130,9 +131,6 @@ class freewhilln_Administration_Pictures {
             $msg .= self::SQLcount( " Keywords ",
                 "photoname not in " .
                 "(select distinct keywordFilename from  $rrw_keywords )" );
-            $msg .= self::SQLcount( " Keyword no photo ",
-                "keywordFilename not in (select distinct photoname" .
-                " from $rrw_photos )", $rrw_keywords );
             $msg .= self::EmptyCount( "copyright", "copyright" );
             $msg .= self::EmptyCount( "DireOnP", "source directory" );
             $msg .= self::SQLcount( "~load before $loadDate and like -s",
@@ -140,7 +138,7 @@ class freewhilln_Administration_Pictures {
             $msg .= "$cntMissingImages database entry missing the image$eol";
             $msg .= self::EmptyCount( "height", "height" );
             $msg .= self::EmptyCount( "width", "width" );
-            $msg .= self::SQLcount( " mismatched keywords ",
+            $msg .= self::SQLcount( "~keywords not on phototable",
                 "not keywordfilename in(
                         select photoname from $rrw_photos)", $rrw_keywords );
             $msg .= "
