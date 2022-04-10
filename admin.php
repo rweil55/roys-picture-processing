@@ -91,20 +91,20 @@ class freewhilln_Administration_Pictures {
             $recKeywords = $wpdbExtra->get_resultsA( $sqlKeyWordcnt );
             $cntKeywords = $wpdbExtra->num_rows;
             $cntMissingImages = self::cntMissingImage( false );
- 
+
             // --------------------------------------------------------- column 1
             $msg .= "<table><tr>
                     <td style='vertical-align:top'>\n
                     <strong> Information Counts </strong>$eol";
-            $msg .= self::SQLcount("~ accessable photos ",
-                                  " photostatus = 'use' " );
-            $msg .= self::SQLcount("~ photos in the photo database", "1=1");
+            $msg .= self::SQLcount( "~ accessable photos ",
+                " photostatus = 'use' " );
+            $msg .= self::SQLcount( "~ photos in the photo database", "1=1" );
             $msg .= "$photorejectCnt photos rejected/duplicates $eol";
             $msg .= "$keyWithCnt distinct photos in the keyword database$eol";
             $msg .= self::EmptyCount( "direonp", "source file" );
-            $msg .= self::SQLcount( "with load dates before $loadDate",
+            $msg .= self::SQLcount( "~with load dates before $loadDate",
                 "uploaddate < '$loadDate' " );
-            $msg .= self::SQLcount( "with load dates after $loadDate'",
+            $msg .= self::SQLcount( "~with load dates after $loadDate'",
                 "uploaddate >= '$loadDate' " );
             $msg .= "$photogUsedCnt <a  href='/display-photographers/'
                     target='list' >
@@ -143,10 +143,10 @@ class freewhilln_Administration_Pictures {
                         select photoname from $rrw_photos)", $rrw_keywords );
             $msg .= "
             $cntKeywordDup duplicate  <a href='/fix?task";
-            $msg .= self::SQLcount ("~parnoramas not label paramanrama",
-                    "height / width < .4 and not photoname in 
-                    (select keywordFilename from $rrw_keywords 
-                            where keyword = 'panorama' )");
+            /*          $msg .= self::SQLcount ("~parnoramas not label paramanrama",
+                              " height / width < .3 and not photoname in " .
+                              " (select keywordFilename from $rrw_keywords " .
+                                      " where keyword = 'panorama' )");*/
             //  -------------------------------------------  column 3
             $msg .= "</td><td style='vertical-align:top'>
             <strong>Specilized search </strong>$eol " .
@@ -228,9 +228,9 @@ Too upload new photos.
         $image = array();
         foreach ( new DirectoryIterator( $photoPath ) as $entry ) {
             $filename = $entry->getfilename();
-            $image[$filename] = 1;
+            $image[ $filename ] = 1;
         }
-   //     print rrwUtil::print_r($image, true, "image found");
+        //     print rrwUtil::print_r($image, true, "image found");
 
         $sqlData = "select photoname from $rrw_photos ";
         $recPhotos = $wpdbExtra->get_resultsA( $sqlData );

@@ -1812,7 +1812,7 @@ class freewheeling_fixit {
 
             //  -------------------------------------------- photographer
             $sofar = "About to process Artist ";
-            $dataPotogrpherWeb = "$databaseCopyright https://pictures.shaw-weil.com/";
+            $dataPotogrpherWeb = "$databasePhotographer https://pictures.shaw-weil.com/";
             if ( array_key_exists( "Artist", $fileExif ) )
                 $fileArtist = $fileExif[ "Artist" ];
             else
