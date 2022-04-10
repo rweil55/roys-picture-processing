@@ -95,7 +95,9 @@ class freewhilln_Administration_Pictures {
             $msg .= "<table><tr>
                     <td style='vertical-align:top'>\n
                     <strong> Information Counts </strong>$eol";
-            $msg .= "$photoRowCnt photos in the photo database$eol";
+            $msg .= self::SQLcount("~ accessable photos ",
+                                  " photostatus = 'use' " );
+            $msg .= self::SQLcount("~ photos in the photo database", "1=1");
             $msg .= "$photorejectCnt photos rejected/duplicates $eol";
             $msg .= "$keyWithCnt distinct photos in the keyword database$eol";
             $msg .= self::EmptyCount( "direonp", "source file" );

@@ -1123,7 +1123,7 @@ class freewheeling_fixit {
         if ( empty( $photoname ) || empty( $sourcefullname ) )
             throw new Exception( "$msg $errorBeg 
                     E#657 missing photoname or sourceFullPath dire $errorEnd" );
-        $sqlExist = "select * from $rrw_photos wheresearchname = '$photoname'";
+        $sqlExist = "select * from $rrw_photos where searchname = '$photoname'";
         $wpdbExtra->query( $sqlExist );
         if ( 0 == $wpdbExtra->num_rows ) {
             $msg .= "creating a new record, 
@@ -1808,6 +1808,7 @@ class freewheeling_fixit {
 
             //  -------------------------------------------- photographer
             $sofar = "About to process Artist ";
+            $dataPotogrpherWeb = "$databaseCopyright https://pictures.shaw-weil.com/";
             if ( array_key_exists( "Artist", $fileExif ) )
                 $fileArtist = $fileExif[ "Artist" ];
             else
@@ -1817,8 +1818,9 @@ class freewheeling_fixit {
             if ( empty( $fileArtist ) && empty( $databasePhotographer ) )
             ; // do nothing
             elseif ( empty( $fileArtist ) && !empty( $databasePhotographer ) ) {
-                $msg .= rrwExif::pushToImage( $photoname, "Artist", $databasePhotographer );
-                $fileArtist = $databasePhotographer;
+                $msg .= rrwExif::pushToImage( $photoname, "Artist",
+                                             $dataPotogrpherWeb );
+                $fileArtist = $dataPotogrpherWeb;
             }
             elseif ( !empty( $fileArtist ) && empty( $databasePhotographer ) ) {
                 $sqlUpdate[ "photographer" ] = $fileArtist;
@@ -1829,8 +1831,8 @@ class freewheeling_fixit {
                         $sqlUpdate[ "photographer" ] = $fileArtist;
                         $databasePhotographer = $fileArtist;
                     } else {
-                        $msg .= rrwExif::pushToImage( $photoname, "Artist", $databasePhotographer );
-                        $fileArtist = $databasePhotographer;
+                        $msg .= rrwExif::pushToImage( $photoname, "Artist", $dataPotogrpherWeb );
+                        $fileArtist = $dataPotogrpherWeb;
                     }
                 } // end diff test
             $sofar = "done phtographer";
@@ -1896,8 +1898,7 @@ class freewheeling_fixit {
 
                 $newDescription = "$databaseTrail, " .
                 "photographer: $databasePhotographer," .
-                " Keyword: $databaseKeyword, " .
-                "https://pictures.shaw-weil.com/display-one-photo/?photoname=$photoname.jpg";
+                " Keyword: $databaseKeyword ";
                 $msg .= rrwExif::pushToImage( $photoname, $keywordname, $newDescription );
                 $fileKeywords = $databaseKeyword;
             } elseif ( !empty( $fileKeywords ) && empty( $databaseKeyword ) ) {
