@@ -70,28 +70,9 @@ class freewhilln_Administration_Pictures {
             $photogUsedCnt = $wpdbExtra->get_var( $sqlPhotog );
             $sqlAllPhotog = "select count(*) from $rrw_photographers";
             $PhotogTotalCnt = $wpdbExtra->get_var( $sqlAllPhotog );
-            $sqlKeywordDups = "select count(*), keyword from $rrw_keywords 
-                group by keyword, keywordFilename having count(*) > 1";
-            $recKeywordDup = $wpdbExtra->get_resultsA( $sqlKeywordDups );
-            $cntKeywordDup = $wpdbExtra->num_rows;
-            $sqlMore = "select count(*) from $rrw_source where sourcestatus = 'use' and ( sourcefullname like '%w-pa-trails%' or
-                      sourcefullname like '%ytrek%' ) and 
-                     not searchname in (select photoname from $rrw_photos)";
-            $cntMore = $wpdbExtra->get_var( $sqlMore );
-            $sqlBadCopyright = "SELECT count(*) FROM $rrw_photos
-                        where not copyright like 'copyright%'
-                        or copyright = '' ";
-            $cntBadCopyright = $wpdbExtra->get_var( $sqlBadCopyright );
-            $sqlmissingPhotog = "SELECT count(*) FROM $rrw_photos ph
-                   left join $rrw_photographers pers 
-                        on ph.photographer = pers.photographer
-                        where pers.photographer is null or ph.photographer = ''";
-            $cntmissingPhotog = $wpdbExtra->get_var( $sqlmissingPhotog );
             $sqlKeyWordcnt = "select distinct keyword from $rrw_keywords";
             $recKeywords = $wpdbExtra->get_resultsA( $sqlKeyWordcnt );
             $cntKeywords = $wpdbExtra->num_rows;
-            $cntMissingImages = self::cntMissingImage( false );
-
             // --------------------------------------------------------- column 1
             $msg .= "<table><tr>
                     <td style='vertical-align:top'>\n
@@ -135,15 +116,15 @@ class freewhilln_Administration_Pictures {
             $msg .= self::EmptyCount( "DireOnP", "source directory" );
             $msg .= self::SQLcount( "~load before $loadDate and like -s",
                 "uploaddate < '$loadDate' and photoname like '%-s' " );
-            $msg .= "$cntMissingImages database entry missing the image$eol";
+            $msg .= self::cntMissingImage( false ) . " database entry missing the image$eol";
             $msg .= self::EmptyCount( "height", "height" );
             $msg .= self::EmptyCount( "width", "width" );
             $msg .= self::SQLcount( "~keywords not on phototable",
-                "not keywordfilename in(
-                        select photoname from $rrw_photos)", $rrw_keywords );
-            $msg .= "
-            $cntKeywordDup duplicate  <a href='/fix?task";
-            /*          $msg .= self::SQLcount ("~parnoramas not label paramanrama",
+                "not keywordfilename in(" . 
+                        " select photoname from $rrw_photos)", $rrw_keywords );
+            $msg .= self::SQLcount( "~keywords pairs duplicated",
+                " 1 = 1", "(select keywordFilename from $rrw_keywords group by keyword, keywordFilename having count(*) > 1) xx " );
+ /*          $msg .= self::SQLcount ("~parnoramas not label paramanrama",
                               " height / width < .3 and not photoname in " .
                               " (select keywordFilename from $rrw_keywords " .
                                       " where keyword = 'panorama' )");*/
@@ -192,26 +173,6 @@ Display keywords with the photos <a href='/admin?setting=on' >On</a> &nbsp;
     [ <a href='/fix/?task=photomissing' > photo information missing</a> ]  
     [  <a href='/fix/?task=filesmissing' > highres missng _cr, _tmb </a> ]
    ";
-            /*
-        Add photos</a> that are not in the database
-(There are $photoRowCnt in database.)<br />
-<a href='notindatabase.php' target='list' >Show photos</a> list<br />
-<a href='/fix?task=cleanup'  target='list'>Clean up database</a> items<br />
-<br />
-
- 
-    <br />
-Too upload new photos.
-<ul>
-    <!--    
- 	<li>  A) Place big file in the c:\temp\pictures folder. </li>
-    <li>  B) Run the local <a href='$httpSource/shawweil/pictures/appendcopyright.pl' >append copyright routine</a>   </li> -->
-    <li> A) Upload the large format photo via the <a href='/submission' >submission form </a></li>
-    <li> B) Update the list of <a href='/notindatabase.php' target='list' >photos not in the database</a> </li>
-    <li> C) Click the link to <a href='/search.php?submit=Photos+Without+any+keyword'
-             target='list'> enter keywords, etc</a> </li>
-</ul>
-*/
             $msg .= "
 </div>";
         } catch ( Exception $ex ) {
@@ -262,6 +223,8 @@ Too upload new photos.
         global $wpdbExtra, $rrw_photos;
         global $eol;
         $msg = "";
+        $debug = false;
+        
         if ( "" == $tablein )
             $table = $rrw_photos;
         else
@@ -270,8 +233,8 @@ Too upload new photos.
         $sql = "select count(*) from $table where $sqlWhere";
         if ( !empty( $limit ) )
             $sql .= " limit $limit";
-        //       print ( "<!-- sql is $sql -->\n" );"
-        $cnt = $wpdbExtra->get_var( $sql );;
+        if ($debug) print ( "<-- sql is $sql -->$eol" );
+        $cnt = $wpdbExtra->get_var( $sql );
         $query = str_replace( "'", "xxy", $sqlWhere );
         if ( "~" == substr( $description, 0, 1 ) ) {
             $description = substr( $description, 1 );

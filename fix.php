@@ -162,7 +162,7 @@ class freewheeling_fixit {
                                             dire/photoname spoke </a>$eol 
       <a href='/fix/?task=filelike' > find source file like 'partfile' </a>$eol 
    <strong>keywords</strong>$eol
-      <a href='/fix/?task=keywordDups' > list photos with 
+      <a href='/fix/?task=keyworddups' > list photos with 
                                             duplicate keywords </a>$eol 
        <a href='/fix/?task=extrakeyword' > list sql to update keyword table
                                                 from photo descrioin</a>$eol 
@@ -1253,7 +1253,8 @@ class freewheeling_fixit {
                 $orderby = "keywordfilename, keyword";
                 break;
             default:
-                $table = "$rrw_photos";
+                if (empty($table))
+                    $table = "$rrw_photos";
                 $fields = " photoname, '1' search,  trail_name, photographer, photostatus ";
                 $orderby = " photoname, trail_name, photographer, photostatus ";
         }
