@@ -11,7 +11,7 @@
  * Text Domain: Roys-picture-processng
  * Domain Path: /translation
  
-  * Version: 2.1.54
+  * Version: 2.1.55
  */
 // disable direct access
 ini_set( "display_errors", true );
@@ -183,143 +183,9 @@ function pushToImage( $filename, $item, $value ) {
     $msg = rrwExif::pushToImage( $filename, $item, $value ) ;
     return $msg;
 }
- /*   
-    
-    global $eol, $errorBeg, $errorEnd;
-    global $photoPath;
-    $msg = "";
-    $debugExif = false;
-    try {
-        if ( $debugExif )$msg .= "---------------------------------------$eol";
-        if ( false === strpos( $filename, "home" ) )
-            $filename = "$photoPath/$filename" . "_cr.jpg";
-        //       ini_set( 'memory_limit', '32M' );
-        if ( $debugExif )$msg .= "( $filename, $item, $value ) $eol";
-        $tmpfname = str_replace( "jpg", "_copyright.jpg", $filename );
-        if ( $debugExif )$msg .= "tempfile is $tmpfname $eol";
-        $contents = file_get_contents( $filename );
-        if ( $debugExif )$msg .= " got contents of $filename $eol";
-        $ss = strlen( $contents );
-        if ( $debugExif )$msg .= " contents size is $ss $eol";
-        $data = new PelDataWindow( $contents );
-        if ( $debugExif )$msg .= " new PelDataWindow worked  $eol";
-        $jpeg = $fileInMemory = new PelJpeg();
-        if ( $debugExif )$msg .= " new PelJpeg() worked  $eol";
-        try {
-            //          $jpeg->load( $data );
-            $jpeg->loadfile( $filename );
-        } // end try
-        catch ( Exception $ex ) {
-            throw new Exception( "$errorBeg E#703 working on $item, 
-                    jprg->load(data) failed" . $ex->getMessage() . $errorEnd );
-        }
-        if ( $debugExif )$msg .= "load worked  $eol";
-        $pelExif = $jpeg->getExif(); // get the desired data
-        if ( $debugExif )$msg .= "pelExif is loaded $eol";
-        if ( $pelExif == null ) {
-            if ( $debugExif )$msg .= println( 'No exif found, create new.' );
-            $pelExif = new PelExif(); // create on
-            $jpeg->setExif( $pelExif ); // insert it into the memory version
-        }
-        $pelTiff = $pelExif->getTiff();
-        if ( $pelTiff == null ) {
-            if ( $debugExif )$msg .= println( 'No Tiff found, create new.' );
-            $pelTiff = new PelTiff();
-            $pelExif->setTiff( $pelTiff );
-        }
-
-        $pelIfd0 = $pelTiff->getIfd();
-        if ( $pelIfd0 == null ) {
-            if ( $debugExif )$msg .= println( 'No ifdo found, create new.' );
-            $pelIfd0 = new PelIfd( PelIfd::IFD0 );
-            $pelTiff->setIfd( $pelIfd0 );
-        }
-        
-        if ( $debugExif )$msg .= "compleated setup, get/adjust the data $eol ";
-        $tag = convertText2EeixID( $item ); // item name into tag integer
-        if ( $debugExif )$msg .= "item is $item, tag integer is $tag (" .
-            dechex($tag) . ") $eol ";
-        $textThing = $pelIfd0->getEntry( $tag );
-        if ( is_null( $textThing ) ) {
-            if ( $debugExif )$msg .= "tag did not exist, create a new one $eol";
-            $type = findTagtype( $tag );
-            if ( $debugExif )$msg .= "Adding new $tag (" . dechex( $tag ) . ") of type $type  with value $value";
-            switch ( $type ) {
-                case "Copyright":
-                case "copyright":
-                    $textThing = new PelEntryCopyright( $value );
-                    break;
-                case "Ascii":
-                case "ascii":
-                    $textThing = new PelEntryAscii( $tag, $value );
-                    break;
-                case "byte":
-                case "Byte":
-                    $textThing = new PelEntryByte( $tag, $value );
-                    break;
-                default:
-                    throw new Exception( "E#488 Unknown findtagtype for $tag" );
-                    break;
-            }
-            $pelIfd0->addEntry( $textThing );
-            $textThing = $pelIfd0->getEntry( $tag );
-            $oldValue = "";
-        } else {
-            // update an existing tag
-            if ( $debugExif )$msg .= "tag thing exits $eol";
-            $oldValue = $textThing->getValue();
-            if ( $debugExif )$msg .= rrwUtil::print_r( $oldValue, true, "found old value of $item" );
-            $textThing->setValue( $value );
-        }
-        $newValue = $textThing->getValue();
-        if ( $debugExif )$msg .= rrwUtil::print_r( $newValue, true, " set new tag value of $item" );
-        if ( $debugExif )$msg .= println( "Writing file $tmpfname $eol" );
-        $fileInMemory->saveFile( $tmpfname );
-        $jpeg->saveFile( $tmpfname );
-        $sizeOld = filesize( $filename );
-        $sizeNew = filesize( $tmpfname );
-        if ( $debugExif )$msg .= rrwExif::dumpMeta( $filename, $tmpfname );
-        if ( abs( $sizeOld - $sizeNew ) < 500 ) {
-            //      copy($tmpfname, "$filename.jpg");
-            //    if ( $debugExif )$msg .= "copy( $tmpfname, $filename.jpg ) $eol";
-            //   return $msg;
-            unlink( $filename );
-            rename( $tmpfname, $filename );
-            if ( $debugExif )$msg .= "rename( $tmpfname, $filename ) $eol";
-        } else {
-            if ( true ) {
-                unlink( $filename );
-                rename( $tmpfname, $filename );
-                if ( $debugExif )$msg .= "rename( $tmpfname, $filename ) $eol";
-            }
-            $err= " old size is $sizeOld, new size is $sizeNew,
-                difference  (" . $sizenew-$sizeold . ") 
-                is more than 500 please check$eol" ;
-            throw new Exception ("$msg E#444 $err");
-        }
-        $ii = strrpos( $filename, "/" );
-        $basename = substr( $filename, $ii );
-        $itemname = str_replace( ".jpg", "", $basename );
-        $itemname = str_replace( "_cr", "", $itemname );
-        $itemname = str_replace( "_tmb", "", $itemname );
-        // copyright and comment may be stored as an arrray
-
-        if (is_array($newValue))
-            $newDisplay = rrwUtil::print_r($newValue, true, "array");
-        else
-            $nameDisplay = $newValue;
-        $comment = "$basename -- $oldValue -> $newDisplay";
-        $msg .= rrwUtil::InsertIntoHistory( $itemname, $comment );
-        if ( $debugExif )$msg .= "History writin $comment $eol ----- $eol";
-    } // end try
-    catch ( Exception $ex ) {
-        $msg .= "$errorBeg E#963 in pushtoimage: " . $ex->getMessage() . $errorEnd;
-    }
-    return $msg;
-}
-*/
-/* a printf() variant that appends a newline to the output. */
+ 
 function println( $fmt, $value = "" ) {
+// a printf() variant that appends a newline to the output. 
     global $eol;
     return $fmt;
     if ( !empty( $value ) )
