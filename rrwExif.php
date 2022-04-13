@@ -68,7 +68,7 @@ class rrwExif {
         $msg = "";
         $debugExif = rrwUtil::setDebug( "debugexif" );
         $debugExifDumpMeta = rrwUtil::setDebug( "debugexifdumpmeta" );
-        if ( false === strpos( $photoname, "home" ) )
+        if ( false === strpos( $photoname, "/home" ) )
             $filename = "$photoPath/$photoname" . "_cr.jpg";
         else
             $filename = $photoname;
