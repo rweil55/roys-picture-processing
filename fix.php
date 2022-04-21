@@ -30,8 +30,8 @@ class freewheeling_fixit {
                     break;
             }
             if ( rrwUtil::notAllowedToEdit( "fix things", "", true ) )
-                throw new Exception( "$msg E#734 not allowed" );
-
+               return "$mdg $errorBeg E#747 Not allowed to search source $errorEnd";
+     
             switch ( $task ) {
                 case "add":
                     $msg .= freewheeling_fixit::addphotos();
@@ -966,8 +966,7 @@ class freewheeling_fixit {
         global $highresUrl, $highresPath;
         global $httpSource;
         $msg = "";
-
-        $debug = true;
+        $debug = false;
         $host = $_SERVER[ 'HTTP_HOST' ];
         if ( strpos( $host, "dev" ) !== false )
             $dev = "&dev=1";
@@ -1031,7 +1030,7 @@ class freewheeling_fixit {
         $msg .= "</tr></table>";
 
         // lets look
-
+ 
         foreach ( array( "searchname, sourceFullname",
                 "sourceFullname, searchname"
             ) as $orderby ) {
@@ -1747,7 +1746,7 @@ class freewheeling_fixit {
             $databasePhotographer = $rec[ "photographer" ];
             $databaseTrail = $rec[ "trail_name" ];
             $databaseKeyword =
-                freeWheeling_DisplayOne::GetkkeywordUnLinkedList( $photoname );
+                freeWheeling_DisplayOne::keywordsDisplay( $photoname );
             $databaseHeight = $rec[ "height" ];
             $databaseWidth = $rec[ "width" ];
             $fullFile = "$photoPath/$photoname" . "_cr.jpg";

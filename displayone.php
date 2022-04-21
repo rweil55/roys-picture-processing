@@ -111,12 +111,14 @@ class freeWheeling_DisplayOne {
                         <img src='$htmlfileref2' alt='small Trail Photo'
                     $thumbsize id='smallImage' /><br /><br />
                     <a href = '$htmlfileref1' download=$photoname > 
-                    <img src ='/wp-content/download.png' width='200'></a>
+                    <img src ='/wp-content/download.png' width='200'></a>";
+                $msg .= freeWheeling_DisplayOne::DisplayTableData( $recset, "narrow" );
+                $msg .= "
                     </td></tr></table> $eol";
                 //print "adjust = $adjust, width=$w_desired $eol";
             }
 
-            $msg .= freeWheeling_DisplayOne::DisplayTableDataOne( $recset );
+     //       $msg .= freeWheeling_DisplayOne::DisplayTableData( $recset, "wide" );
             $msg .= "
         <script type='javascript' >
         var photo =document.getElementById('bigImage');
@@ -131,7 +133,7 @@ class freeWheeling_DisplayOne {
             // --------------------------------------------------- update section
             // --------------------------------------------------- update section
             // --------------------------------------------------- update section
-            $server = $_SERVER['HTTP_HOST'];
+            $server = $_SERVER[ 'HTTP_HOST' ];
             $msg .= "
             <form action='https://$server/update' method='post' >
             <input type='hidden' name='allow' value='1' />
@@ -257,7 +259,7 @@ class freeWheeling_DisplayOne {
     private static function keywodCheckboxes( $photoname ) {
         // buld the display of keyword checkbox
         global $wpdbExtra, $rrw_keywords;
-        global $eol;
+        global $eol, $errorBeg, $errorEnd;
         $msg = "";
         $debugKeywords = false;
         $grid = false;
@@ -304,9 +306,9 @@ class freeWheeling_DisplayOne {
         return $msg;
     }
 
-    private static function DisplayTableDataOne( $recset ) {
+    private static function DisplayTableData( $recset, $format ) {
         global $photoUrl, $photoPath, $highresPath, $thumbPath;
-        global $eol;
+        global $eol, $errorBeg, $errorEnd;
         $msg = "";
 
         $photoname = $recset[ "photoname" ];
@@ -322,6 +324,20 @@ class freeWheeling_DisplayOne {
         } else {
             $photographerDisplay = $recset[ "photographer" ] . "</td>\n ";
         }
+
+        $copyRight = $recset[ "copyright" ];
+        if ( empty( $copyRight ) )
+            $copyRight = "Copyright missing from file - Assume all rights reserved
+                <a href='/author2copyright/?filename=$photoname' >.</a>";
+        else {
+            $copyRight = str_replace( ",", $eol, $copyRight );
+            $copyRight = str_replace( " - ", $eol, $copyRight );
+        }
+
+        $nameDisplay = " <a href='$photoUrl/{$photoname}_cr.jpg'>$photoname</a>
+                &nbsp; &nbsp; &nbsp; &nbsp; " . $recset[ 'comment' ] . "$eol";
+
+        $keywordDisplay = self::GetkkeywordLinkedList( $photoname );
 
         $fullname = "$photoPath/$photoname" . "_cr.jpg";
         if ( file_exists( $fullname ) ) {
@@ -343,38 +359,59 @@ class freeWheeling_DisplayOne {
             $sizeThumb = $photoSize[ 3 ];
         } else
             $sizeThumb = "";
-        //  -------------------------------------------------- Now the display
-        $msg .= " File is <a href='$photoUrl/{$photoname}_cr.jpg'>$photoname</a>
-                &nbsp; &nbsp; &nbsp; &nbsp; " . $recset[ 'comment' ] . "$eol";
-        $msg .= "\n<div class='rrwOnePhoto'><table> \n ";
-        $msg .= rrwFormat::CellRow( "Trail: ", $trailDisplay,
-            "Photographer: ", $photographerDisplay );
-        $msg .= rrwFormat::CellRow( "Location: ", $recset[ "location" ],
-            "Photo Date: ", $recset[ "PhotoDate" ] );
-        $msg .= rrwFormat::CellRow( "Photo Size ",
-            "<a href='$photoUrl/{$photoname}_cr.jpg'>this - $sizeDisplay</a>,
+        switch ( $format ) {
+            case "wide":
+
+                //  -------------------------------------------------- Now the display
+                $msg .= " File is $nameDisplay<table> \n ";
+                $msg .= rrwFormat::CellRow( "Trail: ", $trailDisplay,
+                    "Photographer: ", $photographerDisplay );
+                $msg .= rrwFormat::CellRow( "Location: ", $recset[ "location" ],
+                    "Photo Date: ", $recset[ "PhotoDate" ] );
+                $msg .= rrwFormat::CellRow( "Photo Size ",
+                    "<a href='$photoUrl/{$photoname}_cr.jpg'>this - $sizeDisplay</a>,
                ThumbNail - $sizeThumb " );
-        $msg .= "</table>";
-        $copyRight = $recset[ "copyright" ];
-        if ( empty( $copyRight ) )
-            $copyRight = "Copyright missing from file - Assume all rights reserved
-                <a href='/author2copyright/?filename=$photoname' >.</a>";
-        $msg .= "$copyRight $eol";
+                $msg .= "</table>";
+                $msg .= "$copyRight $eol";
 
-        # -------------------- keywords
-        $msg .= "<strong>Existing keywords:</strong>\n" .
-        self::GetkkeywordLinkedList( $photoname );
+                # -------------------- keywords
+                $msg .= "<strong>Existing keywords:</strong>\n $keywordDisplay";
 
-        $msg .= "$eol<strong>Identifiable People:</strong>" . $recset[ "people" ] . "
+                $msg .= "$eol<strong>Identifiable People:</strong>" . $recset[ "people" ] . "
 <div id='missedClassifi' onclick='openMissedClassifi(this,$photoname);'>
     if any of this infomation is incorrect or missing. Please
     <a href='/webmaster-feedback'>let us know</a></div>$eol";
+                break;
+            case "narrow":
+                $msg .= "\n<div class='rrwOnePhoto'><table> \n " .
+                rrwFormat::CellRow( "Photo Name: ", $nameDisplay ) .
+                rrwFormat::CellRow( "Trail: ", $trailDisplay ) .
+                rrwFormat::CellRow( "Location: ", $recset[ "location" ] ) .
+                rrwFormat::CellRow( "Photographer: ", $photographerDisplay ) .
+                rrwFormat::CellRow( "Photo Date: ", $recset[ "PhotoDate" ] ) .
+                rrwFormat::CellRow( "Identifiable People ", $recset[ "people" ] ) .
+                rrwFormat::CellRow( "Keywords: ", $keywordDisplay ) .
+                rrwFormat::CellRow( "Copyright: ", $copyRight ) .
+                rrwFormat::CellRow( "Photo Size ", $sizeDisplay ) .
+                rrwFormat::CellRow( "TumbNail size", $sizeThumb ) .
+                "</table>";
+                # -------------------- keywords
+
+                $msg .= "
+<div id='missedClassifi' onclick='openMissedClassifi(this,$photoname);'>
+    if any of this information is incorrect or missing. Please
+    <a href='/webmaster-feedback'>let us know</a></div>$eol";
+                break;
+            default:
+                $msg .= "$errorBeg E#736 unknown fromat style of '$format' $errorEnd";
+                break;
+        } // end switch $format
         return $msg;
 
     } // end display table
 
-    public static function GetkkeywordUnLinkedList( $photoname ) {
-        global $eol;
+    public static function keywordsDisplay( $photoname ) {
+        global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_keywords;
         $output = "";
 
@@ -396,7 +433,7 @@ class freeWheeling_DisplayOne {
 
     }
     public static function GetkkeywordLinkedList( $photoname ) {
-        global $eol;
+        global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_keywords;
         $output = "";
 
@@ -418,7 +455,7 @@ class freeWheeling_DisplayOne {
     }
 
     public static function listbox2( $db, $table, $field, $oldvalue, $sortField ) {
-
+        global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra;
         $msg = "";
         $msg .= "\n\n<select name='$field'>

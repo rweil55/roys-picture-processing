@@ -28,7 +28,7 @@ class rrwPicSubmission {
         try {
             $debugsubmit = false;
             if ( $debugsubmit )$msg .= rrwUtil::print_r( $_FILES, true, "Files" );
-            $photographer = rrwUtil::fetchparameterString( "photographer" );
+            $photographer = rrwPara::String( "photographer" );
             $replacephoto = rrwPara::String("replacephoto");
             if ( empty( $photographer ) )
                 throw new RuntimeException( 'you must selct a photographer.' );
@@ -81,6 +81,7 @@ class rrwPicSubmission {
                 throw new RuntimeException( "file name can consist of only
                 letters, numbers, and spaces" );
             $photoname = $matchs[ 0 ];
+            $photoname = strtolower($photoname);
             $highresShortname = "$photoname.$ext";
             $Fullfileupload = "$uploadPath/$highresShortname";
             $FullfileHighRes = "$highresPath/$highresShortname";
@@ -104,9 +105,10 @@ class rrwPicSubmission {
                     $msg .= "Per your request existing photo will be replaced $eol";
                 } else {
                     $dateMod = $recs[0]["uploaddate"];
-                    $msg .= "$errorBeg $eol E#814 $$highresShortname 
+                    $msg .= "$errorBeg $eol E#814 $highresShortname 
                     was uploaded previously on $dateMod. 
-                    You must check the box to allow the replacement $errorEnd" ;
+                    You must check the box to allow the replacement $errorEnd
+                    $sqlexists $eol" ;
                     return $msg;
                 }
                 $updateData[ "uploaddate" ] = date( "Y-m-d" );
