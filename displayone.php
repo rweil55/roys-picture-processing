@@ -156,10 +156,10 @@ class freeWheeling_DisplayOne {
             $msg .= "<input type='hidden' name='copyright' id='copyright'
                 value='$copyright' /> \n";
             $msg .= "<strong>Trail:</strong>" .
-            self::listbox2( $wpdbExtra, "$rrw_trails",
+            rrwFormat::selectBox( $wpdbExtra, "$rrw_trails",
                 "trailName", $trail_name, "trailName" ) . " $eol";
             $msg .= "<strong>Photogrpher:</strong>" .
-            self::listbox2( $wpdbExtra, "$rrw_photographers",
+            rrwFormat::selectBox( $wpdbExtra, "$rrw_photographers",
                 "photographer", $photographer, "photographer" ) . $eol;
             $msg .= "\n" . "<strong>Photo Date:</strong>
                 <input type='text' name='photodate' size='20' 
@@ -453,7 +453,7 @@ class freeWheeling_DisplayOne {
         }
         return $output;
     }
-
+/*
     public static function listbox2( $db, $table, $field, $oldvalue, $sortField ) {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra;
@@ -478,6 +478,7 @@ class freeWheeling_DisplayOne {
 
         return $msg;
 
-    }
+    }   // end listbox2
+    */
 } // ed class
 ?>

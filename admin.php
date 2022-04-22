@@ -29,10 +29,6 @@ class freewhilln_Administration_Pictures {
             $sql = "select count(*) from $rrw_photos"; // total photos
             $msg .= ( "<!-- sql is $sql -->\n" );
             $photoRowCnt = $wpdbExtra->get_var( $sql );;
-            $sql = "select count(*) from $rrw_photos 
-                    where not photostatus = 'use' "; // total rejected photos
-            $msg .= ( "<!-- sql is $sql -->\n" );
-            $photorejectCnt = $wpdbExtra->get_var( $sql );;
             $sql = "select distinct keywordFilename from $rrw_keywords"; // total keyword
             $msg .= ( "<!-- sql is $sql -->\n" );
             $withKeysQuery = $wpdbExtra->get_resultsA( $sql );;
@@ -75,33 +71,11 @@ class freewhilln_Administration_Pictures {
             $cntKeywords = $wpdbExtra->num_rows;
             // --------------------------------------------------------- column 1
             $msg .= "<table><tr>
-                    <td style='vertical-align:top'>\n
-                    <strong> Information Counts </strong>$eol";
-            $msg .= self::SQLcount( "~ accessable photos ",
-                " photostatus = 'use' " );
-            $msg .= self::SQLcount( "~ photos in the photo database", "1=1" );
-            $msg .= "$photorejectCnt photos rejected/duplicates $eol";
-            $msg .= "$keyWithCnt distinct photos in the keyword database$eol";
-            $msg .= self::EmptyCount( "direonp", "source file" );
-            $msg .= self::SQLcount( "~with load dates before $loadDate",
-                "uploaddate < '$loadDate' " );
-            $msg .= self::SQLcount( "~with load dates after $loadDate'",
-                "uploaddate >= '$loadDate' " );
-            $msg .= "$photogUsedCnt <a  href='/display-photographers/'
-                    target='list' >
-                    distinct photographers</a> used of $PhotogTotalCnt 
-                    in the photo tables $eol";
-            $sqlWhere = " sourcestatus = '' and 
-                        ( sourcefullname like '%w-pa-trails%' or
-                          sourcefullname like '%ytrek%' ) and 
-                     not searchname in (select photoname from $rrw_photos)";
-            $sqlWhere = freewheeling_fixit::addsearch( "" );
-            $iiWhere = strpos( $sqlWhere, "where" );
-            $sqlWhere = substr( $sqlWhere, $iiWhere + 5 );
+                    <td style='vertical-align:top'>\n";
+            if ( rrwUtil::AllowedToEdit( "see complete administratin display",
+                    "", false ) )
+                $msg .= self::ColumnOne( $loadDate );
 
-            $msg .= self::SQLcount( "possible adds", $sqlWhere, $rrw_source, 16 );
-
-            $msg .= "$cntKeywords distinct keywords$eol";
             //  -----------------------------------------------   column 2
             $msg .= "\n</td><td style='vertical-align:top'>\n
             <strong>Missing data counts</strong>$eol";
@@ -120,14 +94,14 @@ class freewhilln_Administration_Pictures {
             $msg .= self::EmptyCount( "height", "height" );
             $msg .= self::EmptyCount( "width", "width" );
             $msg .= self::SQLcount( "~keywords not on phototable",
-                "not keywordfilename in(" . 
-                        " select photoname from $rrw_photos)", $rrw_keywords );
+                "not keywordfilename in(" .
+                " select photoname from $rrw_photos)", $rrw_keywords );
             $msg .= self::SQLcount( "~keywords pairs duplicated",
                 " 1 = 1", "(select keywordFilename from $rrw_keywords group by keyword, keywordFilename having count(*) > 1) xx " );
- /*          $msg .= self::SQLcount ("~parnoramas not label paramanrama",
-                              " height / width < .3 and not photoname in " .
-                              " (select keywordFilename from $rrw_keywords " .
-                                      " where keyword = 'panorama' )");*/
+            /*          $msg .= self::SQLcount ("~parnoramas not label paramanrama",
+                                         " height / width < .3 and not photoname in " .
+                                         " (select keywordFilename from $rrw_keywords " .
+                                                 " where keyword = 'panorama' )");*/
             //  -------------------------------------------  column 3
             $msg .= "</td><td style='vertical-align:top'>
             <strong>Specilized search </strong>$eol " .
@@ -138,11 +112,14 @@ class freewhilln_Administration_Pictures {
             $msg .= "
 To Modify/Add <a href='/display-trail/' target='modify'>Trail Names</a><br />
 To Modify/Add <a href='/display-photographer' target='modify'>
-        Phographer Names</a><br />
+        Phographer Names</a><br />";
+            if ( rrwUtil::AllowedToEdit( "see complete administratin display",
+                    "", false ) ) {
+                $msg .= "
 To Modify/Merge <a href='/fix?task=keywordform' target='modify'>Keywords</a>
 ";
-            $today = date( "Y-m-d" );
-            $msg .= "
+                $today = date( "Y-m-d" );
+                $msg .= "
 <form action='/fix?task=bydate' method='post' >
     Display all photos uploaded between
     <input type=text name=startdate value='1/1/2022' >
@@ -150,12 +127,12 @@ To Modify/Merge <a href='/fix?task=keywordform' target='modify'>Keywords</a>
     <input type=text name=enddate value='$today' >
     <input type=submit value='Go Display'>
 </form>";
-            /*
+                /*
 Display keywords with the photos <a href='/admin?setting=on' >On</a> &nbsp; 
 <a href='/admin?setting=off' >Off</a> &nbsp;<br />
 <a href='/notindatabase.php?doupdate=please'> 
 */
-            $msg .= "
+                $msg .= "
 <form method='post' action='/fix?task=deletephoto' >
     Delete photo named
     <input type='text' name='del3' id='del3 '>
@@ -165,14 +142,15 @@ Display keywords with the photos <a href='/admin?setting=on' >On</a> &nbsp;
     <input type='radio' name='why' id+'why' value='reject'>reject 
     <input type='submit' value='Delete the photo from database' >
 </form>";
-            $msg .= freewheeling_fixit::updateRename( "", "" );
-            $msg .= "
+                $msg .= freewheeling_fixit::updateRename( "", "" );
+                $msg .= "
             <br />
     [ <a href='/fix/?task=highresmissing' > high resolution image
                                             missing </a> ]  
     [ <a href='/fix/?task=photomissing' > photo information missing</a> ]  
     [  <a href='/fix/?task=filesmissing' > highres missng _cr, _tmb </a> ]
    ";
+            }
             $msg .= "
 </div>";
         } catch ( Exception $ex ) {
@@ -180,6 +158,41 @@ Display keywords with the photos <a href='/admin?setting=on' >On</a> &nbsp;
         }
         return $msg;
     } // end function
+
+    private static function ColumnOne( $loadDate ) {
+        global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords, $rrw_trails;
+        global $eol;
+        $msg = "";
+        $msg .= " <strong> Information Counts </strong>$eol";
+        $msg .= self::SQLcount( "~ accessable photos ",
+            " photostatus = 'use' " );
+        $msg .= self::SQLcount( "~ photos in the photo database", "1=1" );
+        $msg .= self::SQLcount( "~ photos rejected/duplicates",
+            "not photostatus = 'use'" );
+        $msg .= self::SQLcount( "~ distinct keywords in the keyword database",
+            "(select distinct keywordFilename from $rrw_keywords) xx", "none" );
+        $msg .= self::EmptyCount( "direonp", "source file" );
+        $msg .= self::SQLcount( "~with load dates before $loadDate",
+            "uploaddate < '$loadDate' " );
+        $msg .= self::SQLcount( "~with load dates after $loadDate'",
+            "uploaddate >= '$loadDate' " );
+        $msg .= self::SQLcount( "distinct photographers",
+            "(select distinct photographer from $rrw_photos) xx", "none" );
+
+        $sqlWhere = " sourcestatus = '' and 
+                        ( sourcefullname like '%w-pa-trails%' or
+                          sourcefullname like '%ytrek%' ) and 
+                     not searchname in (select photoname from $rrw_photos)";
+        $sqlWhere = freewheeling_fixit::addsearch( "" );
+        $iiWhere = strpos( $sqlWhere, "where" );
+        $sqlWhere = substr( $sqlWhere, $iiWhere + 5 );
+
+        $msg .= self::SQLcount( "possible adds", $sqlWhere, $rrw_source, 16 );
+
+        $msg .= self::SQLcount( "~distinct keywords",
+            "(select distinct keyword from $rrw_keywords) xx", "none" );
+        return $msg;
+    } // end ColumnOne
 
     public static function cntMissingImage( $showNames ) {
         global $wpdbExtra, $rrw_photos, $photoPath;
@@ -224,16 +237,23 @@ Display keywords with the photos <a href='/admin?setting=on' >On</a> &nbsp;
         global $eol;
         $msg = "";
         $debug = false;
-        
-        if ( "" == $tablein )
-            $table = $rrw_photos;
-        else
-            $table = $tablein;
+
+        switch ( $tablein ) {
+            case "":
+                $table = " from $rrw_photos where ";
+                break;
+            case "none":
+                $table = " from ";
+                break;
+            default:
+                $table = " from $tablein where ";
+                break;
+        }
         $startat = get_option( "sqlCount-$description", 0 );
-        $sql = "select count(*) from $table where $sqlWhere";
+        $sql = "select count(*) $table $sqlWhere";
         if ( !empty( $limit ) )
             $sql .= " limit $limit";
-        if ($debug) print ( "<-- sql is $sql -->$eol" );
+        if ( $debug ) print( "<-- sql is $sql -->$eol" );
         $cnt = $wpdbExtra->get_var( $sql );
         $query = str_replace( "'", "xxy", $sqlWhere );
         if ( "~" == substr( $description, 0, 1 ) ) {

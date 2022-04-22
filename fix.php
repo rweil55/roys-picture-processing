@@ -30,8 +30,8 @@ class freewheeling_fixit {
                     break;
             }
             if ( rrwUtil::notAllowedToEdit( "fix things", "", true ) )
-               return "$mdg $errorBeg E#747 Not allowed to search source $errorEnd";
-     
+                return "$mdg $errorBeg E#747 Not allowed to search source $errorEnd";
+
             switch ( $task ) {
                 case "add":
                     $msg .= freewheeling_fixit::addphotos();
@@ -189,7 +189,7 @@ class freewheeling_fixit {
         $sqlEmpty = "update $rrw_photos set exif = '', width = -1, height = -1";
         $wpdbExtra->query( $sqlEmpty );
         $sqlcnt = "select count(*) from $rrw_photos";
-        $cntUse = $wpdbExtra->get_var($sqlcnt);
+        $cntUse = $wpdbExtra->get_var( $sqlcnt );
         $sqlMissingExif = "select photoname FROM $rrw_photos 
                         where exif = '' "; //and photostatus = 'use' ";
         $recs = $wpdbExtra->get_resultsA( $sqlMissingExif );
@@ -1030,7 +1030,7 @@ class freewheeling_fixit {
         $msg .= "</tr></table>";
 
         // lets look
- 
+
         foreach ( array( "searchname, sourceFullname",
                 "sourceFullname, searchname"
             ) as $orderby ) {
@@ -1244,15 +1244,15 @@ class freewheeling_fixit {
                 $orderby = "sourcefullname, searchname, aspect";
                 break;
             case "$rrw_keywords":
-                 $msg .= "$eol I#699 &nbsp; select * from $rrw_keywords 
+                $msg .= "$eol I#699 &nbsp; select * from $rrw_keywords 
                     where keywordfilename in (
                         select keywordfilename from $rrw_keywords where not keywordfilename in( select photoname from $rrw_photos) order by keywordfilename, keyword ) limit 20 $eol ";
- 
+
                 $fields = "keywordfilename, keyword";
                 $orderby = "keywordfilename, keyword";
                 break;
             default:
-                if (empty($table))
+                if ( empty( $table ) )
                     $table = "$rrw_photos";
                 $fields = " photoname, '1' search,  trail_name, photographer, photostatus ";
                 $orderby = " photoname, trail_name, photographer, photostatus ";
@@ -1482,14 +1482,18 @@ class freewheeling_fixit {
     }
 
     public static function searchform() {
+        global $eol, $errorBeg, $errorEnd;
+        global $wpdbExtra, $rrw_photos, $rrw_photographers;
         $msg = "
 <form action='/displayphotos/' method=POST>
-<input type='text' name='photoname' id='searchphoto' value='' />photo<br />
-<input type='text' name='directory' id='searchdire' value='' />directory<br />
-<input type='text' name='location' id='searchloc' value='' />location<br />
-<input type='text' name='people' id='searchpeople' value='' />people<br />
-<input type='text' name='source' id='searchsource' value='' />source<br />
-<input type='text' name='photographer' id='searchphotographer' value='' />photographer<br />
+<input type='text' name='photoname' id='searchphoto' value='' /> photo<br />
+<input type='text' name='directory' id='searchdire' value='' /> directory<br />
+<input type='text' name='location' id='searchloc' value='' /> location<br />
+<input type='text' name='people' id='searchpeople' value='' /> people<br />
+<input type='text' name='source' id='searchsource' value='' /> source<br />";
+        $msg .= rrwFormat::selectBox( $wpdbExtra, $rrw_photographers,
+            "photographer", "", "photographer" ) . " photographer $eol";
+        $msg .= "$eol 
 <input type='submit' name='submit' id='submit' value='Search any' />
 </form>";
         return $msg;
@@ -1823,7 +1827,7 @@ class freewheeling_fixit {
             ; // do nothing
             elseif ( empty( $fileArtist ) && !empty( $databasePhotographer ) ) {
                 $msg .= rrwExif::pushToImage( $photoname, "Artist",
-                                             $dataPotogrpherWeb );
+                    $dataPotogrpherWeb );
                 $fileArtist = $dataPotogrpherWeb;
             }
             elseif ( !empty( $fileArtist ) && empty( $databasePhotographer ) ) {

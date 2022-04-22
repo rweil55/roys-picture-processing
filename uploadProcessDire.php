@@ -72,7 +72,7 @@ class uploadProcessDire {
         // ------new ----------------------------  validate photoname
         if ( !file_exists( $sourceFile ) )
             throw new Exception( "$msg $errorBeg E#718 processOneFile( $entry )
-                     file not found in upload $errorEnd" );
+                     file not found in upload $errorEnd $sourceFile $eol" );
         $mime_type = mime_content_type( $sourceFile );
         switch ( $mime_type ) {
             case 'image/jpeg':

@@ -82,6 +82,7 @@ class rrwPicSubmission {
                 letters, numbers, and spaces" );
             $photoname = $matchs[ 0 ];
             $photoname = strtolower($photoname);
+            $photoname = str_replace ("+", "-", $photoname);
             $highresShortname = "$photoname.$ext";
             $Fullfileupload = "$uploadPath/$highresShortname";
             $FullfileHighRes = "$highresPath/$highresShortname";
@@ -92,7 +93,6 @@ class rrwPicSubmission {
                 $msg .= freewheeling_fixit::filelike(
                     array( "partial" => $photoname ) );
                 return $msg;
-
             }
 
             // see if metat data exists
@@ -174,7 +174,7 @@ class rrwPicSubmission {
         $msg .= "<form  method='post' action='/submission/' enctype=\"multipart/form-data\" > ";
 
         $msg .= "<strong>Photogrpher:</strong>" .
-        freeWheeling_DisplayOne::listbox2( $wpdbExtra, "$rrw_photographers",
+        rrwFormat::selectBox( $wpdbExtra, "$rrw_photographers",
             "photographer", $photographer, "photographer" );
 
         $msg .= "</select> if not in the list  

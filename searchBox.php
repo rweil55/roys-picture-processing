@@ -63,7 +63,6 @@ class rrwPictures_searchBox {
             $msg = "
             <p> [ <a href='$httpHost/admin' target='admin' >admin </a>]
             [ <a href='$httpHost/submission' target='admin' >submit photo </a> ]
-            [ c:\_e &nbsp; php sub.php ]
             [ <a href='$httpHost/upload' target='admin' >process upload </a> ]
             [ <a href='$exifUrl' target='one' >EXIF description </a> ]
             [ <a href='$exifList' target='one' >EXIF description </a> ]
