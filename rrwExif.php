@@ -772,7 +772,8 @@ class rrwExif {
         global $eol, $errorBeg, $errorEnd;
         global $testPath;
         $msg = "";
-        include "setConstants.php";
+        
+        $msg .= SetConstants("rrwExif:test11");
         $testPath = "/home/pillowan/www-shaw-weil-pictures-dev/testphoto";
         $output_file = "$testPath/output.jpg";
         //       $msg .= rrwUtil::print_r( $attr, true, "I#739 atributes" );

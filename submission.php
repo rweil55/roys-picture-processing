@@ -9,7 +9,12 @@ class rrwPicSubmission {
         global $eol, $errorBeg, $errorEnd;
         $msg = "";
 
-        include "setConstants.php";
+        if ( !freewheeling_fixit::allowedSubmit() ) {
+            $msg .= "$errorBeg  You must be logined in have the necessary
+                priviledges to submit photos $errorEnd";
+            return $msg;
+        }
+
         $submit = rrwUtil::fetchparameterString( "submit" );
         if ( empty( $submit ) )
             $msg .= self::displayform();
@@ -24,12 +29,18 @@ class rrwPicSubmission {
         global $uploadPath, $highresPath, $photoPath;
         $msg = "";
         $debug = false;
-    
+
         try {
             $debugsubmit = false;
             if ( $debugsubmit )$msg .= rrwUtil::print_r( $_FILES, true, "Files" );
+            if ( !freewheeling_fixit::allowedSubmit() ) {
+                $msg .= "$errorBeg  You must be logined in have the necessary
+                priviledges to submit photos $errorEnd";
+                return $msg;
+            }
+
             $photographer = rrwPara::String( "photographer" );
-            $replacephoto = rrwPara::String("replacephoto");
+            $replacephoto = rrwPara::String( "replacephoto" );
             if ( empty( $photographer ) )
                 throw new RuntimeException( 'you must selct a photographer.' );
 
@@ -81,15 +92,15 @@ class rrwPicSubmission {
                 throw new RuntimeException( "file name can consist of only
                 letters, numbers, and spaces" );
             $photoname = $matchs[ 0 ];
-            $photoname = strtolower($photoname);
-            $photoname = str_replace ("+", "-", $photoname);
+            $photoname = strtolower( $photoname );
+            $photoname = str_replace( "+", "-", $photoname );
             $highresShortname = "$photoname.$ext";
             $Fullfileupload = "$uploadPath/$highresShortname";
             $FullfileHighRes = "$highresPath/$highresShortname";
 
             if ( false !== strpos( $highresShortname, "_cr.jpg" ) ) {
                 $msg .= "$errorBeg _cr.jpg not allowed.
-                            $errorEnd select the high resolution verion " ;
+                            $errorEnd select the high resolution verion ";
                 $msg .= freewheeling_fixit::filelike(
                     array( "partial" => $photoname ) );
                 return $msg;
@@ -104,11 +115,11 @@ class rrwPicSubmission {
                 if ( 'on' == $replacephoto ) {
                     $msg .= "Per your request existing photo will be replaced $eol";
                 } else {
-                    $dateMod = $recs[0]["uploaddate"];
+                    $dateMod = $recs[ 0 ][ "uploaddate" ];
                     $msg .= "$errorBeg $eol E#814 $highresShortname 
                     was uploaded previously on $dateMod. 
                     You must check the box to allow the replacement $errorEnd
-                    $sqlexists $eol" ;
+                    $sqlexists $eol";
                     return $msg;
                 }
                 $updateData[ "uploaddate" ] = date( "Y-m-d" );
@@ -145,9 +156,9 @@ class rrwPicSubmission {
             $msg .= rrwUtil::InsertIntoHistory( $photoname, "uploaded " );
             $msg .= "File was uploaded successfully to $Fullfileupload $eol";
             if ( $debugsubmit )$msg .= "lets process upload dire$eol";
-            $attr = array("uploadshortname"=>$highresShortname);
-            if ( $debug )$msg .= rrwUtil::print_r($attr, true, "parameters to upload");
-            $msg .= uploadProcessDire::upload($attr);
+            $attr = array( "uploadshortname" => $highresShortname );
+            if ( $debug )$msg .= rrwUtil::print_r( $attr, true, "parameters to upload" );
+            $msg .= uploadProcessDire::upload( $attr );
         } catch ( RuntimeException $e ) {
             $msg .= $errorBeg . $e->getMessage() . $errorEnd;
         }
@@ -162,7 +173,7 @@ class rrwPicSubmission {
 
         $photographer = rrwUtil::fetchparameterString( "photographer" );
         $ip = $_SERVER[ 'REMOTE_ADDR' ];
-        if (false) $msg .= "IP address == $ip $eol";
+        if ( false )$msg .= "IP address == $ip $eol";
         if ( empty( $photographer ) && ( "72.95.243.124" == $ip ) )
             $photographer = "Mary Shaw";
         if ( empty( $photographer ) ) {
@@ -190,7 +201,7 @@ class rrwPicSubmission {
         $msg .= "<input type='submit' name='submit' id='submit'
         value='Upload the picture, Display it so I can select the keywords' /> $eol
         </form> $eol";
-          return $msg;
+        return $msg;
     } // end function
 } // end class
 ?>

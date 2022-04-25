@@ -14,9 +14,6 @@ class freewheeling_fixit {
         $msg = "";
 
         try {
-            $msg .= "<!-- before allow -->\n";
-            $msg .= "<!-- before set constatnts -->\n";
-            $msg .= SetConstants( "updateDiretoryOnFileMatch" );
             $task = rrwUtil::fetchparameterString( "task" );
             $msg .= "<!-- task == $task -->\n";
             switch ( $task ) { // those tasks which do not reqire a line in
@@ -30,8 +27,7 @@ class freewheeling_fixit {
                     break;
             }
             if ( rrwUtil::notAllowedToEdit( "fix things", "", true ) )
-                return "$mdg $errorBeg E#747 Not allowed to search source $errorEnd";
-
+                return "$mdg $errorBeg E#747 Not alloed to search $errorEnd";
             switch ( $task ) {
                 case "add":
                     $msg .= freewheeling_fixit::addphotos();
@@ -39,12 +35,16 @@ class freewheeling_fixit {
                 case "addlist":
                     $msg .= freewheeling_fixit::addList();
                     break;
+                case "allow":
+                    $msg .= self::AddCapacity( $attr );
+                    break;
                 case "bydate": //get collection of photos between two dates
                     $msg .= freewheeling_fixit::byDate();
                     break;
                 case "badcopyright":
                     $msg .= freewheeling_fixit::badCopyright();
                     break;
+
                 case "copymeta":
                     $msg .= rrwExif::copymeta();
                     break;
@@ -176,6 +176,51 @@ class freewheeling_fixit {
             $msg .= "$errorBeg E#495 " . $ex->getMessage() . $errorEnd;
         }
         return $msg;
+    }
+    private static function AddCapacity( $attr ) {
+        global $eol, $errorBeg, $errorEnd;
+        global $cap_submit;
+        $msg = "";
+
+        $cap_submit = "submit_photo";
+        $userName = rrwPara::String( "user", $attr );
+        $remove = rrwPara::String( "remove", $attr, false );
+        if ( empty( $userName ) )
+            return "$msg $errorBeg missing user name $errorEnd";
+        $user = new WP_User( "", $userName );
+        $msg .= rrwUtil::print_r( $user, true, "Found user" );
+        if ( false === $user || !$user->exists() )
+            return "$msg $errorBeg E#748 no such user '$userName' $errorEnd";
+        if ( $remove ) {
+            $user->remove_cap( $cap_submit );
+            return "$msg user '$userName'can no longer submit photos";
+        } else {
+
+            $user->add_cap( $cap_submit, true );
+            return "$msg user '$userName'can now submit photos";
+        }
+        return $msg;
+    }
+    public static function allowedSubmit() {
+        if ( current_user_can( "edit_posts" ) )
+            return true;
+        if ( current_user_can( "submit_photo" ) )
+            return true;
+        return false;
+    }
+    public static function allowedEdit( $photoOwner ) {
+        if ( current_user_can( "edit_posts" ) )
+            return true;
+        $user = wp_get_current_user();
+        if ( !$user->exists() )
+            return false;
+
+        if ( current_user_can( "edit_photo" ) )
+            return true;
+        $userlogin = $user->get( "user_login" );
+        if ( false !== strpos($photoOwner, $userlogin) )
+            return true;
+        return false;
     }
 
     private static function extractexif() {
@@ -1233,7 +1278,7 @@ class freewheeling_fixit {
         if ( 0 == $limitin )
             $limitin = 20;
         $limit = $limitin + $startAt;
-        $urlNext = "/fix/?task=listing&table=$table&limit=&limit&where=$sqlWhere" .
+        $urlNext = "/fix/?task=listing&table=$table&description=$description&limit=&limit&where=$sqlWhere" .
         "&startat=$limit";
 
         $sqlWhere = str_replace( "xxy", "'", $sqlWhere );
@@ -1507,7 +1552,6 @@ class freewheeling_fixit {
         $msg = "$errorBeg needs check because of rrw_souce dchange $errorEnd";
         $debug = false;
         try {
-            $msg .= SetConstants( "updateDiretoryOnFileMatch" );
             $msg .= direReport( "direonp", "with blank DireOnP" );
             //      return $msg;
             $sql = "select direonp, sourcefullname, sourceFullname from $rrw_photos 
@@ -1573,7 +1617,6 @@ class freewheeling_fixit {
         // used to relate the entries in photo datta database to the file location on spoke
         // if file name is close (contains) then update the diterctory field
 
-        $msg .= SetConstants( "updateDiretoryOnFileMatch" );
         $msg .= direReport( "direonp", "with blank DireOnP" );
         $sql = "select photoname from $rrw_photos wheredireonp = '' ";
         $msg .= "$sql $eol ";

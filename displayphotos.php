@@ -30,6 +30,7 @@ class freewheeling_displayPhotos {
         foreach ( $recFiles as $recFile ) {
             $photoname = $recFile[ "photoname" ];
             $photographer = $recFile[ "photographer" ];
+            $owner = $recFile[ "owner" ];
             $thumbname = "{$photoname}_tmb.jpg";
             $imageTmb = "$thumbUrl/$thumbname";
             //   $msg .= "image file is at imageTmb $eol ";;
@@ -43,7 +44,7 @@ class freewheeling_displayPhotos {
                 $msg .= "
                 <img src='$imageTmb' alt='thumb nail image' $meta[3]
                 onclick='openOnePhotopage(\"$photoname\")' />";
-                if ( rrwUtil::AllowedToEdit( "update", "$photographer", false ) )
+                if ( freewheeling_fixit::allowedEdit( $owner ) )
                     $msg .= "<br /><span class='rrwCaption'> $photoname</span>";
             }
             $msg .= "</li>";
@@ -81,7 +82,7 @@ class freewheeling_displayPhotos {
         // case of random selection
         if ( strpos( $searchdropdown, "random" ) !== false ) {
             $limit = 21;
-            $sql = "SELECT photoname, photographer FROM $rrw_photos
+            $sql = "SELECT photoname, photographer, owner FROM $rrw_photos
                         where photostatus = 'use' order by rand() limit $limit";
             if ( $debugOutput ) print "case random - $sql $eol";
             $selectDisplay = "Selection: $limit random photos ";
@@ -91,7 +92,7 @@ class freewheeling_displayPhotos {
         if ( !empty( $searchdropdown ) ) {
             // case of dropdown selection
             if ( $debug ) print "trail= $trail, searchdropdown= $searchdropdown$eol";
-            $sqlSearch = " select photoname, photographer from $rrw_photos
+            $sqlSearch = " select photoname, photographer, owner from $rrw_photos
                 where photoname in (
                 select keywordfilename from $rrw_keywords 
                 where keyword = '$searchdropdown' )";

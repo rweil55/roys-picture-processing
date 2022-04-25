@@ -7,7 +7,7 @@ class rrwPictures_searchBox {
         $msg = "\n<!-- ================================= begin of the search box -->\n";
         //  return "hi there";
         $tablecss = true;
-        include "/home/pillowan/www-shaw-weil-pictures/wp-content/plugins/roys-picture-processng/setConstants.php";
+        $msg .= SetConstants("searc box");
         $msg .= "<div class='rrwChangeArea' id='trailddetail' onmouseout=changed(); >";
         $msg .= "\n<form action='search.php' method='post' id='form1' name='form1' >";
         if ( $tablecss )
@@ -57,7 +57,7 @@ class rrwPictures_searchBox {
     private static function adminNavBar() {
         $httpHost = "https://" . $_SERVER[ 'HTTP_HOST' ];
         // common routinue to putput the pictures administrators admin bar
-        if ( rrwUtil::AllowedToEdit( "update", "", false ) ) {
+        if ( freewheeling_fixit::allowedSubmit( ) ) {
             $exifUrl = "$httpHost/wp-content/plugins/roys-picture-processng/Exif/html";
             $exifList = "$httpHost/wp-content/plugins/roys-picture-processng/Exif/html/TagNames/EXIF.html";
             $msg = "

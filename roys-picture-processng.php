@@ -11,7 +11,7 @@
  * Text Domain: Roys-picture-processng
  * Domain Path: /translation
  
-  * Version: 2.1.58
+  * Version: 2.1.59
  */
 // disable direct access
 ini_set( "display_errors", true );
@@ -103,6 +103,7 @@ require_once "display_stuff_class.php";
 require_once "display_tables_class.php";
 require_once "display_tables_inc.php";
 // picture routines
+require_once "setConstants.php"; 
 require_once "admin.php";
 require_once "displayone.php";
 require_once "DisplayPhotogaphers.php";
@@ -129,9 +130,6 @@ class FreewheelingCommon {
     } // end funvtion missingImageMessage
    
 } // end of class
-function SetConstants( $whocalled ) {
-    include "setConstants.php";
-}
 
 function rrw_getAccessID() {
     $current_user = wp_get_current_user();
@@ -168,7 +166,6 @@ function direReport( $field, $report = "" ) {
     global $wpdbExtra, $rrw_photos;
     global $eol;
     $msg = "";
-    $msg .= SetConstants( "direReport" );
     $sqlTotal = "select count(*) from $rrw_photos";
     $total = $wpdbExtra->get_var( $sqlTotal );
     $sqlBlank = "select count(*) from $rrw_photos where $field is null or
@@ -209,7 +206,7 @@ add_shortcode( "rrwPicSubmission", array( "rrwPicSubmission", "showForm" ) );
 add_shortcode( "upload", array( "uploadProcessDire", "upload" ) );
 add_shortcode( "testingexif",array("rrwErrwExif", "test11") );
 
-require 'plugin_update_check.php';
+require_once 'plugin_update_check.php';
 $MyUpdateChecker  = new PluginUpdateChecker_2_0(
     'http://pluginserver.royweil.com/roys-picture-processng.php',
     __FILE__,

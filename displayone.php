@@ -7,15 +7,16 @@ class freeWheeling_DisplayOne {
     public static function DisplayOne( $attr ) {
         // display full size and thumbnail and the meta data infomaion
         ini_set( "display_errors", true );
-        global $photoUrl, $photoPath, $highresPath, $thumbUrl, $site_url;
+        global $photoUrl, $photoPath, $highresPath,
+        $thumbPath, $thumbUrl, $site_url;
         global $wpdbExtra, $rrw_photos, $rrw_trails, $rrw_photographers,
         $rrw_keywords, $rrw_access;
+        global $httpSource;
         global $eol, $errorBeg, $errorEnd;
         $msg = "";
         $debugPath = false;
 
         try {
-            include "setConstants.php";
             $photoname = rrwUtil::fetchparameterString( "photoname", $attr );
             $photoname = str_replace( "_tmb", "", $photoname );
             $photoname = str_replace( ".jpg", "", $photoname );
@@ -65,6 +66,7 @@ class freeWheeling_DisplayOne {
             $direonp = $recset[ "DireOnP" ];
             $trail_name = $recset[ "trail_name" ];
             $uploaddate = $recset[ "uploaddate" ];
+            $owner = $recset[ "owner" ];
             $highresShortname = $recset[ "highresShortname" ];
             if ( $debugPath )$msg .= "displayOne:photoUrl $photoPath $eol";
             $htmlfileref1 = "$photoUrl/{$photoname}_cr.jpg";
@@ -72,7 +74,7 @@ class freeWheeling_DisplayOne {
             $htmlfileref2 = "$thumbUrl/{$photoname}_tmb.jpg";
             $fullfilename2 = "$thumbPath/{$photoname}_tmb.jpg";
             if ( !file_exists( $fullfilename1 ) ) {
-                $msg .= "$errorBeg E#957 Not found was the display image $htmlfileref1 $errorEnd";
+                $msg .= "$errorBeg E#958 Not found was the display image $htmlfileref1 $errorEnd";
             }
             /*  displaywidth is based on screen size 
             $imageinfo = getimagesize( $fullfilename1 );
@@ -85,7 +87,7 @@ class freeWheeling_DisplayOne {
             }
             */
             if ( !file_exists( $fullfilename2 ) ) {
-                $msg .= "$errorBeg E#958 Not found was the thumbnail image $htmlfileref2 $errorEnd";
+                $msg .= "$errorBeg E#959 Not found was the thumbnail image $htmlfileref2 $errorEnd";
                 $thumbsize = 200;
             } else {
                 $thumbInfo = getimagesize( $fullfilename2 );
@@ -118,7 +120,7 @@ class freeWheeling_DisplayOne {
                 //print "adjust = $adjust, width=$w_desired $eol";
             }
 
-     //       $msg .= freeWheeling_DisplayOne::DisplayTableData( $recset, "wide" );
+            //       $msg .= freeWheeling_DisplayOne::DisplayTableData( $recset, "wide" );
             $msg .= "
         <script type='javascript' >
         var photo =document.getElementById('bigImage');
@@ -126,8 +128,8 @@ class freeWheeling_DisplayOne {
         </script>
         ";
             // End of display data section
-            if ( rrwUtil::notAllowedToEdit( "update, $photographer", false ) )
-                return $msg;
+            if ( !freewheeling_fixit::allowedEdit( $owner ) )
+                return "$msg $eol .";
 
             $msg .= "<hr>";
             // --------------------------------------------------- update section
@@ -453,32 +455,32 @@ class freeWheeling_DisplayOne {
         }
         return $output;
     }
-/*
-    public static function listbox2( $db, $table, $field, $oldvalue, $sortField ) {
-        global $eol, $errorBeg, $errorEnd;
-        global $wpdbExtra;
-        $msg = "";
-        $msg .= "\n\n<select name='$field'>
-        <option value='' disabled ";
-        if ( "" == $oldvalue )
-            $msg .= " selected='selected' ";
-        $msg .= " >Select the $field</option>\n";
-        $sql = "select $field from $table order by $sortField ";
-        $recset_query = $wpdbExtra->get_resultsA( $sql );
-        foreach ( $recset_query as $recset ) {
-            $FieldValue = $recset[ $field ];
-            $msg .= "<option value='$FieldValue'";
-            if ( 0 == strcmp( $FieldValue, $oldvalue ) ) {
-                $msg .= " selected ";
+    /*
+        public static function listbox2( $db, $table, $field, $oldvalue, $sortField ) {
+            global $eol, $errorBeg, $errorEnd;
+            global $wpdbExtra;
+            $msg = "";
+            $msg .= "\n\n<select name='$field'>
+            <option value='' disabled ";
+            if ( "" == $oldvalue )
+                $msg .= " selected='selected' ";
+            $msg .= " >Select the $field</option>\n";
+            $sql = "select $field from $table order by $sortField ";
+            $recset_query = $wpdbExtra->get_resultsA( $sql );
+            foreach ( $recset_query as $recset ) {
+                $FieldValue = $recset[ $field ];
+                $msg .= "<option value='$FieldValue'";
+                if ( 0 == strcmp( $FieldValue, $oldvalue ) ) {
+                    $msg .= " selected ";
+                }
+                $msg .= "> " . str_replace( "&", "&amp;", $recset[ $sortField ] ) . "</option>" . "\n";
             }
-            $msg .= "> " . str_replace( "&", "&amp;", $recset[ $sortField ] ) . "</option>" . "\n";
-        }
-        $msg .= "
-    </select>";
+            $msg .= "
+        </select>";
 
-        return $msg;
+            return $msg;
 
-    }   // end listbox2
-    */
+        }   // end listbox2
+        */
 } // ed class
 ?>

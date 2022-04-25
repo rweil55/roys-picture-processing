@@ -18,7 +18,6 @@ class uploadProcessDire {
         $debug = rrwUtil::setDebug( "upload" );
         try {
             if ( $debug )$msg .= "uploadProcessDire ($uploadPath) $eol";
-            include "setConstants.php";
             $uploadshortname = rrwPara::String( "uploadshortname", $attr );
             if ( $debug )$msg .= "found $uploadshortname in the calling parameters $eol";
             if ( !empty( $uploadshortname ) ) {
@@ -93,6 +92,9 @@ class uploadProcessDire {
         if ( 1 != count( $matchs ) )
             throw new RuntimeException( "file name can consist of only
                 letters, numbers, and spaces" );
+        // only logged n users can get here
+        $current_user = wp_get_current_user();
+        $userLogin = $current_user->get( "user_login" );
         // --------------------------- deal with database entry
         $Data = array(
             "highresShortname" => $entry,
@@ -107,29 +109,37 @@ class uploadProcessDire {
         $recs = $wpdbExtra->get_resultsA( $sqlRec );
         if ( 1 == $wpdbExtra->num_rows ) {
             // have meta data, update it   
-            if ( $debug )$msg .= rrwUtil::print_r( $Data, true,
-                "updating $photoname $eol" );
+            if ( $recs[ 0 ][ "owner" ] != $userLogin ) {
+                $updator = $recs[ 0 ][ "owner" ];
+                $iiComma = strrpos( $updator, "," );
+                if ( false === $iiComma || 
+                    substr( $updator, $iiComma +1 ) != $userLogin )
+                    $Data[ "owner" ] = "$updator,$userLogin";
+                if ( $debug )$msg .= rrwUtil::print_r( $Data, true,
+                    "updating $photoname $eol" );
+            }
             $key = array( "photoname" => $photoname );
             $cnt = $wpdbExtra->update( $rrw_photos, $Data, $key );
             if ( 1 != $cnt ) {
-                $err = "$errorBeg E#706 update no change $errorEnd";
+                $err = "$errorBeg E#782 update no change $errorEnd";
                 $msg .= rrwUtil::print_r( $Data, true, $err );
             }
         } elseif ( 0 == $wpdbExtra->num_rows ) {
             // no meta data
             $Data[ "photoname" ] = $photoname;
             $Data[ "photographer" ] = "Mary Shaw";
+            $Data[ "owner" ] = $userLogin;
             if ( $debug )$msg .= rrwUtil::print_r( $Data, true,
                 "inserting $photoname $eol" );
             $cnt = $wpdbExtra->insert( $rrw_photos, $Data );
             if ( 1 != $cnt ) {
-                $err = "$errorBeg E#706 insert fails $errorEnd";
+                $err = "$errorBeg E#766 insert fails $errorEnd";
                 $msg .= rrwUtil::print_r( $Data, true, $err );
             }
         } else {
             $msg .= "$errorBeg E#679 found " . $wpdbExtra->num_rows . " of data 
                     for $errorEnd $sqlRec $eol";
-            throw new Exception ($msg);
+            throw new Exception( $msg );
         }
         $sqlRec = "select * from $rrw_photos 
                         where photoname = '$photoname'";
