@@ -177,7 +177,7 @@ Display keywords with the photos <a href='/admin?setting=on' >On</a> &nbsp;
         $msg .= self::SQLcount( "~with load dates after $loadDate'",
             "uploaddate >= '$loadDate' " );
         $msg .= self::SQLcount( "distinct photographers",
-            "(select distinct photographer from $rrw_photos) xx", "none" );
+            "(select distinct photographer from $rrw_photos) xx" );
 
         $sqlWhere = " sourcestatus = '' and 
                         ( sourcefullname like '%w-pa-trails%' or
@@ -243,7 +243,7 @@ Display keywords with the photos <a href='/admin?setting=on' >On</a> &nbsp;
                 $table = " from $rrw_photos where ";
                 break;
             case "none":
-                $table = " from ";
+                $table = " ";
                 break;
             default:
                 $table = " from $tablein where ";

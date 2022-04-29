@@ -21,7 +21,7 @@ class freewheeling_displayPhotos {
             return "$eol $msg - No Selection made $eol ";
         $recFiles = $wpdbExtra->get_resultsA( $sqlFind );
         $msg .= " -- found " . $wpdbExtra->num_rows . " photos,  $selectDisplay. ";
-        if( $wpdbExtra->num_rows > 0 )$msg .= " Click photo to enlage. ";
+        if ( $wpdbExtra->num_rows > 0 )$msg .= " Click photo to enlage. ";
         if ( $debugProgress )$msg .= "$eol $sqlFind $eol";
         $msg .= "
     <ul class='rrwPhotoGrid' role='list'>
@@ -132,7 +132,7 @@ class freewheeling_displayPhotos {
         if ( $debug ) print "Where = $where $eol";
         if ( "or" == substr( $where, -2, 2 ) )
             $where = substr( $where, 0, strlen( $where ) - 2 );
-        $sql = "select photoname, photographer from $rrw_photos 
+        $sql = "select photoname, photographer, owner from $rrw_photos 
                 where $where 
                 and photostatus = 'use'  ";
         if ( $debug ) print "$sql $eol ";
