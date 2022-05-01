@@ -85,7 +85,7 @@ class freewhilln_Administration_Pictures {
             $msg .= self::EmptyCount( "PhotoDate", "Photo Date" );
             $msg .= self::SQLcount( " Keywords ",
                 "photoname not in " .
-                "(select distinct keywordFilename from  $rrw_keywords )" );
+                "  (select distinct keywordFilename from  $rrw_keywords )" );
             $msg .= self::EmptyCount( "copyright", "copyright" );
             $msg .= self::EmptyCount( "DireOnP", "source directory" );
             $msg .= self::SQLcount( "~load before $loadDate and like -s",
@@ -170,15 +170,14 @@ Display keywords with the photos <a href='/admin?setting=on' >On</a> &nbsp;
         $msg .= self::SQLcount( "~ photos rejected/duplicates",
             "not photostatus = 'use'" );
         $msg .= self::SQLcount( "~ distinct keywords in the keyword database",
-            "(select distinct keywordFilename from $rrw_keywords) xx", "none" );
+            "from (select distinct keywordFilename from $rrw_keywords) xx", "none" );
         $msg .= self::EmptyCount( "direonp", "source file" );
         $msg .= self::SQLcount( "~with load dates before $loadDate",
             "uploaddate < '$loadDate' " );
         $msg .= self::SQLcount( "~with load dates after $loadDate'",
             "uploaddate >= '$loadDate' " );
-        $msg .= self::SQLcount( "distinct photographers",
-            "(select distinct photographer from $rrw_photos) xx" );
-
+        $msg .= self::SQLcount( "~distinct photographers",
+            " from (select distinct photographer from $rrw_photos) xx", "none" ); 
         $sqlWhere = " sourcestatus = '' and 
                         ( sourcefullname like '%w-pa-trails%' or
                           sourcefullname like '%ytrek%' ) and 
@@ -190,7 +189,7 @@ Display keywords with the photos <a href='/admin?setting=on' >On</a> &nbsp;
         $msg .= self::SQLcount( "possible adds", $sqlWhere, $rrw_source, 16 );
 
         $msg .= self::SQLcount( "~distinct keywords",
-            "(select distinct keyword from $rrw_keywords) xx", "none" );
+            " from (select distinct keyword from $rrw_keywords) xx", "none" );
         return $msg;
     } // end ColumnOne
 

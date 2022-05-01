@@ -9,7 +9,7 @@ class freewheeling_displayPhotos {
         $msg = "";
         $debugProgress = false;
         $msg .= SetConstants( "displayphotos" );
-        if ( $debugProgress )$msg .= "photos go here$eol";
+        if ( $debugProgress )$msg .= "photos go here$eol"; 
         /*
                 if ( array_key_exists( "selectionIs", $_GET ) )
                     $selectionIs = $_GET[ "selectionIs" ];
