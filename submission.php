@@ -191,10 +191,7 @@ class rrwPicSubmission {
         $msg .= "</select> if not in the list  
                 <a href='display-photographers/?action=new' >
                 Add a new photographer</a> $eol$eol";
-        if ( empty( $photographer ) ) {
-            $msg .= "</form>";
-            return $msg;
-        }
+
         $msg .= "<input type='file' name='inputfile' id='inputfile' />
                 &nbsp; <input type='checkbox' name='replacephoto' id='replacephoto'> repace existing image</input>$eol$eol";
 

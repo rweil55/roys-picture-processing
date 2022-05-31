@@ -922,9 +922,9 @@ class freewheeling_fixit {
                 "count of photographer in the database " );
             return $msg;
         }
-        $sql = "select filename, photographer, photostatus from $rrw_photos 
+        $sql = "select photoname, photographer, photostatus from $rrw_photos 
                 where photographer = '$photog'
-                order by photographer, filename";
+                order by photographer, photoname";
         $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
             "photos created to the photographer $photog ", 5000 );
         return $msg;
@@ -958,7 +958,7 @@ class freewheeling_fixit {
         $enddate = new DateTime( $enddate );
         $enddate = $enddate->format( "Y-m-d" );
         $update = " DATE_FORMAT(uploaddate, '%Y-%m-%d') ";
-        $sql = "select direonp, filename, photostatus " .
+        $sql = "select direonp, photoname, photostatus " .
         "from $rrw_photos where '$startdate' <= $update and $update < '$enddate'"; // missng source
         print( "<!-- sql is $sql -->\n" );
         $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
@@ -971,7 +971,7 @@ class freewheeling_fixit {
         $msg = "";
         $msg = "";
 
-        $sql = "SELECT filename, copyright, photostatus FROM $rrw_photos
+        $sql = "SELECT photoname, copyright, photostatus FROM $rrw_photos
                         where not copyright like 'copyright%' 
                         and photostatus = 'use' ";
         $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
@@ -986,7 +986,7 @@ class freewheeling_fixit {
         global $wpdbExtra, $rrw_photos, $rrw_photographers;
         $msg = "";
 
-        $sqlFind = " select filename, copyrightDefault from $rrw_photos ph
+        $sqlFind = " select photoname, copyrightDefault from $rrw_photos ph
         join $rrw_photographers ar on ar.photographer = ph.photographer
                         where copyright = '' and ! ph.photographer =''";
         $recFinds = $wpdbExtra->get_resultsA( $sqlFind );
@@ -997,7 +997,7 @@ class freewheeling_fixit {
             $photoname = $recFind[ "photoname" ];
             $copyright = $recFinf[ "copyrightDefault" ];
             $sqlShove = "update $rrw_photos set coppyright = '$copyright'
-                        where filename = '$photoname'";
+                        where photoname = '$photoname'";
             $snt = $wpdbExtra->query( $sqlShove );
             $cntUpdate += $cnt;
         }
@@ -1048,7 +1048,7 @@ class freewheeling_fixit {
         foreach ( array( "_cr.", "_tmb.", "-s.", "-w." ) as $check ) {
             if ( strpos( $photoname, $check ) !== false ) {
                 $newphotoname = str_replace( $check, ".", $photoname );
-                $msg .= " &nbsp; <a href='/fix/?task=rename&filename=$photoname&newname=$newphotoname' target='check' > becomes  $newphotoname </a> ";
+                $msg .= " &nbsp; <a href='/fix/?task=rename&photoname=$photoname&newname=$newphotoname' target='check' > becomes  $newphotoname </a> ";
             }
         } // end foreach check
         $msg .= "<table><tr><td><form method='get' action='/fix/'>
@@ -1261,7 +1261,7 @@ class freewheeling_fixit {
         $filename = str_replace( "-dev/", "/", $filename );
         $filename = str_replace( "/home/pillowan/www-shaw-weil-pictures", "", $filename );
         return $filename;
-        return $filename;
+
     }
     private static function listing() {
         global $eol;
@@ -1400,10 +1400,10 @@ class freewheeling_fixit {
                         <a href='$imgFile' target='one' >
                         <img src='$imgFile' width='300' />
                         $eol $cnt)$sourcestatus $photoname $eol </a> $aspect $eol
-                <a href='/fix/?task=sourcereject&filename=$photoname&why=reject'
+                <a href='/fix/?task=sourcereject&photoname=$photoname&why=reject'
                         target='reject' > reject All versions photo 
                         </a>$eol
-                <a href='/fix/?task=sourcereject&filename=$photoname&why=use'
+                <a href='/fix/?task=sourcereject&photoname=$photoname&why=use'
                         target='reject' > clean status 
                         </a> 
                         <a href='/fix/?task=filelike&photoname=$photonameStripped'
@@ -1492,8 +1492,8 @@ class freewheeling_fixit {
             $cnt = $wpdbExtra->query( $sqlupdate );
             $msg .= "updated $cnt records with $sqlupdate $eol";
             $sqlupdate = "update $rrw_photos 
-                set filename = replace(filename, '$photoname', '$newname')
-                where filename ='$photoname' ";
+                set photoname = replace(filename, '$photoname', '$newname')
+                where photoname ='$photoname' ";
             $cnt = $wpdbExtra->query( $sqlupdate );
             $msg .= "updated $cnt records with $sqlupdate $eol";
 
@@ -1714,7 +1714,7 @@ class freewheeling_fixit {
         global $wpdbExtra, $rrw_source;
 
         $photoname = $rrwPara::String( "photoname" );
-        $sql = "select * from $rrw_photo where filename = '$photoname'";
+        $sql = "select * from $rrw_photo where photoname = '$photoname'";
         $recs = $wpdbExtra->get_resultsA( $sql );
         if ( 1 != $wpdbExtra->num_recs )
             throw new Exception( "$errorBeg E#674 wrong number of records found, or not found $errorEnd $sql $eol" );
@@ -1732,7 +1732,6 @@ class freewheeling_fixit {
         foreach ( $recalls as $recall ) {
             $photoname = $recall[ "photoname" ];
             $status = $recall[ "photostatus" ];
-            $photoname = self::removeEndingsJpgDire( $filename );
             foreach ( $self::photonameEndings() as $end ) {
                 $sqlUpdate = "update $rrw_source set status = '$status'
                 where searchname = '$photoname$end'";
@@ -1750,7 +1749,7 @@ class freewheeling_fixit {
 
         try {
             $sql = "SELECT * FROM $rrw_photos
-                     order by filename limit 1 ";
+                     order by photoname limit 1 ";
             $recs = $wpdbExtra->get_resultsA( $sql );
             $cntRecs = 0;
             $cntPUShed = 0;
