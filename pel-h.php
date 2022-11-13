@@ -37,9 +37,7 @@ use lsolesen\pel\PelMakerNotes;
 use lsolesen\pel\PelTag;
 use lsolesen\pel\PelTiff;
 use lsolesen\pel\PelWrongComponentCountException;
-
-$pel = "/home/pillowan/www-shaw-weil-pictures-dev/wp-content/plugins" .
-"/roys-picture-processng/pel-master/src";
+$pel = "pel-master/src";
 require_once "$pel/Pel.php";
 require_once "$pel/PelException.php";
 require_once "$pel/PelInvalidArgumentException.php";

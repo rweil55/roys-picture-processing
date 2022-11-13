@@ -72,4 +72,5 @@ class keywordHandling {
         if ( $debug )$msg .= "commalist: $commalist $eol";
         return array( $msg, $keywordList );
     }    
-} // end class
+} // end class
+?>

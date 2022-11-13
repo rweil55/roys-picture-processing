@@ -11,7 +11,7 @@
  * Text Domain: Roys-picture-processng
  * Domain Path: /translation
  
-  * Version: 2.1.67
+  * Version: 2.1.68
  */
 // disable direct access
 ini_set( "display_errors", true );
@@ -57,6 +57,7 @@ use lsolesen\ pel\ PelWrongComponentCountException;
 
 $pel = "/home/pillowan/www-shaw-weil-pictures-dev/wp-content/plugins" .
 "/roys-picture-processng/pel-master/src";
+$pel = "pel-master/src";
 require_once "$pel/Pel.php";
 require_once "$pel/PelException.php";
 require_once "$pel/PelInvalidArgumentException.php";

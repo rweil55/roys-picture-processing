@@ -45,3 +45,4 @@ following information must be entered on the
         return $msg;
     } // end function
 } // end class
+?>

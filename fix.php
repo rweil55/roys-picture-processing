@@ -1,8 +1,4 @@
 <?php
-
-//require_once "rrw_util_inc.php";
-//require_once "display_tables_inc.php";
-
 if ( class_exists( "freewheeling_fixit" ) )
     return;
 
@@ -769,8 +765,9 @@ class freewheeling_fixit {
         global $eol;
         $msg = "";
         $sql = self::addsearch( "sourceFullname" ) .
-        " order by searchname, sourceFullname limit 17"; // a sql to find addtional files to add
-        print "addlist:sql: $sql $eol";
+        " order by searchname, sourceFullname limit 17"; 
+        // a sql to find addtional files to add
+        $msg .= print "addlist:sql: $sql $eol";
         $msg .= self::rrwFormatDisplayPhotos( $sql,
             "photos that might be uploaded", 20 );
         return $msg;
@@ -960,7 +957,7 @@ class freewheeling_fixit {
         $update = " DATE_FORMAT(uploaddate, '%Y-%m-%d') ";
         $sql = "select direonp, photoname, photostatus " .
         "from $rrw_photos where '$startdate' <= $update and $update < '$enddate'"; // missng source
-        print( "<!-- sql is $sql -->\n" );
+        print "<!-- sql is $sql -->\n" ;
         $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
             "photos uploaded between $startdate and less than $enddate" );
         return $msg;
@@ -1321,7 +1318,7 @@ class freewheeling_fixit {
         error_reporting( E_ALL | E_STRICT );
 
         try {
-            print( "<!-- sql request is \n\n$sql\n, start = $startAt\n\n -->\n" );
+            print "<!-- sql request is \n\n$sql\n, start = $startAt\n\n -->\n" ;
             $missngsource = $wpdbExtra->get_resultsA( $sql );
             $missngsourceCnt = $wpdbExtra->num_rows;
             $msg .= "<strong>There are $missngsourceCnt $description</strong> $eol";

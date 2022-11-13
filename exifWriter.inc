@@ -1,5 +1,5 @@
 <?php
-/**
+/*
  * PHP Class to write EXIF information back to image
  *
  * Vinay Yadav < vinay@vinayras.com >

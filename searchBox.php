@@ -104,3 +104,4 @@ class rrwPictures_searchBox {
         return $out;
     } // end pictureDisplayDropDownsql
 } // end class
+?>
