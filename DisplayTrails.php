@@ -1,26 +1,10 @@
 <?php
 
-
-
-
-
 class DisplayTrails {
-
-
     public static function Display( $attr ) {
-
-
         global $eol, $errorBeg, $errorEnd;
-
-
         global $rrw_trails;
-
-
         $msg = "";
-
-
-
-
 
         $action = rrwUtil::fetchparameterString( "action" );
 
