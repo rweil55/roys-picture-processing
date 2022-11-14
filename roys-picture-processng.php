@@ -11,7 +11,7 @@
  * Text Domain: Roys-picture-processng
  * Domain Path: /translation
  
-  * Version: 2.1.68
+  * Version: 2.1.73
  */
 // disable direct access
 ini_set( "display_errors", true );
@@ -98,25 +98,34 @@ require_once "$pel/PelTag.php";
 require_once "$pel/PelTiff.php";
 require_once "$pel/PelWrongComponentCountException.php";
 // commonly used rutines
+
 require_once "freewheelingeasy-wpdpExtra.php";
+
 require_once "rrw_util_inc.php";
 require_once "display_stuff_class.php";
+
 require_once "display_tables_class.php";
 require_once "display_tables_inc.php";
 // picture routines
-require_once "setConstants.php"; 
 require_once "admin.php";
 require_once "displayone.php";
 require_once "DisplayPhotogaphers.php";
+
 require_once "displayphotos.php";
 require_once "DisplayTrails.php";
+
 require_once "fix.php";
 require_once "fixTaskList.php";
+
 require_once "keywordHandling.php";
 require_once "rrwExif.php";
+require_once "setConstants.php";
 require_once "submission.php";
-require_once "update.php";
+require_once "update-picture.php";
 require_once "uploadProcessDire.php";
+/*
+*/
+
 class FreewheelingCommon {
     public static function missingImageMessage( $from, $photoname = "" ) {
         $msg = "This is somewhat embarrassing. The image that you

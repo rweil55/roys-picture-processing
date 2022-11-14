@@ -28,7 +28,7 @@ function SetConstants( $whocalled ) {
         $numberPhotosMax = 750; // maximun in database used to prevent runaway 
         $picrureCookieName = "picture_visit_ip_time";
         // database names
-        if ( !is_object( $wpdbExtra ) )
+       if ( !is_object( $wpdbExtra ) )
             $wpdbExtra = new wpdbExtra;
         $rrw_history = $wpdbExtra->prefix . "1rrw_history";
         $tablePrefix = $wpdbExtra->prefix . "0"; 

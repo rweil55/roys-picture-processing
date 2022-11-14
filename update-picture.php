@@ -1,11 +1,14 @@
 <?php
-// called by the Commit all changes button via action='update'8/11
+
 class freeWheeling_DisplayUpdate {
+    
+    // called by the Commit all changes button via action='update'8/11
     static public function DisplayUpdate( $attr ) {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_photos, $rrw_photographers, $rrw_keywords;
         global $photoUrl, $photoPath, $thumbUrl, $thumbPath, $highresUrl, $highresPath;
         $msg = "";
+        
         ini_set( "display_errors", true );
         try {
             $debug = false;
@@ -91,7 +94,7 @@ class freeWheeling_DisplayUpdate {
         }
         return $msg;
     } // end DisplayUpdate
-    public static function compare( $itemName, $newValue, $rec ) {
+    private  static function compare( $itemName, $newValue, $rec ) {
         //compare old and new value, update if different
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_photos, $rrw_photographers, $rrw_keywords;
