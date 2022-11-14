@@ -47,6 +47,7 @@
 #/wp-content/themes
 
 #dreamweaver
+_compareTemp/
 _notes/
 *.bak
 *.lck
