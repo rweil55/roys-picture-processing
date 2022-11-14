@@ -1,4 +1,5 @@
 <?php
+
 class freewheeling_quality { 
     function quality() {
         $msg .= "
@@ -40,7 +41,6 @@ following information must be entered on the
   of not taken in a public place and a signed photo relaease  </li>
 	<li>Five or more keywords that describe items visible in the photograph.  Typically selected from the existing lis of keywords, although more may be created</li>
 </ol>
-
 ";
         return $msg;
     } // end function

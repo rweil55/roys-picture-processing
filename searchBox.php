@@ -7,7 +7,7 @@ class rrwPictures_searchBox {
         $msg = "\n<!-- ================================= begin of the search box -->\n";
         //  return "hi there";
         $tablecss = true;
-        $msg .= SetConstants("searc box");
+        $msg .= SetConstants( "searc box" );
         $msg .= "<div class='rrwChangeArea' id='trailddetail' onmouseout=changed(); >";
         $msg .= "\n<form action='search.php' method='post' id='form1' name='form1' >";
         if ( $tablecss )
@@ -38,8 +38,8 @@ class rrwPictures_searchBox {
         $msg .= "[ <a href='/'>Home</a> ] [ <a href='/quality/' >Quality</a> ]
                  [ <a href='/privacy/'> Privacy</a>]
                  [ <a href='/webmaster-feedback/'> Feedback</a>]";
-        if (rrwUtil::AllowedToEdit( "search", "", false ) ) {
-            $hostUrl = $_SERVER['HTTP_HOST']; 
+        if ( rrwUtil::AllowedToEdit( "search", "", false ) ) {
+            $hostUrl = $_SERVER[ 'HTTP_HOST' ];
             $msg .= "</td><td>
     <form action='https://$hostUrl/displayphotos/' method='POST'
     height='13px' >
@@ -57,7 +57,7 @@ class rrwPictures_searchBox {
     private static function adminNavBar() {
         $httpHost = "https://" . $_SERVER[ 'HTTP_HOST' ];
         // common routinue to putput the pictures administrators admin bar
-        if ( freewheeling_fixit::allowedSubmit( ) ) {
+        if ( freewheeling_fixit::allowedSubmit() ) {
             $exifUrl = "$httpHost/wp-content/plugins/roys-picture-processng/Exif/html";
             $exifList = "$httpHost/wp-content/plugins/roys-picture-processng/Exif/html/TagNames/EXIF.html";
             $msg = "
@@ -100,7 +100,8 @@ class rrwPictures_searchBox {
             $out .= " value=\"$rowValue\"> $rowDisplay</option>\n";
         }
         $out .= "</select>";
-        if ( $debugDisplayDropDownsql ) print "$eol--------------$eol " . htmlspecialchars( substr( $out, 0, 200 ) ) . $eol;
+        if ( $debugDisplayDropDownsql ) print "$eol--------------$eol " .
+        htmlspecialchars( substr( $out, 0, 200 ) ) . $eol;
         return $out;
     } // end pictureDisplayDropDownsql
 } // end class
