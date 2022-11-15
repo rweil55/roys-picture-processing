@@ -8,7 +8,7 @@ class freewhilln_Administration_Pictures {
             return true;
         else
             return false;
-    }
+    }  
     
     static public function administrationPicures( $attr ) {
         global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords, $rrw_trails;
