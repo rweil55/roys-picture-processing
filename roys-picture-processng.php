@@ -11,12 +11,11 @@
  * Text Domain: Roys-picture-processng
  * Domain Path: /translation
  
-  * Version: 2.1.78
+  * Version: 2.1.79
  */
 // disable direct access
 ini_set( "display_errors", true );
 error_reporting( E_ALL | E_STRICT );
-
 use lsolesen\ pel\ Pel;
 use lsolesen\ pel\ PelConvert;
 use lsolesen\ pel\ PelCanonMakerNotes;
@@ -54,7 +53,6 @@ use lsolesen\ pel\ PelMakerNotes;
 use lsolesen\ pel\ PelTag;
 use lsolesen\ pel\ PelTiff;
 use lsolesen\ pel\ PelWrongComponentCountException;
-
 $pel = "/home/pillowan/www-shaw-weil-pictures-dev/wp-content/plugins" .
 "/roys-picture-processng/pel-master/src";
 $pel = "pel-master/src";
@@ -98,34 +96,25 @@ require_once "$pel/PelTag.php";
 require_once "$pel/PelTiff.php";
 require_once "$pel/PelWrongComponentCountException.php";
 // commonly used rutines
-
 require_once "freewheelingeasy-wpdpExtra.php";
-
 require_once "rrw_util_inc.php";
 require_once "display_stuff_class.php";
-
-require_once "display_tables_class.php";
-require_once "display_tables_inc.php";
 // picture routines
-require_once "admin.php";
+require_once "rrw_admin.php";
 require_once "displayone.php";
 require_once "DisplayPhotogaphers.php";
-
 require_once "displayphotos.php";
 require_once "DisplayTrails.php";
-
-require_once "fix.php";
+require_once "rrw_fix.php";
 require_once "fixTaskList.php";
-
 require_once "keywordHandling.php";
 require_once "rrwExif.php";
 require_once "setConstants.php";
 require_once "submission.php";
-require_once "update-picture.php";
+require_once "rrw_update-picture.php";
 require_once "uploadProcessDire.php";
 /*
 */
-
 class FreewheelingCommon {
     public static function missingImageMessage( $from, $photoname = "" ) {
         $msg = "This is somewhat embarrassing. The image that you
@@ -140,7 +129,6 @@ class FreewheelingCommon {
     } // end funvtion missingImageMessage
    
 } // end of class
-
 function rrw_getAccessID() {
     $current_user = wp_get_current_user();
     if ( !( $current_user instanceof WP_User ) )
@@ -153,7 +141,6 @@ function rrw_getAccessID() {
     $id .= "-" . rrwUtil::fetchparameterString( "USERNAME" );
     return $id;
 }
-
 function updateAccessTable( $photoname, $search ) {
     global $wpdbExtra, $rrw_access;
     global $picrureCookieName;
@@ -170,7 +157,6 @@ function updateAccessTable( $photoname, $search ) {
     $answer = $wpdbExtra->insert( $rrw_access, $update );
     return $msg;
 }
-
 function direReport( $field, $report = "" ) {
     // count the number of items for a particular field
     global $wpdbExtra, $rrw_photos;
@@ -184,7 +170,6 @@ function direReport( $field, $report = "" ) {
     $msg .= "there are $blank blank $field out of $total photos $report $eol";
     return $msg;
 }
-
 function pushToImage( $filename, $item, $value ) {
     
     $msg = rrwExif::pushToImage( $filename, $item, $value ) ;
@@ -215,7 +200,6 @@ add_shortcode( "fixtasklist", array( "fixTaskList", "showlist" ) );
 add_shortcode( "rrwPicSubmission", array( "rrwPicSubmission", "showForm" ) );
 add_shortcode( "upload", array( "uploadProcessDire", "upload" ) );
 add_shortcode( "testingexif",array("rrwErrwExif", "test11") );
-
 require_once 'plugin_update_check.php';
 $MyUpdateChecker  = new PluginUpdateChecker_2_0(
     'http://pluginserver.royweil.com/roys-picture-processng.php',
@@ -223,5 +207,4 @@ $MyUpdateChecker  = new PluginUpdateChecker_2_0(
     'roys-very-picture-processng',
     1
 );
-
 ?>

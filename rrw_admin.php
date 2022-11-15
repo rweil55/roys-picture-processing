@@ -1,6 +1,5 @@
 <?php
-ini_set( "Display_errors", true );
-class_alias( "freewhilln_Administration_Pictures", "admin" );
+
 class freewhilln_Administration_Pictures {
     
     static public function user_can_update_picsxx( $photoname ) {
