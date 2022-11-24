@@ -57,7 +57,10 @@ class rrwPictures_searchBox {
     private static function adminNavBar() {
         $httpHost = "https://" . $_SERVER[ 'HTTP_HOST' ];
         // common routinue to putput the pictures administrators admin bar
-        if ( freewheeling_fixit::allowedSubmit() ) {
+
+   //     if ( freewheeling_fixit::allowedSubmit( ) ) {
+        if ( rrwUtil::AllowedToEdit( ) ) {
+
             $exifUrl = "$httpHost/wp-content/plugins/roys-picture-processng/Exif/html";
             $exifList = "$httpHost/wp-content/plugins/roys-picture-processng/Exif/html/TagNames/EXIF.html";
             $msg = "

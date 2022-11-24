@@ -808,6 +808,9 @@ class freeWheeling_DisplayOne {
 
     <a href='/webmaster-feedback'>let us know</a></div>$eol";
 
+                $jigsawPiece = jigsaw_verify::buildpiece( "$photoUrl/{$photoname}_cr.jpg",
+                    $keywordDisplay, $copyRight, "" );
+                $msg .= "$eol $jigsawPiece $eol";
                 break;
 
             default:
