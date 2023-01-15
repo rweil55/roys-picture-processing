@@ -1,4 +1,8 @@
 <?php
+/*		Freewheeling Easy Mapping Application
+ *		A collection of routines for display of trail maps and amenities
+ *		copyright Roy R Weil 2019 - https://royweil.com
+ */
 class rrwPictures_searchBox {
     // called from inside the header.php routine
     public static function rrwPicturesSearchBox() {
