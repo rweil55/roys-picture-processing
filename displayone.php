@@ -1,13 +1,8 @@
 <?php
-
-
-
-ini_set( "display_errors", true );
-
-
-
-
-
+/*		Freewheeling Easy Mapping Application
+ *		A collection of routines for display of trail maps and amenities
+ *		copyright Roy R Weil 2019 - https://royweil.com
+ */
 class freeWheeling_DisplayOne {
 
     public static function DisplayOne( $attr ) {
@@ -149,9 +144,7 @@ class freeWheeling_DisplayOne {
             $fullfilename2 = "$thumbPath/{$photoname}_tmb.jpg";
 
             if ( !file_exists( $fullfilename1 ) ) {
-
-                $msg .= "$errorBeg E#958 Not found was the display image $htmlfileref1 $errorEnd";
-
+                $msg .= "$errorBeg E#210 Not found was the display image $htmlfileref1 $errorEnd";
             }
 
             /*  displaywidth is based on screen size 
@@ -175,9 +168,7 @@ class freeWheeling_DisplayOne {
             */
 
             if ( !file_exists( $fullfilename2 ) ) {
-
-                $msg .= "$errorBeg E#959 Not found was the thumbnail image $htmlfileref2 $errorEnd";
-
+                $msg .= "$errorBeg E#209 Not found was the thumbnail image $htmlfileref2 $errorEnd";
                 $thumbsize = 200;
 
             } else {
@@ -285,33 +276,6 @@ class freeWheeling_DisplayOne {
             ";
 
             if ( $debugPath )$msg .= "***** 4 *****displayOne:photoPath $photoPath <br/>";
-
-            /*
-
-                        $sql = "Select * from $rrw_photos 
-
-                                    where filename = '$photoname' ";
-
-                        $msg .= "\n<!-- photo == $sql \n-->";
-
-                        $rec_photo_query = $wpdbExtra->get_resultsA( $sql );
-
-                        if ( 1 != $wpdbExtra->num_rows )
-
-                            throw new Exception( "ErrorBeg E#959 not find while looking for trail $eol 
-
-                                    $eol $sql $eol $eol" );
-
-                        $rec_photo = $rec_photo_query[ 0 ];
-
-                        $photographer = $rec_photo[ "photographer" ];
-
-                        */
-
-
-
-
-
             $msg .= "<input type='hidden' name='copyright' id='copyright'
 
                 value='$copyright' /> \n";
@@ -507,9 +471,7 @@ class freeWheeling_DisplayOne {
         } catch ( Exception $ex ) {
 
             print "catch";
-
-            $msg .= " E#496 DisplayOne " . $ex->getMessage();
-
+            $msg .= " E#199 DisplayOne " . $ex->getMessage();
         }
 
         return $msg;
@@ -914,60 +876,6 @@ class freeWheeling_DisplayOne {
         return $output;
 
     }
-
-    /*
-
-        public static function listbox2( $db, $table, $field, $oldvalue, $sortField ) {
-
-            global $eol, $errorBeg, $errorEnd;
-
-            global $wpdbExtra;
-
-            $msg = "";
-
-            $msg .= "\n\n<select name='$field'>
-
-            <option value='' disabled ";
-
-            if ( "" == $oldvalue )
-
-                $msg .= " selected='selected' ";
-
-            $msg .= " >Select the $field</option>\n";
-
-            $sql = "select $field from $table order by $sortField ";
-
-            $recset_query = $wpdbExtra->get_resultsA( $sql );
-
-            foreach ( $recset_query as $recset ) {
-
-                $FieldValue = $recset[ $field ];
-
-                $msg .= "<option value='$FieldValue'";
-
-                if ( 0 == strcmp( $FieldValue, $oldvalue ) ) {
-
-                    $msg .= " selected ";
-
-                }
-
-                $msg .= "> " . str_replace( "&", "&amp;", $recset[ $sortField ] ) . "</option>" . "\n";
-
-            }
-
-            $msg .= "
-
-        </select>";
-
-
-
-            return $msg;
-
-
-
-        }   // end listbox2
-
-        */
 
 } // ed class
 
