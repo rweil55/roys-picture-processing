@@ -252,10 +252,13 @@ class uploadProcessDire {
         $metrics = $im_src->queryFontMetrics( $draw, $text );
         $baseline = $h_new - ( ( $h_bottom - $fontSize ) / 2 );
         $marginLeft = ( $w_new - $metrics[ "textWidth" ] ) / 2;
+        if ( $debug )$msg .= "calling annotation $eol";
         $draw->annotation( $marginLeft, $baseline, $text );
         $im_src->drawImage( $draw );
         $draw->destroy();
+        if ( $debug )$msg .= "deleting source $sourceFile $eol";
         $result = unlink( $sourceFile );
+        if ( $debug )$msg .= "writing source $sourceFile $eol";
         $im_src->writeImage( $sourceFile );
         $im_src->destroy();
         return $msg;
