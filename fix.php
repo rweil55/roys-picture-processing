@@ -1,17 +1,22 @@
 <?php
-/*		Freewheeling Easy Mapping Application
- *		A collection of routines for display of trail maps and amenities
- *		copyright Roy R Weil 2019 - https://royweil.com
- */
+//require_once "rrw_util_inc.php";
+//require_once "display_tables_inc.php";
 if ( class_exists( "freewheeling_fixit" ) )
     return;
+//
 class freewheeling_fixit {
+    public static function allowedEdit() {
+        return !rrwUtil::notAllowedToEdit();
+    }
     public static function fit_it( $attr ) {
         global $eol, $errorBeg, $errorEnd;
         error_reporting( E_ALL | E_STRICT );
         ini_set( "display_errors", true );
         $msg = "";
         try {
+            $msg .= "<!-- before allow -->\n";
+            $msg .= "<!-- before set constatnts -->\n";
+            $msg .= SetConstants( "updateDiretoryOnFileMatch" );
             $task = rrwUtil::fetchparameterString( "task" );
             $msg .= "<!-- task == $task -->\n";
             switch ( $task ) { // those tasks which do not reqire a line in
@@ -25,16 +30,13 @@ class freewheeling_fixit {
                     break;
             }
             if ( rrwUtil::notAllowedToEdit( "fix things", "", true ) )
-                return "$mdg $errorBeg E#219 Not alloed to search $errorEnd";
+                throw new Exception( "$msg E#734 not allowed" );
             switch ( $task ) {
                 case "add":
                     $msg .= freewheeling_fixit::addphotos();
                     break;
                 case "addlist":
                     $msg .= freewheeling_fixit::addList();
-                    break;
-                case "allow":
-                    $msg .= self::AddCapacity( $attr );
                     break;
                 case "bydate": //get collection of photos between two dates
                     $msg .= freewheeling_fixit::byDate();
@@ -170,51 +172,9 @@ class freewheeling_fixit {
                     break;
             }
         } catch ( Exception $ex ) {
-            $msg .= "$errorBeg E#208 " . $ex->getMessage() . $errorEnd;
+            $msg .= "$errorBeg E#198 " . $ex->getMessage() . $errorEnd;
         }
         return $msg;
-    }
-    private static function AddCapacity( $attr ) {
-        global $eol, $errorBeg, $errorEnd;
-        global $cap_submit;
-        $msg = "";
-        $cap_submit = "submit_photo";
-        $userName = rrwPara::String( "user", $attr );
-        $remove = rrwPara::String( "remove", $attr, false );
-        if ( empty( $userName ) )
-            return "$msg $errorBeg missing user name $errorEnd";
-        $user = new WP_User( "", $userName );
-        $msg .= rrwUtil::print_r( $user, true, "Found user" );
-        if ( false === $user || !$user->exists() )
-            return "$msg $errorBeg E#218 no such user '$userName' $errorEnd";
-        if ( $remove ) {
-            $user->remove_cap( $cap_submit );
-            return "$msg user '$userName'can no longer submit photos";
-        } else {
-            $user->add_cap( $cap_submit, true );
-            return "$msg user '$userName'can now submit photos";
-        }
-        return $msg;
-    }
-    public static function allowedSubmit() {
-        if ( current_user_can( "edit_posts" ) )
-            return true;
-        if ( current_user_can( "submit_photo" ) )
-            return true;
-        return false;
-    }
-    public static function allowedEdit( $photoOwner ) {
-        if ( current_user_can( "edit_posts" ) )
-            return true;
-        $user = wp_get_current_user();
-        if ( !$user->exists() )
-            return false;
-        if ( current_user_can( "edit_photo" ) )
-            return true;
-        $userlogin = $user->get( "user_login" );
-        if ( false !== strpos($photoOwner, $userlogin) )
-            return true;
-        return false;
     }
     private static function extractexif() {
         global $eol, $errorBeg, $errorEnd;
@@ -727,9 +687,8 @@ class freewheeling_fixit {
         global $eol;
         $msg = "";
         $sql = self::addsearch( "sourceFullname" ) .
-        " order by searchname, sourceFullname limit 17"; 
-        // a sql to find addtional files to add
-        $msg .= print "addlist:sql: $sql $eol";
+        " order by searchname, sourceFullname limit 17"; // a sql to find addtional files to add
+        print "addlist:sql: $sql $eol";
         $msg .= self::rrwFormatDisplayPhotos( $sql,
             "photos that might be uploaded", 20 );
         return $msg;
@@ -865,9 +824,9 @@ class freewheeling_fixit {
                 "count of photographer in the database " );
             return $msg;
         }
-        $sql = "select photoname, photographer, photostatus from $rrw_photos 
+        $sql = "select filename, photographer, photostatus from $rrw_photos 
                 where photographer = '$photog'
-                order by photographer, photoname";
+                order by photographer, filename";
         $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
             "photos created to the photographer $photog ", 5000 );
         return $msg;
@@ -897,9 +856,9 @@ class freewheeling_fixit {
         $enddate = new DateTime( $enddate );
         $enddate = $enddate->format( "Y-m-d" );
         $update = " DATE_FORMAT(uploaddate, '%Y-%m-%d') ";
-        $sql = "select direonp, photoname, photostatus " .
+        $sql = "select direonp, filename, photostatus " .
         "from $rrw_photos where '$startdate' <= $update and $update < '$enddate'"; // missng source
-        print "<!-- sql is $sql -->\n" ;
+        print( "<!-- sql is $sql -->\n" );
         $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
             "photos uploaded between $startdate and less than $enddate" );
         return $msg;
@@ -909,7 +868,7 @@ class freewheeling_fixit {
         global $wpdbExtra, $rrw_photos;
         $msg = "";
         $msg = "";
-        $sql = "SELECT photoname, copyright, photostatus FROM $rrw_photos
+        $sql = "SELECT filename, copyright, photostatus FROM $rrw_photos
                         where not copyright like 'copyright%' 
                         and photostatus = 'use' ";
         $msg .= freewheeling_fixit::rrwFormatDisplayPhotos( $sql,
@@ -921,7 +880,7 @@ class freewheeling_fixit {
         global $eol;
         global $wpdbExtra, $rrw_photos, $rrw_photographers;
         $msg = "";
-        $sqlFind = " select photoname, copyrightDefault from $rrw_photos ph
+        $sqlFind = " select filename, copyrightDefault from $rrw_photos ph
         join $rrw_photographers ar on ar.photographer = ph.photographer
                         where copyright = '' and ! ph.photographer =''";
         $recFinds = $wpdbExtra->get_resultsA( $sqlFind );
@@ -932,7 +891,7 @@ class freewheeling_fixit {
             $photoname = $recFind[ "photoname" ];
             $copyright = $recFinf[ "copyrightDefault" ];
             $sqlShove = "update $rrw_photos set coppyright = '$copyright'
-                        where photoname = '$photoname'";
+                        where filename = '$photoname'";
             $snt = $wpdbExtra->query( $sqlShove );
             $cntUpdate += $cnt;
         }
@@ -945,7 +904,7 @@ class freewheeling_fixit {
         global $highresUrl, $highresPath;
         global $httpSource;
         $msg = "";
-        $debug = false;
+        $debug = true;
         $host = $_SERVER[ 'HTTP_HOST' ];
         if ( strpos( $host, "dev" ) !== false )
             $dev = "&dev=1";
@@ -979,7 +938,7 @@ class freewheeling_fixit {
         foreach ( array( "_cr.", "_tmb.", "-s.", "-w." ) as $check ) {
             if ( strpos( $photoname, $check ) !== false ) {
                 $newphotoname = str_replace( $check, ".", $photoname );
-                $msg .= " &nbsp; <a href='/fix/?task=rename&photoname=$photoname&newname=$newphotoname' target='check' > becomes  $newphotoname </a> ";
+                $msg .= " &nbsp; <a href='/fix/?task=rename&filename=$photoname&newname=$newphotoname' target='check' > becomes  $newphotoname </a> ";
             }
         } // end foreach check
         $msg .= "<table><tr><td><form method='get' action='/fix/'>
@@ -1058,6 +1017,27 @@ class freewheeling_fixit {
         $msg .= rrwPicSubmission::displayform(); //uses photographer, photoname
         return $msg;
     }
+    /*     static public function fetchURL( $url ) {
+            global $eol, $errorBeg, $errorEnd;
+            $msg = "";
+            $debugJuturl = false;
+            if ( $debugJuturl );
+            $msg .= "calling curl inti  with $eol &nbsp; &nbsp; &nbsp; $url $eol";
+            $ch = curl_init( $url );
+            curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+            curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, 120 );
+            curl_setopt( $ch, CURLOPT_TIMEOUT, 120 );
+            $placesJson = curl_exec( $ch );
+            $curlError = curl_errno( $ch );
+            //          $msg .= "E#961 Curl error: $curlError $eol";
+            if ( $curlError != 0 ) {
+                $msg .= "$errorBeg E#960 Curl error: " . curl_error( $ch ) . $errorEnd;
+                $placeJson = "";
+            }
+            curl_close( $ch );
+            return $placesJson;
+        }
+    */
     private static function sourcePush( $attr = "" ) {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_photos;
@@ -1100,7 +1080,7 @@ class freewheeling_fixit {
         if ( empty( $photoname ) ) {
             $photoname = rrwPara::String( "photoname" );
             if ( empty( $photoname ) )
-                return "$msg $errorBeg E#217 source reject missing name $errorEnd";
+                return "$msg $errorBeg E#713 source reject missing name $errorEnd";
         }
         if ( empty( $why ) ) {
             $why = rrwPara::String( "why" );
@@ -1109,7 +1089,7 @@ class freewheeling_fixit {
         }
         $photoname = self::removeEndingsJpgDire( $photoname );
         if ( empty( $photoname ) )
-            return "E#216 No photo name given to source Reject $eol";
+            return "E#711 No photo name given to source Reject $eol";
         foreach ( self::photonameEndings() as $end ) {
             if ( "use" == $why ) {
                 $cnt = $wpdbExtra->query( "update $rrw_source 
@@ -1156,6 +1136,7 @@ class freewheeling_fixit {
         $filename = str_replace( "-dev/", "/", $filename );
         $filename = str_replace( "/home/pillowan/www-shaw-weil-pictures", "", $filename );
         return $filename;
+        return $filename;
     }
     private static function listing() {
         global $eol;
@@ -1171,7 +1152,7 @@ class freewheeling_fixit {
         if ( 0 == $limitin )
             $limitin = 20;
         $limit = $limitin + $startAt;
-        $urlNext = "/fix/?task=listing&table=$table&description=$description&limit=&limit&where=$sqlWhere" .
+        $urlNext = "/fix/?task=listing&table=$table&limit=&limit&where=$sqlWhere" .
         "&startat=$limit";
         $sqlWhere = str_replace( "xxy", "'", $sqlWhere );
         $sqlWhere = htmlspecialchars_decode( $sqlWhere );
@@ -1210,13 +1191,13 @@ class freewheeling_fixit {
         $msg = "";
         error_reporting( E_ALL | E_STRICT );
         try {
-            print "<!-- sql request is \n\n$sql\n, start = $startAt\n\n -->\n" ;
+            print( "<!-- sql request is \n\n$sql\n, start = $startAt\n\n -->\n" );
             $missngsource = $wpdbExtra->get_resultsA( $sql );
             $missngsourceCnt = $wpdbExtra->num_rows;
             $msg .= "<strong>There are $missngsourceCnt $description</strong> $eol";
             $cnt = 0;
             if ( 0 == $missngsourceCnt )
-                return "$msg E#215 $sql $eol ";
+                return "$msg E#717 $sql $eol ";
             $color = rrwUtil::colorSwap();
             $msg .= "$eol <table><tr> \n";
             $msg .= rrwFormat::CellHeader( "count" );
@@ -1287,10 +1268,10 @@ class freewheeling_fixit {
                         <a href='$imgFile' target='one' >
                         <img src='$imgFile' width='300' />
                         $eol $cnt)$sourcestatus $photoname $eol </a> $aspect $eol
-                <a href='/fix/?task=sourcereject&photoname=$photoname&why=reject'
+                <a href='/fix/?task=sourcereject&filename=$photoname&why=reject'
                         target='reject' > reject All versions photo 
                         </a>$eol
-                <a href='/fix/?task=sourcereject&photoname=$photoname&why=use'
+                <a href='/fix/?task=sourcereject&filename=$photoname&why=use'
                         target='reject' > clean status 
                         </a> 
                         <a href='/fix/?task=filelike&photoname=$photonameStripped'
@@ -1302,7 +1283,7 @@ class freewheeling_fixit {
             $msg .= "</table>\n";
             if ( $cnt < $totalCnt ) {
                 $remain = $totalCnt - $cnt;
-                $msg .= "$errorBeg E#201 limit of reached,
+                $msg .= "$errorBeg E#197 limit of reached,
                             there are $remain more $eol";
             }
             $msg .= "<strong> ------------ available images ------ </strong$eol
@@ -1310,7 +1291,7 @@ class freewheeling_fixit {
             $msg .= self::filelike( array() ) .
             " ] [ <a href='$urlNext' >Next group</a> $eol";
         } catch ( Exception $ex ) {
-            $msg .= "E#206 " . $ex->getMessage() . "<p> $sql </p> ";
+            $msg .= "E#401 " . $ex->getMessage() . "<p> $sql </p> ";
         }
         return $msg;
     }
@@ -1343,7 +1324,7 @@ class freewheeling_fixit {
         }
         if ( $debug )$msg .= "start updateRename( $photoname, $newname ) $eol";
         if ( empty( $photoname ) )
-            return "$msg $errorBeg E#214 updateRename missng photoname $errorEnd";
+            return "$msg $errorBeg E#712 updateRename missng photoname $errorEnd";
         if ( empty( $newname ) ) {
             // no new name supplied, Assume remove endings
             $newname = self::removeEndingsJpgDire( $photoname );
@@ -1351,7 +1332,7 @@ class freewheeling_fixit {
         $photoname = self::removeJpgDire( $photoname );
         $newname = self::removeJpgDire( $newname );
         if ( $photoname == $newname )
-            return "$msg $errorBeg E#213 $photoname = $newname, 
+            return "$msg $errorBeg E#720 $photoname = $newname, 
                     rename not neccessary $errorEnd";
         //  ---------------------------------------------- move three files
         $msg .= self::checkAndRename( "$photoPath/${photoname}.jpg",
@@ -1366,7 +1347,7 @@ class freewheeling_fixit {
         $sqlExist = "select photoname from $rrw_photos where photoname = '$newname'";
         $recExists = $wpdbExtra->get_resultsA( $sqlExist );
         if ( 0 != $wpdbExtra->num_rows )
-            $msg .= "$errorBeg E#295 file $newname is already in the photo table,
+            $msg .= "$errorBeg E#195 file $newname is already in the photo table,
                     not replaced $errorEnd";
         else {
             $sqlupdate = "update $rrw_photos set photoname = '$newname'
@@ -1374,8 +1355,8 @@ class freewheeling_fixit {
             $cnt = $wpdbExtra->query( $sqlupdate );
             $msg .= "updated $cnt records with $sqlupdate $eol";
             $sqlupdate = "update $rrw_photos 
-                set photoname = replace(filename, '$photoname', '$newname')
-                where photoname ='$photoname' ";
+                set filename = replace(filename, '$photoname', '$newname')
+                where filename ='$photoname' ";
             $cnt = $wpdbExtra->query( $sqlupdate );
             $msg .= "updated $cnt records with $sqlupdate $eol";
             $sqlupdate = "update $rrw_keywords set keywordfilename = '$newname'
@@ -1405,18 +1386,14 @@ class freewheeling_fixit {
         return "$msg rename ($fileFrom, $fileTo) $eol";
     }
     public static function searchform() {
-        global $eol, $errorBeg, $errorEnd;
-        global $wpdbExtra, $rrw_photos, $rrw_photographers;
         $msg = "
 <form action='/displayphotos/' method=POST>
-<input type='text' name='photoname' id='searchphoto' value='' /> photo<br />
-<input type='text' name='directory' id='searchdire' value='' /> directory<br />
-<input type='text' name='location' id='searchloc' value='' /> location<br />
-<input type='text' name='people' id='searchpeople' value='' /> people<br />
-<input type='text' name='source' id='searchsource' value='' /> source<br />";
-        $msg .= rrwFormat::selectBox( $wpdbExtra, $rrw_photographers,
-            "photographer", "", "photographer" ) . " photographer $eol";
-        $msg .= "$eol 
+<input type='text' name='photoname' id='searchphoto' value='' />photo<br />
+<input type='text' name='directory' id='searchdire' value='' />directory<br />
+<input type='text' name='location' id='searchloc' value='' />location<br />
+<input type='text' name='people' id='searchpeople' value='' />people<br />
+<input type='text' name='source' id='searchsource' value='' />source<br />
+<input type='text' name='photographer' id='searchphotographer' value='' />photographer<br />
 <input type='submit' name='submit' id='submit' value='Search any' />
 </form>";
         return $msg;
@@ -1429,6 +1406,7 @@ class freewheeling_fixit {
         $msg = "$errorBeg needs check because of rrw_souce dchange $errorEnd";
         $debug = false;
         try {
+            $msg .= SetConstants( "updateDiretoryOnFileMatch" );
             $msg .= direReport( "direonp", "with blank DireOnP" );
             //      return $msg;
             $sql = "select direonp, sourcefullname, sourceFullname from $rrw_photos 
@@ -1458,7 +1436,7 @@ class freewheeling_fixit {
             }
             $msg .= direReport( "direonp", "with blank DireOnP" ) . "$eol <table> $eol";
             foreach ( $sqlList as $key => $value ) {
-                $keyDisplay = "<a href='http://pictures.shaw-weil.com/display-one-photo" .
+                $keyDisplay = "<a href='https://pictures.shaw-weil.com/display-one-photo" .
                 "?photoname=$key' target='one' >$key</a>";
                 $msg .= rrwFormat::CellRow( $keyDisplay, $value );
             }
@@ -1472,7 +1450,7 @@ class freewheeling_fixit {
             $msg .= "<table> ";
             foreach ( $recs as $rec ) {
                 $key = $rec[ "photoname" ];
-                $keyDisplay = "<a href='http://pictures.shaw-weil.com/display-one-photo" .
+                $keyDisplay = "<a href='https://pictures.shaw-weil.com/display-one-photo" .
                 "?photoname=$key' target='one' >$key</a>";
                 $msg .= rrwFormat::CellRow( $keyDisplay );
             }
@@ -1488,6 +1466,7 @@ class freewheeling_fixit {
         $msg = "";
         // used to relate the entries in photo datta database to the file location on spoke
         // if file name is close (contains) then update the diterctory field
+        $msg .= SetConstants( "updateDiretoryOnFileMatch" );
         $msg .= direReport( "direonp", "with blank DireOnP" );
         $sql = "select photoname from $rrw_photos wheredireonp = '' ";
         $msg .= "$sql $eol ";
@@ -1533,7 +1512,7 @@ class freewheeling_fixit {
                             $newname = $sourceFullname;
                             break;
                         default:
-                            throw new Exception( "E#204 iinvalid testpas = $testPass" );
+                            throw new Exception( "E#485 iinvalid testpas = $testPass" );
                     }
                     if ( $newname != $searchname ) {
                         $match = "** adjust ***";
@@ -1581,7 +1560,7 @@ class freewheeling_fixit {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_source;
         $photoname = $rrwPara::String( "photoname" );
-        $sql = "select * from $rrw_photo where photoname = '$photoname'";
+        $sql = "select * from $rrw_photo where filename = '$photoname'";
         $recs = $wpdbExtra->get_resultsA( $sql );
         if ( 1 != $wpdbExtra->num_recs )
             throw new Exception( "$errorBeg E#674 wrong number of records found, or not found $errorEnd $sql $eol" );
@@ -1598,6 +1577,7 @@ class freewheeling_fixit {
         foreach ( $recalls as $recall ) {
             $photoname = $recall[ "photoname" ];
             $status = $recall[ "photostatus" ];
+            $photoname = self::removeEndingsJpgDire( $filename );
             foreach ( $self::photonameEndings() as $end ) {
                 $sqlUpdate = "update $rrw_source set status = '$status'
                 where searchname = '$photoname$end'";
@@ -1613,7 +1593,7 @@ class freewheeling_fixit {
         $msg = "";
         try {
             $sql = "SELECT * FROM $rrw_photos
-                     order by photoname limit 1 ";
+                     order by filename limit 1 ";
             $recs = $wpdbExtra->get_resultsA( $sql );
             $cntRecs = 0;
             $cntPUShed = 0;
@@ -1654,13 +1634,13 @@ class freewheeling_fixit {
             $databasePhotographer = $rec[ "photographer" ];
             $databaseTrail = $rec[ "trail_name" ];
             $databaseKeyword =
-                freeWheeling_DisplayOne::keywordsDisplay( $photoname );
+                freeWheeling_DisplayOne::GetkkeywordUnLinkedList( $photoname );
             $databaseHeight = $rec[ "height" ];
             $databaseWidth = $rec[ "width" ];
             $fullFile = "$photoPath/$photoname" . "_cr.jpg";
             $sqlUpdate = array();
             if ( !file_exists( $fullFile ) )
-                throw new Exception( "$errorBeg E#203  file $fullFile not found $errorEnd" );
+                throw new Exception( "$errorBeg E#448  file $fullFile not found $errorEnd" );
             if ( $debugForce )$msg .= "
             <a href='display-one-photo?photoname=$photoname' 
             target='one' >$photoname </a>, ";
@@ -1670,7 +1650,7 @@ class freewheeling_fixit {
                 $fileExif = rrwExif::rrw_exif_read_data( $fullFile );
             } // end try
             catch ( Exception $ex ) {
-                throw new Exception( "$msg E#202 " . $ex->getMessage() . " while        reading exif of '$fullFile' in fixAssumeExifCorrect " );
+                throw new Exception( "$msg E#469 " . $ex->getMessage() . " while        reading exif of '$fullFile' in fixAssumeExifCorrect " );
             }
             if ( empty( $fileExif ) || !is_array( $fileExif ) )
                 throw new Exception( "$errorBeg #854 Fetch of exif 
@@ -1707,15 +1687,15 @@ class freewheeling_fixit {
                 $sqlUpdate[ "copyright" ] = $fileCopyRight;
                 $databaseCopyright = $fileCopyRight;
             } elseif ( $databaseCopyright != $fileCopyRight ) { // both have data
-                if ( $exifCorrect ) {
-                    $sqlUpdate[ "copyright" ] = $fileCopyRight;
-                    $databaseCopyright = $fileCopyRight;
-                } else {
-                    $msg .= rrwExif::pushToImage( $photoname, "Copyright", $databaseCopyright );
-                    $fileCopyRight = $databaseCopyright;
+                    if ( $exifCorrect ) {
+                        $sqlUpdate[ "copyright" ] = $fileCopyRight;
+                        $databaseCopyright = $fileCopyRight;
+                    } else {
+                        $msg .= rrwExif::pushToImage( $photoname, "Copyright", $databaseCopyright );
+                        $fileCopyRight = $databaseCopyright;
+                    }
                 }
-            }
-            //  -------------------------------------------- photographer
+                //  -------------------------------------------- photographer
             $sofar = "About to process Artist ";
             $dataPotogrpherWeb = "$databasePhotographer https://pictures.shaw-weil.com/";
             if ( array_key_exists( "Artist", $fileExif ) )
@@ -1760,28 +1740,28 @@ class freewheeling_fixit {
                 }
                 $FileDateTime = datebasePhotoDate;
             } elseif ( !empty( $FileDateTime ) && empty( $datebasePhotoDate ) ) {
-                if ( $debugDate )$msg .= "I#741 have photo $FileDateTime,but have database date $eol ";
-                $sqlUpdate[ "PhotoDate" ] = $FileDateTime;
-                $datebasePhotoDate = $FileDateTime;
-            } else { // both have dates
-                $datePH = new Datetime( $datebasePhotoDate );
-                $dateDB = new DateTime( $FileDateTime );
-                $dateDiff = $datePH->diff( $dateDB );
-                if ( abs( $dateDiff->days ) > 1 ) { // more than one day difference
-                    if ( $debugDate )$msg .= "I#741  photo $FileDateTime, not equal database $datebasePhotoDate $eol ";
-                    if ( $exifCorrect ) {
-                        if ( $debugDate )$msg .= "I#741 update database $eol";
-                        $sqlUpdate[ "PhotoDate" ] = $fileArtist;
-                        $datebasePhotoDate = $fileArtist;
-                    } else {
-                        if ( $debugDate )$msg .= "I#741 update database $eol";
-                        $msg .= rrwExif::pushToImage( $photoname, "DateTimeOriginal", $datebasePhotoDate );
-                        $fileArtist = $datebasePhotoDate;
-                    }
-                } // end if (abs($dateDiff->day)
-            }
-            // -------------------------------------------- keywodes
-            // more code needed here to get the file tags
+                    if ( $debugDate )$msg .= "I#741 have photo $FileDateTime,but have database date $eol ";
+                    $sqlUpdate[ "PhotoDate" ] = $FileDateTime;
+                    $datebasePhotoDate = $FileDateTime;
+                } else { // both have dates
+                    $datePH = new Datetime( $datebasePhotoDate );
+                    $dateDB = new DateTime( $FileDateTime );
+                    $dateDiff = $datePH->diff( $dateDB );
+                    if ( abs( $dateDiff->days ) > 1 ) { // more than one day difference
+                        if ( $debugDate )$msg .= "I#741  photo $FileDateTime, not equal database $datebasePhotoDate $eol ";
+                        if ( $exifCorrect ) {
+                            if ( $debugDate )$msg .= "I#741 update database $eol";
+                            $sqlUpdate[ "PhotoDate" ] = $fileArtist;
+                            $datebasePhotoDate = $fileArtist;
+                        } else {
+                            if ( $debugDate )$msg .= "I#741 update database $eol";
+                            $msg .= rrwExif::pushToImage( $photoname, "DateTimeOriginal", $datebasePhotoDate );
+                            $fileArtist = $datebasePhotoDate;
+                        }
+                    } // end if (abs($dateDiff->day)
+                }
+                // -------------------------------------------- keywodes
+                // more code needed here to get the file tags
             $sofar = "About to process keywrods";
             $debugKeywords = false;
             $keywordname = "0x9c9e";
@@ -1836,7 +1816,7 @@ class freewheeling_fixit {
             }
             $sofar = "fixAssumeExifCorrect is done";
         } catch ( Exception $ex ) {
-            $msg .= "$msg E#200 in fixAssumeExifCorrect: $sofar: " .
+            $msg .= "$msg E#440 in fixAssumeExifCorrect: $sofar: " .
             $ex->getMessage() . $eol;
         }
         return $msg;
