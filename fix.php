@@ -1089,7 +1089,7 @@ class freewheeling_fixit {
         }
         $photoname = self::removeEndingsJpgDire( $photoname );
         if ( empty( $photoname ) )
-            return "E#711 No photo name given to source Reject $eol";
+            return "E#211 No photo name given to source Reject $eol";
         foreach ( self::photonameEndings() as $end ) {
             if ( "use" == $why ) {
                 $cnt = $wpdbExtra->query( "update $rrw_source 
