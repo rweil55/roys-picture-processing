@@ -25,7 +25,7 @@ class freewheeling_fixit {
                     break;
             }
             if ( rrwUtil::notAllowedToEdit( "fix things", "", true ) )
-                return "$mdg $errorBeg E#219 Not alloed to search $errorEnd";
+                return "$msg $errorBeg E#219 Not alloed to search $errorEnd";
             switch ( $task ) {
                 case "add":
                     $msg .= freewheeling_fixit::addphotos();
@@ -481,13 +481,13 @@ class freewheeling_fixit {
             filename " );
             if ( empty( $filename ) )
                 throw new Exception( "
-            $errorBeg E #207 missing filename parameter $errorEnd" );
+            $errorBeg E #188 missing filename parameter $errorEnd" );
             $sqlPhoto = "select copyrightDefault from $rrw_photos ph
         join $rrw_photographers ger on ph.photographer = ger.photographer 
                     where filename ='$filename' ";
             $copyRight = $wpdbExtra->get_var( $sqlPhoto );
             if ( false === $copyRight || empty( $copyRight ) )
-                throw new Exception( "$errorBeg E#212 missing Author or author copyright $errorEnd $sqlPhoto $eol " );
+                throw new Exception( "$errorBeg E#187 missing Author or author copyright $errorEnd $sqlPhoto $eol " );
             $fileFull = "$photoPath/$filename" . "_cr.jpg";
             //      $msg .= rrwExif::rrwExif::pushToImage( $fileFull, "Copyright", $copyRight );
             $sqlUpdate = "update $rrw_photos set copyright = '$copyRight' 
@@ -495,7 +495,7 @@ class freewheeling_fixit {
             $cnt = $wpdbExtra->query( $sqlUpdate );
             $msg .= "update $cnt record in the photo database";
         } catch ( Exception $ex ) {
-            $msg .= "E#211 top level - " . $ex->getMessage();
+            $msg .= "E#186 top level - " . $ex->getMessage();
         }
         return $msg;
     }
@@ -1058,7 +1058,6 @@ class freewheeling_fixit {
         $msg .= rrwPicSubmission::displayform(); //uses photographer, photoname
         return $msg;
     }
-
     private static function sourcePush( $attr = "" ) {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_photos;
@@ -1674,7 +1673,7 @@ class freewheeling_fixit {
                 throw new Exception( "$msg E#202 " . $ex->getMessage() . " while        reading exif of '$fullFile' in fixAssumeExifCorrect " );
             }
             if ( empty( $fileExif ) || !is_array( $fileExif ) )
-                throw new Exception( "$errorBeg #854 Fetch of exif 
+                throw new Exception( "$errorBeg #185 Fetch of exif 
                                 from $fullFile failed $errorEnd" );
             if ( $debugForce )$msg .= rrwUtil::print_r( $fileExif, true, "$fullFile exif " );
             $sofar = "exif rread, go datetime";
