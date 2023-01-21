@@ -1080,7 +1080,7 @@ class freewheeling_fixit {
         if ( empty( $photoname ) ) {
             $photoname = rrwPara::String( "photoname" );
             if ( empty( $photoname ) )
-                return "$msg $errorBeg E#713 source reject missing name $errorEnd";
+                return "$msg $errorBeg E#183 source reject missing name $errorEnd";
         }
         if ( empty( $why ) ) {
             $why = rrwPara::String( "why" );
@@ -1197,7 +1197,7 @@ class freewheeling_fixit {
             $msg .= "<strong>There are $missngsourceCnt $description</strong> $eol";
             $cnt = 0;
             if ( 0 == $missngsourceCnt )
-                return "$msg E#717 $sql $eol ";
+                return "$msg E#187 $sql $eol ";
             $color = rrwUtil::colorSwap();
             $msg .= "$eol <table><tr> \n";
             $msg .= rrwFormat::CellHeader( "count" );
@@ -1324,7 +1324,7 @@ class freewheeling_fixit {
         }
         if ( $debug )$msg .= "start updateRename( $photoname, $newname ) $eol";
         if ( empty( $photoname ) )
-            return "$msg $errorBeg E#712 updateRename missng photoname $errorEnd";
+            return "$msg $errorBeg E#182 updateRename missng photoname $errorEnd";
         if ( empty( $newname ) ) {
             // no new name supplied, Assume remove endings
             $newname = self::removeEndingsJpgDire( $photoname );
