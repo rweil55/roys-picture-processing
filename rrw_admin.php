@@ -1,18 +1,17 @@
 <?php
 
 class freewhilln_Administration_Pictures {
-    
+
     static public function user_can_update_picsxx( $photoname ) {
         // more code to come to selectively allow edits
         if ( current_user_can( "edit_posts" ) )
             return true;
         else
             return false;
-    }  
-    
+    }
+
     static public function administrationPicures( $attr ) {
         global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords, $rrw_trails;
-        global $rrw_photographers;
         global $eol;
         global $photoUrl, $photoPath, $thumbUrl, $thumbPath, $highresUrl, $highresPath;
         global $displaykey;
@@ -65,8 +64,6 @@ class freewhilln_Administration_Pictures {
                     (select distinct photographer from $rrw_photos ) ph1 ";
             $msg .= "<!-- $sqlPhotog \n-->";
             $photogUsedCnt = $wpdbExtra->get_var( $sqlPhotog );
-            $sqlAllPhotog = "select count(*) from $rrw_photographers";
-            $PhotogTotalCnt = $wpdbExtra->get_var( $sqlAllPhotog );
             $sqlKeyWordcnt = "select distinct keyword from $rrw_keywords";
             $recKeywords = $wpdbExtra->get_resultsA( $sqlKeyWordcnt );
             $cntKeywords = $wpdbExtra->num_rows;
@@ -158,10 +155,12 @@ Display keywords with the photos <a href='/admin?setting=on' >On</a> &nbsp;
         }
         return $msg;
     } // end function
-    
+
     private static function ColumnOne( $loadDate ) {
         global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords, $rrw_trails;
+        global $rrw_photographers;
         global $eol;
+
         $msg = "";
         $msg .= " <strong> Information Counts </strong>$eol";
         $msg .= self::SQLcount( "~ accessable photos ",
@@ -169,15 +168,13 @@ Display keywords with the photos <a href='/admin?setting=on' >On</a> &nbsp;
         $msg .= self::SQLcount( "~ photos in the photo database", "1=1" );
         $msg .= self::SQLcount( "~ photos rejected/duplicates",
             "not photostatus = 'use'" );
-        $msg .= self::SQLcount( "~ distinct keywords in the keyword database",
-            "from (select distinct keywordFilename from $rrw_keywords) xx", "none" );
-        $msg .= self::EmptyCount( "direonp", "source file" );
+         $msg .= self::EmptyCount( "direonp", "source file" );
         $msg .= self::SQLcount( "~with load dates before $loadDate",
             "uploaddate < '$loadDate' " );
         $msg .= self::SQLcount( "~with load dates after $loadDate'",
             "uploaddate >= '$loadDate' " );
-        $msg .= self::SQLcount( "~distinct photographers",
-            " from (select distinct photographer from $rrw_photos) xx", "none" ); 
+        $msg .= self::tableCounts( $rrw_photographers, "photographer" ) .
+        "<a href='/display-photographers/' > photographers </a> $eol";
         $sqlWhere = " sourcestatus = '' and 
                         ( sourcefullname like '%w-pa-trails%' or
                           sourcefullname like '%ytrek%' ) and 
@@ -186,10 +183,15 @@ Display keywords with the photos <a href='/admin?setting=on' >On</a> &nbsp;
         $iiWhere = strpos( $sqlWhere, "where" );
         $sqlWhere = substr( $sqlWhere, $iiWhere + 5 );
         $msg .= self::SQLcount( "possible adds", $sqlWhere, $rrw_source, 16 );
-        $msg .= self::SQLcount( "~distinct keywords",
-            " from (select distinct keyword from $rrw_keywords) xx", "none" );
+        $msg .= self::tableCounts( $rrw_keywords, "keyword" ) . " distinct keywords $eol";
         return $msg;
     } // end ColumnOne
+    private static function tableCounts( $table, $field ) {
+        global $wpdbExtra;
+        $sql = "select count( distinct($field) ) from $table ";
+        $cnt = $wpdbExtra->get_var( $sql );
+        return $cnt;
+    }
     public static function cntMissingImage( $showNames ) {
         global $wpdbExtra, $rrw_photos, $photoPath;
         global $eol;
