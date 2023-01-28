@@ -124,7 +124,7 @@ class freeWheeling_DisplayUpdate {
             if ( "copyright" == $itemName ) {
                 $msg .= pushToImage( $photoname, "Copyright", $newValue );
             } elseif ( "photodate" == $itemName ) {
-                $msg .= "$errorBeg E#701 date inside photo not updated $errorEnd";
+                $msg .= "$errorBeg E#198 date inside photo not updated $errorEnd";
             } elseif ( "photographer" == $itemName ) {
                 $sqlCopy = "select copyrightDefault from $rrw_photographers
                 where photographer = '$newValue' ";
@@ -135,7 +135,7 @@ class freeWheeling_DisplayUpdate {
                 $msg .= ""; // no specail shove to image
         } // end try
         catch ( Exception $ex ) {
-            $msg .= $ex->getMessage() . "$errorBeg  E#469 update:compare:itenname $itemName, newvalue $newValue  $errorEnd";
+            $msg .= $ex->getMessage() . "$errorBeg  E#195 update:compare:itenname $itemName, newvalue $newValue  $errorEnd";
         }
         return $msg;
     } // end   function compare

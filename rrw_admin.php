@@ -151,7 +151,7 @@ Display keywords with the photos <a href='/admin?setting=on' >On</a> &nbsp;
             $msg .= "
 </div>";
         } catch ( Exception $ex ) {
-            $msg .= "E#409 administraion over all error " . $ex->getMessage();
+            $msg .= "E#212 administraion over all error " . $ex->getMessage();
         }
         return $msg;
     } // end function

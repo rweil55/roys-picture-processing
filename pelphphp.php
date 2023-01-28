@@ -170,7 +170,7 @@ function MakeImakeImages( $fullfilename, $year, $photographer, $trail ) {
     $h_new = $h_cr + $h_botWhite;
     $imgFinal = imagecreatetruecolor( $w_cr, $h_new );
     if ( !imagecopy( $imgFinal, $img_src, 0, 0, 0, 0, $w_src, $h_cr ) )
-        throw new Exception( "4msg E#404 imaagecopy failed " );
+        throw new Exception( "4msg E#211 imaagecopy failed " );
     if ( $debugImageWork )$msg .= "rectangle( ..., 0,  $h_cr+1, $w_src, $h_new, $white )";
     if ( !imagefilledrectangle( $imgFinal, 0, $h_cr, $w_src, $h_new, $white ) )
         throw new Exception( " $errorBeg $mdg E#404 

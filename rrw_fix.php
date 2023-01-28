@@ -1066,7 +1066,7 @@ class freewheeling_fixit {
         $sourcefullname = rrwPara::String( "sourcefullname", $attr );
         if ( empty( $photoname ) || empty( $sourcefullname ) )
             throw new Exception( "$msg $errorBeg 
-                    E#657 missing photoname or sourceFullPath dire $errorEnd" );
+                    E#229 missing photoname or sourceFullPath dire $errorEnd" );
         $sqlExist = "select * from $rrw_photos where searchname = '$photoname'";
         $wpdbExtra->query( $sqlExist );
         if ( 0 == $wpdbExtra->num_rows ) {
@@ -1750,17 +1750,17 @@ class freewheeling_fixit {
             $FileDateTime = self::getPhotoDateTime( $fileExif );
             $debugDate = false;
             if ( empty( $FileDateTime ) && empty( $datebasePhotoDate ) ) {
-                if ( $debugDate )$msg .= "I#741 no dates available $eol ";
+                if ( $debugDate )$msg .= "I#222 no dates available $eol ";
                 // do nothing
             } elseif ( empty( $FileDateTime ) && !empty( $datebasePhotoDate ) ) {
-                if ( $debugDate )$msg .= "I#741 no photo date,but have database $datebasePhotoDate $eol ";
+                if ( $debugDate )$msg .= "I#223 no photo date,but have database $datebasePhotoDate $eol ";
                 if ( strpos( $datebasePhotoDate, "1800" ) !== false ) {
-                    if ( $debugDate )$msg .= "I741 a real date, pudh it to photo $eol";
+                    if ( $debugDate )$msg .= "I#224 a real date, pudh it to photo $eol";
                     $msg .= rrwExif::pushToImage( $photoname, "DateTimeOriginal", $datebasePhotoDate );
                 }
                 $FileDateTime = datebasePhotoDate;
             } elseif ( !empty( $FileDateTime ) && empty( $datebasePhotoDate ) ) {
-                if ( $debugDate )$msg .= "I#741 have photo $FileDateTime,but have database date $eol ";
+                if ( $debugDate )$msg .= "I#225 have photo $FileDateTime,but have database date $eol ";
                 $sqlUpdate[ "PhotoDate" ] = $FileDateTime;
                 $datebasePhotoDate = $FileDateTime;
             } else { // both have dates
@@ -1768,13 +1768,13 @@ class freewheeling_fixit {
                 $dateDB = new DateTime( $FileDateTime );
                 $dateDiff = $datePH->diff( $dateDB );
                 if ( abs( $dateDiff->days ) > 1 ) { // more than one day difference
-                    if ( $debugDate )$msg .= "I#741  photo $FileDateTime, not equal database $datebasePhotoDate $eol ";
+                    if ( $debugDate )$msg .= "I#226  photo $FileDateTime, not equal database $datebasePhotoDate $eol ";
                     if ( $exifCorrect ) {
-                        if ( $debugDate )$msg .= "I#741 update database $eol";
+                        if ( $debugDate )$msg .= "I#227 update database $eol";
                         $sqlUpdate[ "PhotoDate" ] = $fileArtist;
                         $datebasePhotoDate = $fileArtist;
                     } else {
-                        if ( $debugDate )$msg .= "I#741 update database $eol";
+                        if ( $debugDate )$msg .= "I#228 update database $eol";
                         $msg .= rrwExif::pushToImage( $photoname, "DateTimeOriginal", $datebasePhotoDate );
                         $fileArtist = $datebasePhotoDate;
                     }

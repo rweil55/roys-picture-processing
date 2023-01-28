@@ -33,7 +33,7 @@ class uploadProcessDire {
                 // not a single file request. walk the directory
                 $handle = opendir( $uploadPath );
                 if ( !is_resource( $handle ) )
-                    throw new Exception( "$errorBeg E#710 failed to 
+                    throw new Exception( "$errorBeg E#207 failed to 
                                     open $uploadPath $errorEnd" );
                 if ( $debug )$msg .= "Entries:$eol";
                 $cnt = 0;
@@ -314,7 +314,7 @@ class uploadProcessDire {
                                     using $w_max, $h_max $errorEnd " );
         $resultOut = imagejpeg( $imgGDout, $pathout, 100 );
         if ( false === $resultOut )
-            throw new Exception( "$msg $errorBeg E#657 failure in resize:write 
+            throw new Exception( "$msg $errorBeg E#196 failure in resize:write 
                         failed to $pathout $errorEnd" );
         if ( $debug )$msg .= ", file succefully created $eol";
         return $msg;
