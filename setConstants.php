@@ -56,7 +56,7 @@ function SetConstants( $whocalled ) {
         $uploadPath = "$photoPath/upload";
         $rejectPath = "$photoPath/reject";
     } catch ( Exception $ex ) {
-        throw new Exception( "$errorBeg E#499 xxx SetConstants " . 
+        throw new Exception( "$errorBeg E#157 xxx SetConstants " . 
                             $ex->get_message() . $errorEnd );
     }
     return $msg;

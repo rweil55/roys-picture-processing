@@ -61,7 +61,7 @@ class freeWheeling_DisplayUpdate {
             $sqlOld = "select * from $rrw_photos where photoname = '$photoname'";
             $recsold = $wpdbExtra->get_resultsA( $sqlOld );
             if ( 1 < $wpdbExtra->num_rows )
-                $msg .= "$errorBeg E#858 caution more than one photos 
+                $msg .= "$errorBeg E#235 caution more than one photos 
                             database. $errorEnd";
             if ( 0 == $wpdbExtra->num_rows )
                 throw new Exception( "$errorBeg no photo record found,
@@ -93,7 +93,7 @@ class freeWheeling_DisplayUpdate {
             }
             $msg .= freeWheeling_DisplayOne::DisplayOne( null );
         } catch ( Exception $ex ) {
-            $msg .= "E#490" . $ex->getMessage();
+            $msg .= "E#158" . $ex->getMessage();
         }
         return $msg;
     } // end DisplayUpdate

@@ -245,7 +245,7 @@ class freewheeling_fixit {
             if ( $displayExif == $cnt )
                 $msg .= rrwUtil::print_r( $exif, true, "Exif for the second file read." );
             if ( !is_array( $exif ) ) {
-                $msg .= "$errorBeg E#688 bad exif for $photoLoc $errorEnd ";
+                $msg .= "$errorBeg E#170 bad exif for $photoLoc $errorEnd ";
             } else {
                 $height = $exif[ "COMPUTED" ][ "Height" ];
                 $width = $exif[ "COMPUTED" ][ "Width" ];
@@ -455,7 +455,7 @@ class freewheeling_fixit {
         $debug = false;
         $fullFilename = rrwPara::String( "fullfilename" );
         if ( empty( $fullFilename ) )
-            throw new Exception( "$msg $errorBeg E#669 missing filename $errorEnd" );
+            throw new Exception( "$msg $errorBeg E#171 missing filename $errorEnd" );
         $photoname = self::removeJpgDire( $fullFilename );
         $iislash = strrpos( $fullFilename, "/" );
         $Highresname = substr( $fullFilename, $iislash );
@@ -1077,7 +1077,7 @@ class freewheeling_fixit {
                         direonp = '$sourceFullPath'";
             $cnt = $wpdbExtra->query( $sqlInsert );
             if ( 0 == $cnt )
-                $msg .= "$errorBeg E#674 file failed to insert $errorEnd
+                $msg .= "$errorBeg E#172 file failed to insert $errorEnd
                             $sqlinsert $eol";
             $msg .= "inserted $cnt records $eol ";
         } else {
@@ -1085,7 +1085,7 @@ class freewheeling_fixit {
                             where photoname = '$photoname'";
             $cntUpdate = $wpdbExtra->query( $sqlUpdate );
             if ( 0 == $cntUpdate )
-                $msg .= "$errorBeg E#683 file failed to update $errorEnd
+                $msg .= "$errorBeg E#173 file failed to update $errorEnd
                             $sqlUpdate $eol";
             $msg .= "update $cntUpdate records 
             <a href='/display-one-photo?photoname=$photoname' > $photoname </a>$eol ";
@@ -1584,7 +1584,7 @@ class freewheeling_fixit {
         $sql = "select * from $rrw_photo where photoname = '$photoname'";
         $recs = $wpdbExtra->get_resultsA( $sql );
         if ( 1 != $wpdbExtra->num_recs )
-            throw new Exception( "$errorBeg E#674 wrong number of records found, or not found $errorEnd $sql $eol" );
+            throw new Exception( "$errorBeg E#174 wrong number of records found, or not found $errorEnd $sql $eol" );
         $msg .= fixAssumeExifCorrect( $recs[ 0 ] );
         return $msg;
     }
@@ -1879,7 +1879,7 @@ class freewheeling_fixit {
             return $picFormated;
         } // end try
         catch ( Exception $ex ) {
-            print $ex->getMessage() . "$errorBeg  E#673 somewhere in 
+            print $ex->getMessage() . "$errorBeg  E#156 somewhere in 
                 getPhotoDateTime with a datekey of $datekey $errorEnd";
             return "1800-03-03";
         }

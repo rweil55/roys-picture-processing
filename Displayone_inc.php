@@ -214,7 +214,7 @@ class freeWheeling_DisplayOne {
         }
         $msg .= "$eol<strong>Identifiable People:</strong>" . $recset[ "People" ] . "
     <div id='missedClassifi'  onclick='openMissedClassifi(this,$photoname);'>
-    if any of thie infomation is incorrect or missing. Please let us know E#863,
+    if any of thie infomation is incorrect or missing. Please let us know E#220,
     so we can fix it $eol";
         return $msg;
     } // end display table

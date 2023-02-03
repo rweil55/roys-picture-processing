@@ -88,7 +88,7 @@ class rrwExif {
         if ( !file_exists( $tmpfname ) ) {
             sleep( 1 );
             if ( !file_exists( $tmpfname ) )
-                throw new Exception( "$msg $errorBeg E#745 changeItem did Not 
+                throw new Exception( "$msg $errorBeg E#176 changeItem did Not 
                                 produce  expected updated file $errorEnd" );
         };
         $sizeOld = filesize( $filename );
@@ -339,7 +339,7 @@ class rrwExif {
                 $tagL = self::convertText2EeixID( $text );
                 $textThing = $ifd0->getEntry( $tagL );
                 if ( is_null( $textThing ) ) {
-                    if ( $debug )$msg .= self::println( "E#702 did not find an entry  for $text $eol" );
+                    if ( $debug )$msg .= self::println( "E# did not find an entry  for $text $eol" );
                 } else {
                     $textValue = $textThing->getValue();
                     if ( $debug )$msg .= self::println( $textThing . rrwUtil::print_r( $textValue, true, "$text" ) );
@@ -353,13 +353,13 @@ class rrwExif {
             rrwUtil::print_r( $desc, true, "tagvalue" );
             //     We need to check if the image already had a description stored. 
             if ( $desc == null ) {
-                if ( $debug )$msg .= "E#230 value was null $eol";
+                if ( $debug )$msg .= "E#239 value was null $eol";
                 //        The was no description in the image. 
                 //   * In this case we simply create a new PelEntryAscii object to hold
                 //   * the description. The constructor for PelEntryAscii needs to know
                 //   * the tag and contents of the new entry.
                 $type = self::findTagtype( $tag );
-                if ( $debug )$msg .= self::println( "E#724 Adding new $tag of type $type with $newValue $eol " );
+                if ( $debug )$msg .= self::println( "E#177 Adding new $tag of type $type with $newValue $eol " );
                 switch ( $type ) {
                     case "Artist":
                         if ( $debug )$msg .= "trying new PelTag::ARTIST(  $eol";
@@ -430,7 +430,7 @@ class rrwExif {
         } catch ( Exception $ex ) {
             $code = $ex->getCode();
             if ( 0 == $code )
-                $msg .= "$errorBeg E#633 rrwPel: routine catch with no message $errorEnd
+                $msg .= "$errorBeg E#178 rrwPel: routine catch with no message $errorEnd
                 $eol rrwPHPel( $input, $output, $tag (" . dechex( $tag ) .
             "), $newValue) $eol";
             else
@@ -522,7 +522,7 @@ class rrwExif {
 */
             default:
                 $hex = dechex( $tag );
-                throw new Exception( "E#695 looking for typeof exif[$tag]
+                throw new Exception( "E#179 looking for typeof exif[$tag]
             of exif[$hex]", -695 );
         }
         return $out;
@@ -573,7 +573,7 @@ class rrwExif {
         if ( $checkValue == $value )
             $msg .= "<span style='background-color:lightgreen;' >Sucessfully update</span> the exif$eol";
         else
-            $msg .= "$errorBeg E#720 proposed value '$value', resultant value 
+            $msg .= "$errorBeg E#165 proposed value '$value', resultant value 
                             '$checkValue' $errorEnd";
         $msg .= self::dumpMeta( $input_file, $output_file );
         return $msg;
@@ -679,7 +679,7 @@ class rrwExif {
         array_walk_recursive( $temp1, 'truncate' );
         $temp1size = filesize( $file1 );
         if ( !file_exists( $file2 ) ) {
-            $msg .= "E#460 file does not exist $eol";
+            $msg .= "E#238 file does not exist $eol";
             $temp2 = "$eol $file2 $eol $errorBeg E#182 file does not exist $errorEnd";
             $temp2Size = 0;
         } else {

@@ -108,7 +108,7 @@ class rrwPicSubmission {
                     $msg .= "Per your request existing photo will be replaced $eol";
                 } else {
                     $dateMod = $recs[ 0 ][ "uploaddate" ];
-                    $msg .= "$errorBeg $eol E#814 $highresShortname 
+                    $msg .= "$errorBeg $eol E#221 $highresShortname 
                     was uploaded previously on $dateMod. 
                     You must check the box to allow the replacement $errorEnd
                     $sqlexists $eol";
@@ -125,7 +125,7 @@ class rrwPicSubmission {
                 $cntchaged = $wpdbExtra->update( $rrw_photos, $updateData,
                     array( "photoname" => $photoname ) );
                 if ( 1 != $cntchaged )
-                    $msg .= "$errorBeg E#686 meta data did not update 
+                    $msg .= "$errorBeg E#160 meta data did not update 
                                 $errorEnd";
             } else {
                 // no meta data

@@ -173,7 +173,7 @@ function MakeImakeImages( $fullfilename, $year, $photographer, $trail ) {
         throw new Exception( "4msg E#211 imaagecopy failed " );
     if ( $debugImageWork )$msg .= "rectangle( ..., 0,  $h_cr+1, $w_src, $h_new, $white )";
     if ( !imagefilledrectangle( $imgFinal, 0, $h_cr, $w_src, $h_new, $white ) )
-        throw new Exception( " $errorBeg $mdg E#404 
+        throw new Exception( " $errorBeg $mdg E#230 
                     imagerectangle(... 0, $h_cr,$w_src, $h_new, $white ) " );
     if ( $debugImageWork )$msg .= "appended white rectangle ...";
     $left = 2;
@@ -184,7 +184,7 @@ function MakeImakeImages( $fullfilename, $year, $photographer, $trail ) {
     $bounds = imagettftext( $imgFinal, $fontSize, 0, $left, $bot, $black,
         $fontfile, $copyrightMsg );
     if ( $bounds === false )
-        throw new Exception( " $errorBeg E#404 imagettftext ($img_copyright,
+        throw new Exception( " $errorBeg E#169 imagettftext ($img_copyright,
                     $fontSize, 0, $left, $bot, 
 										$black,$fontfile,$copyrightMsg)" );
     $w_text = abs( $bounds[ 0 ] - $bounds[ 2 ] );
@@ -328,7 +328,7 @@ function processuploadDire() {
     if ($debug) $msg .= " go to processuploadDire () $eol";
     $handle = opendir( $uploadPath );
     if ( !is_resource( $handle ) )
-        throw new Exception( "$errorBeg E#496 failed to 
+        throw new Exception( "$errorBeg E#159 failed to 
                                     open $uploadPath $errorEnd" );
     if ($debug) $msg .= "Entries:$eol";
 

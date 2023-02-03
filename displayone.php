@@ -48,7 +48,7 @@ class freeWheeling_DisplayOne {
             $msg .= ( "\n<!-- sql is $sql -->\n" );
             $recset_query = $wpdbExtra->get_resultsA( $sql );
             if ( 1 != $wpdbExtra->num_rows ) {
-                $msg .= "E#856 no meta data for image $photoname was found             $errorEnd $sql $eol";
+                $msg .= "E#234 no meta data for image $photoname was found             $errorEnd $sql $eol";
                 $msg .= freewheeling_fixit::filelike(
                     array( "photname" => $photoname,
                         "partial" => $photoname ) );
@@ -394,7 +394,7 @@ class freeWheeling_DisplayOne {
                 $msg .= "$eol $jigsawPiece $eol";
                 break;
             default:
-                $msg .= "$errorBeg E#736 unknown fromat style of '$format' $errorEnd";
+                $msg .= "$errorBeg E#175 unknown fromat style of '$format' $errorEnd";
                 break;
         } // end switch $format
         return $msg;

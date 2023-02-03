@@ -75,7 +75,7 @@ class uploadProcessDire {
         $sourceFile = "$uploadPath/$entry"; // in uplosd dire
         // ------new ----------------------------  validate photoname
         if ( !file_exists( $sourceFile ) )
-            throw new Exception( "$msg $errorBeg E#718 processOneFile( $entry )
+            throw new Exception( "$msg $errorBeg E#166 processOneFile( $entry )
                      file not found in upload $errorEnd $sourceFile $eol" );
         $mime_type = mime_content_type( $sourceFile );
         switch ( $mime_type ) {
@@ -126,7 +126,7 @@ class uploadProcessDire {
             $key = array( "photoname" => $photoname );
             $cnt = $wpdbExtra->update( $rrw_photos, $Data, $key );
             if ( 1 != $cnt ) {
-                $err = "$errorBeg E#782 update no change $errorEnd";
+                $err = "$errorBeg E#167 update no change $errorEnd";
                 $msg .= rrwUtil::print_r( $Data, true, $err );
             }
         } elseif ( 0 == $wpdbExtra->num_rows ) {
@@ -138,11 +138,11 @@ class uploadProcessDire {
                 "inserting $photoname $eol" );
             $cnt = $wpdbExtra->insert( $rrw_photos, $Data );
             if ( 1 != $cnt ) {
-                $err = "$errorBeg E#766 insert fails $errorEnd";
+                $err = "$errorBeg E#168 insert fails $errorEnd";
                 $msg .= rrwUtil::print_r( $Data, true, $err );
             }
         } else {
-            $msg .= "$errorBeg E#679 found " . $wpdbExtra->num_rows . " of data
+            $msg .= "$errorBeg E#161 found " . $wpdbExtra->num_rows . " of data
                     for $errorEnd $sqlRec $eol";
             throw new Exception( $msg );
         }
@@ -206,7 +206,7 @@ class uploadProcessDire {
                 $msg .= self::nameToBottom( $fullFilePhoto, $photographer );
             // ----------------- move input image to save location
             if ( !rename( $sourceFile, $FullfileHighRes ) ) {
-                throw new Exception( " $errorBeg $msg E#813 while attempting
+                throw new Exception( " $errorBeg $msg E#236 while attempting
                 move ($sourceFile, $FullfileHighRes) $errorEnd" );
             }
             if ( !file_exists( $FullfileHighRes ) ) {
@@ -219,7 +219,7 @@ class uploadProcessDire {
             return $msg;
         } // end try
         catch ( Exception $ex ) {
-            $msg .= $ex->getMessage() . "$errorBeg  E#430 main upload $errorEnd";
+            $msg .= $ex->getMessage() . "$errorBeg  E#155 main upload $errorEnd";
         }
         return $msg;
     } // end makeFile
@@ -235,7 +235,7 @@ class uploadProcessDire {
         $fontfile = "$fontDire/mvboli.ttf";
         if ( !file_exists( $fontfile ) ) {
             $msg .= "bad font $fontfile ";
-            throw new Exception( "$msg $errorBeg E#812 Problems with the font file $errorEnd" );
+            throw new Exception( "$msg $errorBeg E#237 Problems with the font file $errorEnd" );
         }
         // use Imagick to add the name to the bottom
         $im_src = new Imagick();
@@ -275,13 +275,13 @@ class uploadProcessDire {
         $debug = rrwPara::Boolean( "resize" );
         $debug = false;
         if ( !file_exists( $pathin ) ) {
-            throw new Exception( "$errorBeg E#633 resizeToWidth:file: 
+            throw new Exception( "$errorBeg E#162 resizeToWidth:file: 
                     ''$pathin' Not found $errorEnd" );
         }
         if ( file_exists( $pathout ) ) {
             $resultLink = unlink( $pathout ); // remove resultant file
             if ( false === $resultLink )
-                throw new Exception( "$errorBeg E#634 resizeToWidth:file:
+                throw new Exception( "$errorBeg E#164 resizeToWidth:file:
                     '$pathout' did not unlink $errorEnd" );
         }
         $imgGDin = self::imageCreateFrom( $pathin );
@@ -291,7 +291,7 @@ class uploadProcessDire {
                             curent siz =  $w_cur. $h_cur $eol";
         $w_scalefactor = $h_scalefactor = $scalefactor = "not set";
         if ( 0 >= $w_max && 0 >= $h_max ) {
-            throw new Exception( "$msg $errorBeg E#639 resizeImage: 
+            throw new Exception( "$msg $errorBeg E#163 resizeImage: 
             Invalid widths specified $w_max, $h_max  $errorEnd" );
         } elseif ( 0 >= $h_max ) {; // donothing w,0
         } elseif ( 0 >= $w_max ) {

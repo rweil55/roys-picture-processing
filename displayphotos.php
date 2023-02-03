@@ -9,7 +9,7 @@ class freewheeling_displayPhotos {
         $msg = "";
         $debugProgress = false;
         $msg .= SetConstants( "displayphotos" );
-        if ( $debugProgress )$msg .= "photos go here$eol"; 
+        if ( $debugProgress )$msg .= "photos go here$eol";
         /*
                 if ( array_key_exists( "selectionIs", $_GET ) )
                     $selectionIs = $_GET[ "selectionIs" ];
@@ -83,7 +83,7 @@ class freewheeling_displayPhotos {
         if ( strpos( $searchdropdown, "random" ) !== false ) {
             $limit = 21;
             $sql = "SELECT photoname, photographer, owner FROM $rrw_photos
-                        where photostatus = 'use' order by rand() limit $limit";
+                        where photostatus = 'use' order by (rand() * 1000) limit $limit";
             if ( $debugOutput ) print "case random - $sql $eol";
             $selectDisplay = "Selection: $limit random photos ";
             return $sql;
