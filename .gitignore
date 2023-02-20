@@ -51,3 +51,4 @@ _compareTemp/
 _notes/
 *.bak
 *.lck
+.vscode/sftp.json

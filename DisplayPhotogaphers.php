@@ -12,7 +12,7 @@ class DisplayPhotographers {
         $action = rrwUtil::fetchparameterString( "action" );
         $TABLE->tablename( "$rrw_photographers" );
         $TABLE->sortdefault( "photographer" );
-        $TABLE->seqname( "photographer" );
+        $TABLE->keyname( "photographer" );
         $TABLE->columns( "photographer Name", "photographer", 69 );
         $TABLE->columns( "E-Mail", "Address", 69 );
         $TABLE->columns( "Comment", "Comment", 69 );
@@ -26,4 +26,3 @@ class DisplayPhotographers {
         return $msg;
     }   // end function
 } // end class
-?>

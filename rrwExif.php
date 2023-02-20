@@ -6,43 +6,43 @@
  */
 ini_set( "display_errors", true );
 error_reporting( E_ALL | E_STRICT );
-use lsolesen\ pel\ Pel;
-use lsolesen\ pel\ PelConvert;
-use lsolesen\ pel\ PelCanonMakerNotes;
-use lsolesen\ pel\ PelDataWindow;
-use lsolesen\ pel\ PelEntryException;
-use lsolesen\ pel\ PelEntryAscii;
-use lsolesen\ pel\ PelEntryByte;
-use lsolesen\ pel\ PelEntryCopyright;
-use lsolesen\ pel\ PelEntryLong;
-use lsolesen\ pel\ PelEntryNumber;
-use lsolesen\ pel\ PelEntryRational;
-use lsolesen\ pel\ PelEntryShort;
-use lsolesen\ pel\ PelEntrySShort;
-use lsolesen\ pel\ PelEntrySRational;
-use lsolesen\ pel\ PelEntrySLong;
-use lsolesen\ pel\ PelEntryTime;
+use lsolesen\pel\Pel;
+use lsolesen\pel\PelConvert;
+use lsolesen\pel\PelCanonMakerNotes;
+use lsolesen\pel\PelDataWindow;
+use lsolesen\pel\PelEntryException;
+use lsolesen\pel\PelEntryAscii;
+use lsolesen\pel\PelEntryByte;
+use lsolesen\pel\PelEntryCopyright;
+use lsolesen\pel\PelEntryLong;
+use lsolesen\pel\PelEntryNumber;
+use lsolesen\pel\PelEntryRational;
+use lsolesen\pel\PelEntryShort;
+use lsolesen\pel\PelEntrySShort;
+use lsolesen\pel\PelEntrySRational;
+use lsolesen\pel\PelEntrySLong;
+use lsolesen\pel\PelEntryTime;
 //use lsolesen\pel\PelEntryUndefined;
-use lsolesen\ pel\ PelEntryUserComment;
-use lsolesen\ pel\ PelEntryUserCopyright;
-use lsolesen\ pel\ PelEntryVersion;
-use lsolesen\ pel\ PelEntryWindowsString;
-use lsolesen\ pel\ PelEntryUndefined;
-use lsolesen\ pel\ PelExif;
-use lsolesen\ pel\ PelFormat;
-use lsolesen\ pel\ PelIfd;
-use lsolesen\ pel\ PelIfdException;
-use lsolesen\ pel\ PelIllegalFormatException;
-use lsolesen\ pel\ PelInvalidDataException;
-use lsolesen\ pel\ PelJpeg;
-use lsolesen\ pel\ PelJpegComment;
-use lsolesen\ pel\ PelJpegContent;
-use lsolesen\ pel\ PelJpegInvalidMarkerException;
-use lsolesen\ pel\ PelJpegMarker;
-use lsolesen\ pel\ PelMakerNotes;
-use lsolesen\ pel\ PelTag;
-use lsolesen\ pel\ PelTiff;
-use lsolesen\ pel\ PelWrongComponentCountException;
+use lsolesen\pel\PelEntryUserComment;
+use lsolesen\pel\PelEntryUserCopyright;
+use lsolesen\pel\PelEntryVersion;
+use lsolesen\pel\PelEntryWindowsString;
+use lsolesen\pel\PelEntryUndefined;
+use lsolesen\pel\PelExif;
+use lsolesen\pel\PelFormat;
+use lsolesen\pel\PelIfd;
+use lsolesen\pel\PelIfdException;
+use lsolesen\pel\PelIllegalFormatException;
+use lsolesen\pel\PelInvalidDataException;
+use lsolesen\pel\PelJpeg;
+use lsolesen\pel\PelJpegComment;
+use lsolesen\pel\PelJpegContent;
+use lsolesen\pel\PelJpegInvalidMarkerException;
+use lsolesen\pel\PelJpegMarker;
+use lsolesen\pel\PelMakerNotes;
+use lsolesen\pel\PelTag;
+use lsolesen\pel\PelTiff;
+use lsolesen\pel\PelWrongComponentCountException;
 require_once "pel-h.php";
 
 class rrwExif {
@@ -61,7 +61,7 @@ class rrwExif {
                     is to big " . round( filesize( $filename ) / 1024, 0 ) . " $errorEnd" );
         $exif = self::rrw_exif_read_data( $filename );
         if ( array_key_exists( $item, $exif ) )
-            return $exif[ $tem ];
+            return $exif[ $item ];
         return "&lt;Missing&gt;";
     }
 
@@ -629,7 +629,7 @@ class rrwExif {
         $output_file = "$gallery/a5.jpg";
         // Copyright info to add
         $copyright = "Mary Shaw";
-        $msg .= changeCopyRight( $input_file, $output_file, $copyright );
+        $msg .= self::changeCopyRight( $input_file, $output_file, $copyright );
         $msg .= rrwExif::dumpMeta( $input_file, $output_file );
         return $msg;
     }
@@ -654,7 +654,7 @@ class rrwExif {
             );
             $msg .= self::rrwPHPel( $argv );
         } catch ( Exception $ex ) {
-            $msg .= "E#232 testpel3 catch " . $ex->get_message();
+            $msg .= "E#232 testpel3 catch " . $ex->getMessage();
         }
         $msg .= rrwExif::dumpMeta( $input_file, $output_file );
         return $msg;
@@ -675,7 +675,7 @@ class rrwExif {
             $file2 = "$testPath/output.jpg";
 
         $temp1 = self::rrw_exif_read_data( $file1 );
-        $temp1 = rrwUtil::print_r( $temp1, true, " file $file1" );
+        $msg .= rrwUtil::print_r( $temp1, true, " file $file1" );
         array_walk_recursive( $temp1, 'truncate' );
         $temp1size = filesize( $file1 );
         if ( !file_exists( $file2 ) ) {
@@ -684,7 +684,7 @@ class rrwExif {
             $temp2Size = 0;
         } else {
             $temp2 = self::rrw_exif_read_data( $file2 );
-            $temp2 = rrwUtil::print_r( $temp2, true, " file $file2" );
+            $msg .= rrwUtil::print_r( $temp2, true, " file $file2" );
             array_walk_recursive( $temp2, 'truncate' );
             $temp2size = filesize( $file2 );
         }
@@ -821,7 +821,7 @@ class rrwExif {
                 $msg .= self::testpel();
                 break;
             case "testpel2":
-                $msg .= self::testpel2();
+                $msg .= self::testpel2($attr);
                 break;
             case "testpel3":
                 $msg .= self::testpel3();
@@ -993,4 +993,3 @@ class rrwExif {
         return $msg;
     }
 } // end class
-?>

@@ -67,7 +67,7 @@ class AppendPhotographer {
             $w_tmb = $widthThumb;
             $h_tmb = $w_tmb * $aspect;
             if ( $debug )$msg .= "resizetmb $w_src, $h_src, $w_tmb, $h_tmb$eol ";
-            $img_src = self::loadtheimageintocore( $sourcefile );
+            $img_src = self::loadtheimageintocore( $sourceFile );
             $img_tmb =
                 self::resizeImage( $img_src, $w_src, $h_src, $w_tmb, $h_tmb );
             if ( !imagejpeg( $img_tmb, $fullfileThumb ) ) //  save new image
@@ -79,14 +79,14 @@ class AppendPhotographer {
             if ( $w_src != $width ) {
                 $w_cr = $width;
                 $h_cr = $h_src * $aspect;
-                $img_src = self::loadtheimageintocore( $sourcefile );
+                $img_src = self::loadtheimageintocore( $sourceFile );
                 $img_copyright =
                     self::resizeImage( $img_src, $w_src, $h_src, $w_cr, $h_cr );
                 imagedestroy( $img_src ); // free memory
                 if ( $debugImageWork )$msg .= "aspect = $aspect image 
                     resized $w_src X $h_src to $w_cr X $h_cr $eol";
             } else {
-                $img_copyright = self::loadtheimageintocore( $sourcefile );;
+                $img_copyright = self::loadtheimageintocore( $sourceFile );;
                 $h_cr = $h_src;
                 $w_cr = $w_src;
             } 
@@ -98,7 +98,7 @@ class AppendPhotographer {
                     throw new Exception( "$msg $errorBeg E#736 
                         imagejpeg( $img_copyright, $fullFilePhoto )$errorEnd" );
                 if ( $debugImageWork )$msg .= " imageno border saved to $fullFilePhoto $eol";
-                if ( !imagedestroy( img_copyright ) )
+                if ( !imagedestroy( $img_copyright ) )
                     throw new Exception( "$msg $errorBeg E#762 
                             imagedestroy( img_copyright ) $errorEnd" );
             } else {
@@ -157,9 +157,11 @@ class AppendPhotographer {
             $msg .= $errorBeg . $ex->getMessage() . $errorEnd;
         }
         return $msg;
-    } // end function MakeImakeImages 
-    private static function loadtheimageintocore( $sourcefile ) {
+    } // end makeImages
+
+    private static function loadtheimageintocore( $sourceFile ) {
         # load the image into core
+        global $eol, $errorBeg, $errorEnd;
         $im_src = new Imagick();
         $mime_type = mime_content_type( $sourceFile );
         switch ( $mime_type ) {
@@ -199,4 +201,3 @@ class AppendPhotographer {
     }
    
 } // end class uploadProcessDire
-?>
