@@ -14,11 +14,13 @@ class DisplayPhotographers
         $action = rrwUtil::fetchparameterString("action");
         $TABLE->tablename("$rrw_photographers");
         $TABLE->sortdefault("photographer");
-        $TABLE->keyname("photographer");
+        $TABLE->keyname("photographer_id");
         $TABLE->columns("photographer Name", "photographer", 69);
         $TABLE->columns("E-Mail", "Address", 69);
         $TABLE->columns("Comment", "Comment", 69);
         $TABLE->columns("copyright Default", "copyrightDefault", 69);
+        $newphotogName = date("H:i:s");
+        $TABLE->columnNewData("photographer", "'$newphotogName'");
 
         if (empty($action)) {
             $msg .= $TABLE->DoAction("list");

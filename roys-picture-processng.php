@@ -14,8 +14,9 @@
   * Version: 2.1.80
  */
 // disable direct access
-ini_set( "display_errors", true );
-error_reporting( E_ALL | E_STRICT );
+ini_set("display_errors", true);
+error_reporting(E_ALL | E_STRICT);
+
 use lsolesen\pel\Pel;
 use lsolesen\pel\PelConvert;
 use lsolesen\pel\PelCanonMakerNotes;
@@ -53,8 +54,9 @@ use lsolesen\pel\PelMakerNotes;
 use lsolesen\pel\PelTag;
 use lsolesen\pel\PelTiff;
 use lsolesen\pel\PelWrongComponentCountException;
+
 $pel = "/home/pillowan/www-shaw-weil-pictures-dev/wp-content/plugins" .
-"/roys-picture-processng/pel-master/src";
+    "/roys-picture-processng/pel-master/src";
 $pel = "pel-master/src";
 require_once "$pel/Pel.php";
 require_once "$pel/PelException.php";
@@ -115,11 +117,13 @@ require_once "rrw_update-picture.php";
 require_once "uploadProcessDire.php";
 /*
 */
-class FreewheelingCommon {
-    public static function missingImageMessage( $from, $photoname = "" ) {
+class FreewheelingCommon
+{
+    public static function missingImageMessage($from, $photoname = "")
+    {
         $msg = "This is somewhat embarrassing. The image that you
                 requested ";
-        if ( !empty( $photoname ) )
+        if (!empty($photoname))
             $msg .= " ( $photoname )";
         $msg .= " was not found. Please remember your selection,
                 what you did, copy this message 
@@ -127,79 +131,88 @@ class FreewheelingCommon {
                 and tell us what you did to get here ($from) ";
         return $msg;
     } // end funvtion missingImageMessage
-   
+
 } // end of class
-function rrw_getAccessID() {
+function rrw_getAccessID()
+{
     $current_user = wp_get_current_user();
-    if ( !( $current_user instanceof WP_User ) )
+    if (!($current_user instanceof WP_User))
         $id = "Guest";
     else
         $id = $current_user->display_name;
-    $id .= "-" . rrwUtil::fetchparameterString( "session" );
-    $id .= "-" . rrwUtil::fetchparameterString( "REMOTE_ADDR" );
-    $id .= "-" . rrwUtil::fetchparameterString( "USERDOMAN" );
-    $id .= "-" . rrwUtil::fetchparameterString( "USERNAME" );
+    $id .= "-" . rrwUtil::fetchparameterString("session");
+    $id .= "-" . rrwUtil::fetchparameterString("REMOTE_ADDR");
+    $id .= "-" . rrwUtil::fetchparameterString("USERDOMAN");
+    $id .= "-" . rrwUtil::fetchparameterString("USERNAME");
     return $id;
 }
-function updateAccessTable( $photoname, $search ) {
+function updateAccessTable($photoname, $search)
+{
     global $wpdbExtra, $rrw_access;
     global $picrureCookieName;
     global $eol;
     $msg = "";
     $userid = rrw_getAccessID();
-    $update = array( "accessIP" => $userid );
-    if ( !empty( $user ) )
-        $update[ "accessuser" ] = $user;
-    if ( !empty( $photoname ) )
-        $update[ "accessphotoname" ] = $photoname;
-    if ( !empty( $search ) )
-        $update[ "accessSearch" ] = $search;
-    $answer = $wpdbExtra->insert( $rrw_access, $update );
+    $update = array("accessIP" => $userid);
+    if (!empty($user))
+        $update["accessuser"] = $user;
+    if (!empty($photoname))
+        $update["accessphotoname"] = $photoname;
+    if (!empty($search))
+        $update["accessSearch"] = $search;
+    $answer = $wpdbExtra->insert($rrw_access, $update);
     return $msg;
 }
-function direReport( $field, $report = "" ) {
+function direReport($field, $report = "")
+{
     // count the number of items for a particular field
     global $wpdbExtra, $rrw_photos;
     global $eol;
     $msg = "";
     $sqlTotal = "select count(*) from $rrw_photos";
-    $total = $wpdbExtra->get_var( $sqlTotal );
+    $total = $wpdbExtra->get_var($sqlTotal);
     $sqlBlank = "select count(*) from $rrw_photos where $field is null or
                     trim($field) = ''";
-    $blank = $wpdbExtra->get_var( $sqlBlank );
+    $blank = $wpdbExtra->get_var($sqlBlank);
     $msg .= "there are $blank blank $field out of $total photos $report $eol";
     return $msg;
 }
-function pushToImage( $filename, $item, $value ) {
-    
-    $msg = rrwExif::pushToImage( $filename, $item, $value ) ;
+function pushToImage($filename, $item, $value)
+{
+
+    $msg = rrwExif::pushToImage($filename, $item, $value);
     return $msg;
 }
- 
-function println( $fmt, $value = "" ) {
-// a printf() variant that appends a newline to the output. 
+
+function println($fmt, $value = "")
+{
+    // a printf() variant that appends a newline to the output. 
     global $eol;
     return $fmt;
-    if ( !empty( $value ) )
-        $fmt = sprintf( $fmt, $value );
+    if (!empty($value))
+        $fmt = sprintf($fmt, $value);
     return "$fmt $eol";
 }
 // picture tasks
-SetConstants( "by the short codes" );
-add_shortcode( "author2copyright", array( "freewheeling_fixit", "Author2Copyright" ) );
-add_shortcode( "adminpictures", array( "freewhilln_Administration_Pictures",
-    "administrationPicures" ) );
-add_shortcode( "displayphotos", array( "freewheeling_displayPhotos", "displayPhotos" ) );
-add_shortcode( "display-one-photo",
-    array( "freeWheeling_DisplayOne", "DisplayOne" ) );
-add_shortcode( "display-photographer", array( "DisplayPhotographers", "Display" ) );
-add_shortcode( "displaytrail", array( "DisplayTrails", "Display" ) );
-add_shortcode( "displayupdate", array( "freeWheeling_DisplayUpdate", "DisplayUpdate" ) );
-add_shortcode( "fix", array( "freewheeling_fixit", "fit_it" ) );
-add_shortcode( "fixtasklist", array( "fixTaskList", "showlist" ) );
-add_shortcode( "rrwPicSubmission", array( "rrwPicSubmission", "showForm" ) );
-add_shortcode( "upload", array( "uploadProcessDire", "upload" ) );
-add_shortcode( "testingexif",array("rrwErrwExif", "test11") );
+SetConstants("by the short codes");
+add_shortcode("author2copyright", array("freewheeling_fixit", "Author2Copyright"));
+add_shortcode("adminpictures", array(
+    "freewhilln_Administration_Pictures",
+    "administrationPicures"
+));
+add_shortcode("displayphotos", array("freewheeling_displayPhotos", "displayPhotos"));
+add_shortcode(
+    "display-one-photo",
+    array("freeWheeling_DisplayOne", "DisplayOne")
+);
+add_shortcode("display-photographer", array("DisplayPhotographers", "Display"));
+add_shortcode("displaytrail", array("DisplayTrails", "Display"));
+add_shortcode("displayupdate", array("freeWheeling_DisplayUpdate", "DisplayUpdate"));
+add_shortcode("fix", array("freewheeling_fixit", "fit_it"));
+add_shortcode("fixtasklist", array("fixTaskList", "showlist"));
+add_shortcode("rrwPicSubmission", array("rrwPicSubmission", "showForm"));
+add_shortcode("upload", array("uploadProcessDire", "upload"));
+add_shortcode("testingexif", array("rrwErrwExif", "test11"));
 require_once 'plugin_update_check.php';
 $MyUpdateChecker  = new PluginUpdateChecker_2_0(
     'http://pluginserver.royweil.com/roys-picture-processng.php',
