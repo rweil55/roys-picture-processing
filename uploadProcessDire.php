@@ -340,11 +340,10 @@ class uploadProcessDire {
                     $errorEnd" );
         }
         return $img_src;
-    }
+    } // end imageCreateFrom
     //-------------------------------------------------- ENOUGH MEMORY ?
     private static function enoughmem( $x, $y ) {
         $MAXMEMy = 32 * 1024 * 1024;
         return ( $x * $y * 3 * 1.7 < $MAXMEMy - memory_get_usage() );
-    }
+    } // end enoughmem
 } // end class uploadProcessDire
-?>
