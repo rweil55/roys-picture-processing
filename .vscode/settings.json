@@ -3,7 +3,7 @@
         "../freewheeling-edit/includes",
         "../freewheeling-edit",
         "../freewheeling-map",
-        "c:/inetpub/wwwroot/ww-include",
+        "c:/inetpub/wwwroot/ww-include/",
         "../jigsaw-puzzle-tool"
     ],
     "intelephense.stubs": [
@@ -79,6 +79,7 @@
         "Zend OPcache",
         "zip",
         "zlib",
-        "wordpress"
+        "wordpress",
+        "imagick"
     ]
 }
