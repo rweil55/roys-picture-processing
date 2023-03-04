@@ -107,7 +107,7 @@ class freewhilln_Administration_Pictures
                 $rrw_keywords
             );
             $msg .= self::SQLcount(
-                "E#154 Keywords pairs duplicated",
+                "E#153 Keywords pairs duplicated",
                 " 1 = 1",
                 "(select keywordFilename from $rrw_keywords group by keyword, keywordFilename having count(*) > 1) xx "
             );

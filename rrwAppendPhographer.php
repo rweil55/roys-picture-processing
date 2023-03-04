@@ -101,7 +101,7 @@ class AppendPhotographer
                         imagejpeg( $img_copyright, $fullFilePhoto )$errorEnd");
                 if ($debugImageWork) $msg .= " imageno border saved to $fullFilePhoto $eol";
                 if (!imagedestroy($img_copyright))
-                    throw new Exception("$msg $errorBeg E#762 
+                    throw new Exception("$msg $errorBeg E#215 
                             imagedestroy( img_copyright ) $errorEnd");
             } else {
                 //  ------------------------------------------------ place text 
