@@ -4,7 +4,8 @@
  *		copyright Roy R Weil 2019 - https://royweil.com
  */
 
-function SetConstants( $whocalled ) {
+function SetConstants($whocalled)
+{
     global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords, $rrw_trails;
     global $rrw_photographer, $rrw_photographers, $rrw_access, $rrw_history;
     global $eol, $errorBeg, $errorEnd;
@@ -16,11 +17,11 @@ function SetConstants( $whocalled ) {
     global $httpSource;
     global $rrwProcessPhotosConstants;
     global $numberPhotosMax;
-    error_reporting( E_ALL | E_STRICT );
-    ini_set( "display_errors", true );
+    error_reporting(E_ALL | E_STRICT);
+    ini_set("display_errors", true);
     $msg = "";
     try {
-        
+
         $eol = "<br />\n";
         $errorBeg = "<span style='color:red;' >";
         $errorEnd = "</span>$eol";
@@ -31,10 +32,10 @@ function SetConstants( $whocalled ) {
         $numberPhotosMax = 750; // maximun in database used to prevent runaway 
         $picrureCookieName = "picture_visit_ip_time";
         // database names
-       if ( !is_object( $wpdbExtra ) )
+        if (!is_object($wpdbExtra))
             $wpdbExtra = new wpdbExtra;
         $rrw_history = $wpdbExtra->prefix . "1rrw_history";
-        $tablePrefix = $wpdbExtra->prefix . "0"; 
+        $tablePrefix = $wpdbExtra->prefix . "0";
         $rrw_access = $tablePrefix . "access";
         $rrw_photos = $tablePrefix . "photos";
         $rrw_source = $tablePrefix . "source";
@@ -55,10 +56,9 @@ function SetConstants( $whocalled ) {
         $highresPath = "$photoPath/high_resolution";
         $uploadPath = "$photoPath/upload";
         $rejectPath = "$photoPath/reject";
-    } catch ( Exception $ex ) {
-        throw new Exception( "$errorBeg E#157 xxx SetConstants " . 
-                            $ex->get_message() . $errorEnd );
+    } catch (Exception $ex) {
+        throw new Exception("$errorBeg E#144 xxx SetConstants " .
+            $ex->getMessage . $errorEnd);
     }
     return $msg;
 }
-?>

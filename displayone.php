@@ -241,7 +241,7 @@ class freeWheeling_DisplayOne
                     $meta = rrwExif::rrw_exif_read_data($fullfilename1);
                 } // end try
                 catch (Exception $ex) {
-                    $msg .= $ex->getMessage() . "$errorBeg  E#668 error loading the exif for '$fullfilename1' $errorEnd";
+                    $msg .= $ex->getMessage() . "$errorBeg  E#143 error loading the exif for '$fullfilename1' $errorEnd";
                 }
                 if (false !== $meta) {
                     $msg .= rrwUtil::print_r($meta, true, "EXIF data for $fullfilename1");

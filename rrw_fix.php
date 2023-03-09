@@ -1280,7 +1280,7 @@ class freewheeling_fixit
                 $orderby = "sourcefullname, searchname, aspect";
                 break;
             case "$rrw_keywords":
-                $msg .= "$eol I#699 &nbsp; select * from $rrw_keywords 
+                $msg .= "$eol I#142 &nbsp; select * from $rrw_keywords 
                     where keywordfilename in (
                         select keywordfilename from $rrw_keywords where not keywordfilename in( select photoname from $rrw_photos) order by keywordfilename, keyword ) limit 20 $eol ";
                 $fields = "keywordfilename, keyword";
@@ -1485,7 +1485,7 @@ class freewheeling_fixit
         $sqlExist = "select photoname from $rrw_photos where photoname = '$newname'";
         $recExists = $wpdbExtra->get_resultsA($sqlExist);
         if (0 != $wpdbExtra->num_rows)
-            $msg .= "$errorBeg E#295 file $newname is already in the photo table,
+            $msg .= "$errorBeg E#138 file $newname is already in the photo table,
                     not replaced $errorEnd";
         else {
             $sqlupdate = "update $rrw_photos set photoname = '$newname'
@@ -2032,7 +2032,7 @@ class freewheeling_fixit
             return $picFormated;
         } // end try
         catch (Exception $ex) {
-            print $ex->getMessage() . "$errorBeg  E#156 somewhere in 
+            print $ex->getMessage() . "$errorBeg  E#146 somewhere in 
                 getPhotoDateTime with a datekey of $pictureDate $errorEnd";
             return "1800-03-03";
         }

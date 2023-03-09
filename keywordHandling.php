@@ -32,7 +32,7 @@ class keywordHandling
             );
             $cnt = $wpdbExtra->insert($rrw_keywords, $insertItem);
             if (1 != $cnt) {
-                $msg .= "$errorBeg E#620 Something happened with '$item'. 
+                $msg .= "$errorBeg E#150 Something happened with '$item'. 
                                 $cnt should one $errorEnd";
             }
             if ($item == "panarama") {
@@ -41,7 +41,7 @@ class keywordHandling
                 if ($debug) $msg .= "\r$sql<br>\r";
                 $cnt = $wpdbExtra->query($sql);
                 if (1 != $cnt)
-                    $msg .= "$errorBeg E#621 Something happened with '$item'. 
+                    $msg .= "$errorBeg E#149 Something happened with '$item'. 
                                 $cnt should one $errorEnd";
             }
         } // end of processing one keyword

@@ -836,7 +836,7 @@ class rrwExif
         $output_file = "$testPath/output.jpg";
         //       $msg .= rrwUtil::print_r( $attr, true, "#Ixxx atributes" );
         $task = rrwPara::String("task", $attr);
-        print "I#735 testing the task $task $eol";
+        print "I#140 testing the task $task $eol";
         if (file_exists($output_file))
             unlink($output_file);
         switch ($task) {

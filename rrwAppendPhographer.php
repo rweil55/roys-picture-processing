@@ -55,7 +55,7 @@ class AppendPhotographer
             //  ------------------------------------- got the file now process it
             if (!file_exists($fontfile)) {
                 $msg .= "bad font $fontfile ";
-                throw new Exception("$msg $errorBeg E#811 Problems with the font file $errorEnd");
+                throw new Exception("$msg $errorBeg E#139 Problems with the font file $errorEnd");
             }
             // create new dimensions, keeping aspect ratio
             $imageInfo = getimagesize($sourceFile);
@@ -73,7 +73,7 @@ class AppendPhotographer
             $img_tmb =
                 self::resizeImage($img_src, $w_src, $h_src, $w_tmb, $h_tmb);
             if (!imagejpeg($img_tmb, $fullfileThumb)) //  save new image
-                throw new Exception(" E#816 imagejpeg($img_tmb, 
+                throw new Exception(" E#132 imagejpeg($img_tmb, 
                                     $fullfileThumb ) failed ");
             if ($debugImageWork) $msg .= " thumbnail saved to $fullfileThumb $eol";
             imagedestroy($img_tmb); // free memory
@@ -97,7 +97,7 @@ class AppendPhotographer
                 // skip adding the bottom line, just write the file
                 if ($debugImageWork) $msg .= "about to write file to $fullFilePhoto ...";
                 if (!imagejpeg($img_copyright, $fullFilePhoto))
-                    throw new Exception("$msg $errorBeg E#736 
+                    throw new Exception("$msg $errorBeg E#141 
                         imagejpeg( $img_copyright, $fullFilePhoto )$errorEnd");
                 if ($debugImageWork) $msg .= " imageno border saved to $fullFilePhoto $eol";
                 if (!imagedestroy($img_copyright))
@@ -122,14 +122,14 @@ class AppendPhotographer
                                 0, 0, 0, 0, $w_src, $h_cr  failed");
                 $white = imagecolorallocate($imgFinal, 255, 255, 255);
                 if ($white === false)
-                    throw new Exception("E#639
+                    throw new Exception("E#148
                     imagecolorallocate($imgFinal, 255,255,0)");
                 $black = imagecolorallocate($imgFinal, 0, 0, 0); # returns zero
                 if ($black === false)
-                    throw new Exception("E#648
+                    throw new Exception("E#147
                     imagecolorallocate($imgFinal, 0,0,0)");
                 if (!imagefilledrectangle($imgFinal, 0, $h_cr, $w_src, $h_new, $white))
-                    throw new Exception(" $msg E#629
+                    throw new Exception(" $msg E#151
                     imagerectangle(... 0, $h_cr,$w_src, $h_new, $white ) ");
                 $left = 2;
                 $top = $h_cr + 2;
@@ -138,7 +138,7 @@ class AppendPhotographer
                 // use true type fonts. First deterine the actual length
                 $bounds = imagettftext($imgFinal, $fontSize, 0, $left, $bot, $black, $fontfile, $copyrightMsg);
                 if ($bounds === false)
-                    throw new Exception("E#634 imagettftext ($img_copyright,
+                    throw new Exception("E#157 imagettftext ($img_copyright,
                                 $fontSize, 0, $left, $bot, 
                                 $black,$fontfile,$copyrightMsg)");
                 $w_text = abs($bounds[0] - $bounds[2]);
@@ -160,7 +160,7 @@ class AppendPhotographer
                 if (!imagedestroy($imgFinal))
                     throw new Exception("imagedestroy( img_copyright ");
                 if (!imagedestroy($img_src)) // free memory
-                    throw new Exception("$msg E#628 imagedestroy( img_sec )");
+                    throw new Exception("$msg E#152 imagedestroy( img_sec )");
             } // end of drawing photographer name
         } // end try
         catch (Exception $ex) {
@@ -206,7 +206,7 @@ class AppendPhotographer
         $scalefactor = $w_new / $curWidth;
         $imgout = imagescale($img_in, $scalefactor);
         if (false === $imgout)
-            throw new Exception("E#651 failure in resize usine $scalefactor
+            throw new Exception("E#156 failure in resize usine $scalefactor
             as scale factor or $w_new/ $curWidth ");
         return $imgout;
         $img_out = imagecreatetruecolor($w_new, $h_new)
