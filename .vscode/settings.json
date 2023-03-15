@@ -6,6 +6,7 @@
         "c:/inetpub/wwwroot/ww-include/",
         "../jigsaw-puzzle-tool"
     ],
+    "editor.formatOnSave": true,
     "intelephense.stubs": [
         "apache",
         "bcmath",
