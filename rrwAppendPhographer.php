@@ -55,7 +55,7 @@ class AppendPhotographer
             //  ------------------------------------- got the file now process it
             if (!file_exists($fontfile)) {
                 $msg .= "bad font $fontfile ";
-                throw new Exception("$msg $errorBeg E#139 Problems with the font file $errorEnd");
+                throw new Exception("$msg $errorBeg E#243 Problems with the font file $errorEnd");
             }
             // create new dimensions, keeping aspect ratio
             $imageInfo = getimagesize($sourceFile);
@@ -73,7 +73,7 @@ class AppendPhotographer
             $img_tmb =
                 self::resizeImage($img_src, $w_src, $h_src, $w_tmb, $h_tmb);
             if (!imagejpeg($img_tmb, $fullfileThumb)) //  save new image
-                throw new Exception(" E#132 imagejpeg($img_tmb, 
+                throw new Exception(" E#241 imagejpeg($img_tmb, 
                                     $fullfileThumb ) failed ");
             if ($debugImageWork) $msg .= " thumbnail saved to $fullfileThumb $eol";
             imagedestroy($img_tmb); // free memory

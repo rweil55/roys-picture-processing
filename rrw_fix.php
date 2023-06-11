@@ -1485,7 +1485,7 @@ class freewheeling_fixit
         $sqlExist = "select photoname from $rrw_photos where photoname = '$newname'";
         $recExists = $wpdbExtra->get_resultsA($sqlExist);
         if (0 != $wpdbExtra->num_rows)
-            $msg .= "$errorBeg E#138 file $newname is already in the photo table,
+            $msg .= "$errorBeg E#240 file $newname is already in the photo table,
                     not replaced $errorEnd";
         else {
             $sqlupdate = "update $rrw_photos set photoname = '$newname'
