@@ -201,10 +201,7 @@ add_shortcode("adminpictures", array(
     "administrationPicures"
 ));
 add_shortcode("displayphotos", array("freewheeling_displayPhotos", "displayPhotos"));
-add_shortcode(
-    "display-one-photo",
-    array("freeWheeling_DisplayOne", "DisplayOne")
-);
+add_shortcode("display-one-photo", array("freeWheeling_DisplayOne", "DisplayOne"));
 add_shortcode("display-photographer", array("DisplayPhotographers", "Display"));
 add_shortcode("displaytrail", array("DisplayTrails", "Display"));
 add_shortcode("displayupdate", array("freeWheeling_DisplayUpdate", "DisplayUpdate"));
