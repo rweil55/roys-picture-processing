@@ -340,7 +340,7 @@ class freeWheeling_DisplayOne
 
         $nameDisplay = " <a href='$photoUrl/{$photoname}_cr.jpg'>$photoname</a>
                 &nbsp; &nbsp; &nbsp; &nbsp; " . $recset['comment'] . "$eol";
-
+        $shareDisplay = "<a href='/display-one-photo?photoname=$photoname '> Share </a>";
         $keywordDisplay = self::GetkkeywordLinkedList($photoname);
 
         $fullname = "$photoPath/$photoname" . "_cr.jpg";
@@ -398,7 +398,7 @@ class freeWheeling_DisplayOne
                 break;
             case "narrow":
                 $msg .= "\n<div class='rrwOnePhoto'><table> \n " .
-                    rrwFormat::CellRow("Photo Name: ", $nameDisplay) .
+                    rrwFormat::CellRow("Photo Name: ", "$nameDisplay &nbsp; &nbsp; $shareDisplay") .
                     rrwFormat::CellRow("Trail: ", $trailDisplay) .
                     rrwFormat::CellRow("Location: ", $recset["location"]) .
                     rrwFormat::CellRow("Photographer: ", $photographerDisplay) .
