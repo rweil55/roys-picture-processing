@@ -46,6 +46,8 @@ use lsolesen\pel\PelTiff;
 use lsolesen\pel\PelWrongComponentCountException;
 
 require_once "pel-h.php";
+require_once "ExifWriter.php";
+
 
 class rrwExif
 {
@@ -131,7 +133,7 @@ class rrwExif
         return $msg;
     }
 
-    private static function writeoutput()
+    private static function writeoutput($attr)
     {
         ini_set("display_errors", true);
         global $testPath, $eol;
@@ -155,7 +157,7 @@ class rrwExif
          */
         $er->writeImage($filenameNew);
         $msg .= "file written $eol";
-        $msg .= readinputa4($attr);
+        $msg .= self::readinputa4($attr);
         return $msg;
     }
 
@@ -376,10 +378,7 @@ class rrwExif
                         break;
                     case "Copyright":
                         if ($debug) $msg .= "trying new PelEntryCopyright( $newValue ); $eol";
-                        $desc = new PelEntryAscii(
-                            PelTag::COPYRIGHT,
-                            $newValue
-                        );
+                        $desc = new PelEntryAscii(PelTag::COPYRIGHT, $newValue);
                         break;
                     case "Description":
                     case "ImageDescription":
@@ -390,7 +389,7 @@ class rrwExif
                         break;
                     case "HostComputer":
                         if ($debug) $msg .= "trying new PelTag::HostComputer(  $eol";
-                        $desc = new PelEntryAscii(PelTag::HOSTCOMPUTER, $newValue);
+                        $desc = new PelEntryAscii(PelTag::HostComputer, $newValue);
                         break;
                     case "Keywords":
                         $msg .= "trying to make keyword entry $eol";
@@ -399,14 +398,14 @@ class rrwExif
                         break;
                     case "TimeZoneOffset":
                         $msg .= "trying to make TimeZoneOffset entry $eol";
-                        $desc = new PelEntryShort(PelTag::TIMEZONROFFSET, $newValue);
+                        $desc = new PelEntryShort(PelTag::OFFSET_TIME, $newValue);
                         $msg .= "created keyword TimeZoneOffset $eol";
                         break;
                     case "UserComment":
-                        $desc = new PelEntryAscii(PelTag::USERCOMMENT, $newValue);
+                        $desc = new PelEntryAscii(PelTag::USER_COMMENT, $newValue);
                         break;
                     case "XPComment":
-                        $desc = new PelEntryAscii(PelTag::XPCOMMENT, $newValue);
+                        $desc = new PelEntryAscii(PelTag::XP_COMMENT, $newValue);
                         break;
 
                     default:
@@ -445,7 +444,7 @@ class rrwExif
                 $eol rrwPHPel( $input, $output, $tag (" . dechex($tag) .
                     "), $newValue) $eol";
             else
-                $msg .= "$errorBeg" . $ex->get_message() .
+                $msg .= "$errorBeg" . $ex->getMessage() .
                     "E#197 main routine catch $errorEnd"; // . 
         }
         return $msg;
@@ -460,6 +459,7 @@ class rrwExif
             case "Artist":
                 return 0x013b;
             case "Copyright":
+            case "copyright":
                 return 0x8298;
             case "ImageDescription":
             case "Image_Description":
@@ -665,7 +665,7 @@ class rrwExif
         $output_file = "$gallery/a5.jpg";
         // Copyright info to add
         $copyright = "Mary Shaw";
-        $msg .= self::changeCopyRight($input_file, $output_file, $copyright);
+        $msg .= self::changeItem($input_file, $output_file, "Copyright", $copyright);
         $msg .= rrwExif::dumpMeta($input_file, $output_file);
         return $msg;
     }
@@ -743,7 +743,7 @@ class rrwExif
         return $exifArray;
     }
 
-    function readinputa4($attr)
+    private static function readinputa4($attr)
     {
         // reads and displays the meta data for file f1, f2
         ini_set("display_errors", true);
@@ -839,7 +839,7 @@ class rrwExif
         print "I#140 testing the task $task $eol";
         if (file_exists($output_file))
             unlink($output_file);
-        switch ($task) {
+        switch (strtolower($task)) {
             case "artist":
                 $msg .= self::Artist();
                 break;
@@ -865,7 +865,7 @@ class rrwExif
                 print "calling example_editDescription $eol";
                 $msg .= self::example_editDescription(" a new description");
                 break;
-            case "HostComputer":
+            case "hostcomputer":
                 $msg .= self::HostComputer();
                 break;
             case "keyword":
@@ -881,7 +881,7 @@ class rrwExif
                 $msg .= self::testpel3();
                 break;
             case "writeoutput":
-                $msg .= self::writeoutput();
+                $msg .= self::writeoutput($attr);
                 break;
             default:
                 $msg .= "$errorBeg task of '$task' was not found$errorEnd";

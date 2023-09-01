@@ -4,7 +4,8 @@
         "../freewheeling-edit",
         "../freewheeling-map",
         "c:/inetpub/wwwroot/ww-include/",
-        "../jigsaw-puzzle-tool"
+        "../jigsaw-puzzle-tool",
+        "./ExifWriter.php",
     ],
     "editor.formatOnSave": true,
     "intelephense.stubs": [
