@@ -46,8 +46,6 @@ use lsolesen\pel\PelTiff;
 use lsolesen\pel\PelWrongComponentCountException;
 
 require_once "pel-h.php";
-require_once "ExifWriter.php";
-
 
 class rrwExif
 {
@@ -182,6 +180,7 @@ class rrwExif
         error_reporting(E_ALL | E_STRICT);
         $msg = "";
         $debug = rrwUtil::setDebug("debugrrwphpel");
+        $debug = true;
         try {
             if ($debug) $msg .= self::println("--------------------- emter self::rrwPHPel $eol");
             $prog = array_shift($argv);
@@ -206,7 +205,7 @@ class rrwExif
             } else {
                 $error = true;
             }
-            /* The mandatory item to be updated filename. */
+            /* The mandatory item to be updated filename. is an integer */
             if (isset($argv[0])) {
                 $tag = array_shift($argv);
             } else {
@@ -440,9 +439,9 @@ class rrwExif
         } catch (Exception $ex) {
             $code = $ex->getCode();
             if (0 == $code)
-                $msg .= "$errorBeg E#178 rrwPel: routine catch with no message $errorEnd
-                $eol rrwPHPel( $input, $output, $tag (" . dechex($tag) .
-                    "), $newValue) $eol";
+                $msg .= "$errorBeg E#178 rrwPel: routine catch with no message $errorEnd " . $ex->getMessage() .
+                    " $eol rrwPHPel( $input, $output, $tag (" . dechex($tag) .
+                    "), $newValue) $eol" . rrwFormat::backtrace(3);
             else
                 $msg .= "$errorBeg" . $ex->getMessage() .
                     "E#197 main routine catch $errorEnd"; // . 

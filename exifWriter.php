@@ -79,12 +79,7 @@
  */
 
 
-require_once("exifReader.inc");
-
-
-
-
-
+require_once("exifReader.php");
 /**
 
 
