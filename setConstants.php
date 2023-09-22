@@ -8,6 +8,7 @@ function SetConstants($whocalled)
 {
     global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords, $rrw_trails;
     global $rrw_photographer, $rrw_photographers, $rrw_access, $rrw_history;
+    global $rrw_portrait, $rrw_landscape;
     global $eol, $errorBeg, $errorEnd;
     global $photoUrl, $photoPath, $thumbUrl, $thumbPath, $highresUrl, $highresPath;
     global $rejectUrl, $rejectPath;
@@ -35,6 +36,8 @@ function SetConstants($whocalled)
         if (!is_object($wpdbExtra))
             $wpdbExtra = new wpdbExtra;
         $rrw_history = $wpdbExtra->prefix . "1rrw_history";
+        $rrw_portrait = $wpdbExtra->prefix . "7rrw_portrait";
+        $rrw_landscape = $wpdbExtra->prefix . "7rrw_landscape";
         $tablePrefix = $wpdbExtra->prefix . "0";
         $rrw_access = $tablePrefix . "access";
         $rrw_photos = $tablePrefix . "photos";

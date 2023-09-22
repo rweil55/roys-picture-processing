@@ -63,6 +63,7 @@ class freewheeling_displayPhotos
     private static function buildSql($attr)
     {
         global $rrw_keywords, $rrw_photos;
+        global $rrw_portrait, $rrw_landscape;
         global $eol;
         global $selectDisplay; // a user readable of the selection citeris
         $debug = false;
@@ -78,13 +79,22 @@ class freewheeling_displayPhotos
             $trail = "";
         if ($debug) print "found searchdropdown of $searchdropdown $eol";
         // case of random selection
-        if (strpos($searchdropdown, "random") !== false) {
-            $limit = 21;
-            $sql = "SELECT photoname, photographer, owner FROM $rrw_photos
+        switch ($searchdropdown) {
+            case "random_21":
+                $limit = 21;
+                $sql = "SELECT photoname, photographer, owner FROM $rrw_photos
                         where photostatus = 'use' order by (rand() * 10000) limit $limit";
-            if ($debugOutput) print "case random - $sql $eol";
-            $selectDisplay = "Selection: $limit random photos ";
-            return $sql;
+                if ($debugOutput) print "case random - $sql $eol";
+                $selectDisplay = "Selection: $limit random photos ";
+                return $sql;
+            case "landscape":
+                $sql = "SELECT photoname, photographer, owner FROM $rrw_landscape";
+                $selectDisplay = "Selection: photos in landscape format";
+                return $sql;
+            case "portriat":
+                $sql = "SELECT photoname, photographer, owner FROM $rrw_portrait";
+                $selectDisplay = "Selection: photos in portrait format ";
+                return $sql;
         }
         // not a request for random images
         if (!empty($searchdropdown)) {
