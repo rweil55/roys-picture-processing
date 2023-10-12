@@ -415,13 +415,23 @@ class freeWheeling_DisplayOne
 <div id='missedClassifi' onclick='openMissedClassifi(this,$photoname);'>
     if any of this information is incorrect or missing. Please
     <a href='/webmaster-feedback'>let us know</a></div>$eol";
+                // jigsaw_verify is a class in the the file ../jigsaw=puzzle-tools.php
+                $photoHtmlToJigsaw = "$photoUrl/{$photoname}_cr.jpg";
+                $photoFileToJigsaw = "$photoPath/" . $photoname . "_cr.jpg";
                 $jigsawPiece = jigsaw_verify::buildpiece(
-                    "$photoUrl/{$photoname}_cr.jpg",
+                    $photoHtmlToJigsaw,
                     $keywordDisplay,
                     $copyRight,
                     ""
                 );
-                $msg .= "$eol $jigsawPiece $eol";
+                if (file_exists($photoFileToJigsaw)) {
+                    $msg .= "$eol $jigsawPiece $eol
+                    <!-- $photoFileToJigsaw  --->";
+                } else {
+                    if (is_user_logged_in())
+                        $msg .= "$errorBeg E#242 no jigsaw data for image $photoFileToJigsaw was found $errorEnd $eol";
+                    $msg .= htmlspecialchars($jigsawPiece) . $eol;
+                }
                 break;
             default:
                 $msg .= "$errorBeg E#175 unknown fromat style of '$format' $errorEnd";

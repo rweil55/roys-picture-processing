@@ -37,8 +37,8 @@ class rrwPictures_searchBox
         $landscapeCount = $wpdbExtra->get_var($sql);
         $sql = "select ' Any Detail' selection, 'Any Detail' val 
                 union  select  'random_21', ' random photos (21)' 
-                union  select  'landscape', ' extreme landscape ($landscapeCount)'
-                union  select  'portriat', ' extreme portrait ($portraintCount)'
+                union  select  'landscape', 'landscape format ($landscapeCount)'
+                union  select  'portriat', 'portrait formet ($portraintCount)'
                 union  select keyword, concat(keyword, ' (', count(*), ')') cnt 
                         from $rrw_keywords group by keyword ";
         $msg .= rrwPictures_searchBox::pictureDisplayDropDownsql($wpdbExtra, $rrw_keywords, "selection", $sql, "");
