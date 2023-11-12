@@ -9,16 +9,15 @@ class freeWheeling_DisplayUpdate {
     static public function DisplayUpdate( $attr ) {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_photos, $rrw_photographers, $rrw_keywords;
-        global $photoUrl, $photoPath, $thumbUrl, $thumbPath, $highresUrl, $highresPath;
         $msg = "";
         
         ini_set( "display_errors", true );
         try {
-            $debug = false;
+            $debugDisplayUpdate = true;
             //   if ( $debug ) print rrwUtil::print_r( $_POST, true, "Post input" );
             $photoname = rrwUtil::fetchparameterString( "photoname", $attr );
             if ( empty( $photoname ) )
-                throw new Exception( "$msg $errorBeg Missing parameters to update routine $errorEnd" );
+                throw new Exception( "$msg $errorBeg E#158 Missing parameters to update routine $errorEnd" );
             $trailName = rrwUtil::fetchparameterString( "trailName", $attr );
             $photographer = rrwUtil::fetchparameterString( "photographer", $attr );
             $copyright = rrwUtil::fetchparameterString( "copyright", $attr );
@@ -53,7 +52,7 @@ class freeWheeling_DisplayUpdate {
                                 set copyright = '$copydefalt'
                                 where photoname = '$photoname' ";
                     $cnt = $wpdbExtra->query( $sqlupdateCopy );
-                    //         $msg .= "$cnt = $cnt,  $sqlupdateCopy $eol ";
+                    if ($debugDisplayUpdate)         $msg .= "$cnt = $cnt,  $sqlupdateCopy $eol ";
                     $copyright = $copydefalt;
                 }
             }
@@ -86,11 +85,9 @@ class freeWheeling_DisplayUpdate {
             $sqlCheck = "select * from $rrw_photos where photoname ='$photoname'";
             $rec = $wpdbExtra->get_resultsA( $sqlCheck );
             $msg .= freewheeling_fixit::fixAssumeDatabaseCorrect( $rec[ 0 ] );
-            if ( $debug ) {
-                $msg .= rrwUtil::print_r( $rec, true, "Check record" );
+            if ( $debugDisplayUpdate ) $msg .= rrwUtil::print_r( $rec, true, "Check record" );
                 $msg .= "<h3>Update completed</h3>
                 <a href='/display-one-photo/?photoname=$photoname' >$photoname</a>";
-            }
             $msg .= freeWheeling_DisplayOne::DisplayOne( null );
         } catch ( Exception $ex ) {
             $msg .= "E#158" . $ex->getMessage();
@@ -140,4 +137,3 @@ class freeWheeling_DisplayUpdate {
         return $msg;
     } // end   function compare
 } // end class freeWheeling_DisplayUpdate
-?>

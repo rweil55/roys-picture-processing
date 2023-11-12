@@ -1,4 +1,5 @@
 <?php
+
 class freewheeling_displayPhotos
 {
     static public function displayPhotos($attr = "")

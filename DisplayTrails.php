@@ -20,9 +20,9 @@ class DisplayTrails
         $TABLE->DropDownSelf("Corridor", "corridor", 69);
 
         if (empty($action)) {
-            $msg .= DoAction("list");
+            $msg .= $TABLE->DoAction("list");
         } else {
-            $msg .= $TABLE->DoAction();
+            $msg .= $TABLE->DoAction($action);
         }
         return $msg;
     }   // end function

@@ -1,0 +1,5 @@
+changelog.txt
+
+== 2023-11-12 ==
+refactor        Moved display trails for functions to class
+feature         added countAndRepot function to the admmin page

@@ -1,5 +1,5 @@
 <?php
-
+require_once "rrw_util_inc.php";
 class freewhilln_Administration_Pictures
 {
 
@@ -14,13 +14,11 @@ class freewhilln_Administration_Pictures
 
     static public function administrationPicures($attr)
     {
-        global $wpdbExtra, $rrw_photos, $rrw_source, $rrw_keywords, $rrw_trails;
+        global $wpdbExtra, $rrw_photos,  $rrw_keywords, $rrw_trails;
         global $eol;
-        global $photoUrl, $photoPath, $thumbUrl, $thumbPath, $highresUrl, $highresPath;
-        global $displaykey;
-        global $httpSource;
         ini_set("display_errors", true);
         $msg = "";
+        $debug = false;
         try {
             $loadDate = '2022-03-10';
             $setdisplaykey = rrwUtil::fetchparameterString("setdisplaykey");
@@ -29,47 +27,9 @@ class freewhilln_Administration_Pictures
             if ("off" == $setdisplaykey)
                 $displaykey = false;
             //  ----------------------------------------------- various counts
-            $sql = "select count(*) from $rrw_photos"; // total photos
-            $msg .= ("<-- sql #1 is $sql -->\n");
-            $photoRowCnt = $wpdbExtra->get_var($sql);;
-            $sql = "select distinct keywordFilename from $rrw_keywords"; // total keyword
-            $msg .= ("<!-- sql is $sql -->\n");
-            $withKeysQuery = $wpdbExtra->get_resultsA($sql);;
-            $keyWithCnt = $wpdbExtra->num_rows;
-            $sql = "select photoname from $rrw_photos 
-                        where photoname not in (
-                                select keywordFilename 
-                                from $rrw_keywords ) 
-                                and photostatus = 'use' "; // photo not in keyword
-            $msg .= ("<!-- sql is $sql -->\n");
-            $photoNokey = $wpdbExtra->get_resultsA($sql);;
-            $keyMissingCnt = $wpdbExtra->num_rows;
-            $keyMissingList = "";
-            foreach ($photoNokey as $recset) {
-                $key = $recset["photoname"];
-                $keyMissingList .= "<a href='/display-one-photo?photoname=$key'
-                 target='one' > $key</a> &nbsp ";
-            }
-            // keyword not in photo
-            $sql = "select keywordFilename from $rrw_keywords 
-                            where keywordFilename not in (
-                                select photoname from $rrw_photos ) ";
-            $msg .= ("<!-- sql is $sql -->\n");
-            $KeyNoPhoto = $wpdbExtra->get_resultsA($sql);;
-            $photoMissingCnt = $wpdbExtra->num_rows;
-            $photoMissingList = "";
-            $photo = ""; // later used in the rename form
-            foreach ($KeyNoPhoto as $recset) {
-                $photo = $recset["keywordFilename"];
-                $photoMissingList .= "<a href='/display-one-photo?photoname=$photo'  target='one' >$photo</a>  &nbsp; ";
-            }
-            $sqlPhotog = "select count(*) from 
-                    (select distinct photographer from $rrw_photos ) ph1 ";
-            $msg .= "<!-- $sqlPhotog \n-->";
-            $photogUsedCnt = $wpdbExtra->get_var($sqlPhotog);
-            $sqlKeyWordcnt = "select distinct keyword from $rrw_keywords";
-            $recKeywords = $wpdbExtra->get_resultsA($sqlKeyWordcnt);
-            $cntKeywords = $wpdbExtra->num_rows;
+
+
+
             // --------------------------------------------------------- column 1
             $msg .= "<table><tr>
                     <td style='vertical-align:top'>\n";
@@ -79,7 +39,7 @@ class freewhilln_Administration_Pictures
                 false
             ))
                 $msg .= self::ColumnOne($loadDate);
-            //  -----------------------------------------------   column 2
+            //  --------------------------------------------------------- column 2
             $msg .= "\n</td><td style='vertical-align:top'>\n
             <strong>Missing data counts</strong>$eol";
             $msg .= self::EmptyCount("trail_name", "trail name");
@@ -249,6 +209,16 @@ Display keywords with the photos <a href='/admin?setting=on' >On</a> &nbsp;
         $msg .= "$numMissing";
         return $msg;
     }
+
+    private static function countAndReport($sql, $description)
+    {
+        global $wpdbExtra;
+        $msg = "";
+        $cnt = $wpdbExtra->get_var($sql);
+        $msg .= sprintf("%3d", $cnt) . " - $description";
+        return $msg;
+    } // end countAndReportions
+
     private static function EmptyCount($item, $description)
     {
         $msg = "";
