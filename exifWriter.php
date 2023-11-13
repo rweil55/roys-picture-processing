@@ -343,31 +343,14 @@ class phpExifWriter extends phpExifReader
 
 
                     if ($fmt != FMT_STRING) {
-
-
                         $arr = $this->ConvertAnyFormatBack($val, $fmt);
-
-
                         $chars = $arr;
-
-
                         $ByteCount = 8;
                     }
-
-
                     $offset += $ByteCount;
-
-
-
-
-
                     $otherDataArr = array_merge($otherDataArr, $chars);
                 }
-
-
                 $totalLength += 12 + $ByteCount;
-
-
                 $totalElements++;
             }
         }
@@ -873,119 +856,49 @@ class phpExifWriter extends phpExifReader
 
 
     /**
-
-
      *
-
-
      * Reverse of ConvertAnyFormat, - Incomplete
-
-
      * TODO:
-
-
             only FMT_URATIONAL, FMT_SRATIONAL works
-
-
      *
-
-
      */
-
-
     function ConvertAnyFormatBack($Value, $Format)
     {
         //$Value = 0;
         switch ($Format) {
-
-
             case FMT_SBYTE:
                 $Value = $ValuePtr[0];
                 break;
-
-
             case FMT_BYTE:
                 $Value = $ValuePtr[0];
                 break;
-
-
-
-
-
             case FMT_USHORT:
                 $Value = $this->Get16u($ValuePtr[0], $ValuePtr[1]);
                 break;
-
-
             case FMT_ULONG:
                 $Value = $this->Get32u($ValuePtr[0], $ValuePtr[1], $ValuePtr[2], $ValuePtr[3]);
                 break;
-
-
-
-
-
             case FMT_URATIONAL:
-
-
             case FMT_SRATIONAL: {
                     $num = $Value[1][0];
-
-
                     $Den = $Value[1][1];
-
-
-
-
-
                     $ValuePtr[0] = chr($num >> 24);
-
-
                     $ValuePtr[1] = chr($num >> 16);
-
-
                     $ValuePtr[2] = chr($num >> 8);
-
-
                     $ValuePtr[3] = chr($num);
-
-
-
-
-
                     $ValuePtr[4] = chr($Den >> 24);
-
-
                     $ValuePtr[5] = chr($Den >> 16);
-
-
                     $ValuePtr[6] = chr($Den >> 8);
-
-
                     $ValuePtr[7] = chr($Den);
-
-
-
-
-
                     break;
                 }
-
-
-
-
-
             case FMT_SSHORT:
                 $Value = $this->Get16u($ValuePtr[0], $ValuePtr[1]);
                 break;
-
-
             case FMT_SLONG:
                 $Value = $this->Get32s($ValuePtr[0], $ValuePtr[1], $ValuePtr[2], $ValuePtr[3]);
                 break;
                 // Not sure if this is correct (never seen float used in Exif format)
-
-
             case FMT_SINGLE:
                 $Value = $ValuePtr[0];
                 break;

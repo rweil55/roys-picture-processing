@@ -61,7 +61,7 @@ function SetConstants($whocalled)
         $rejectPath = "$photoPath/reject";
     } catch (Exception $ex) {
         throw new Exception("$errorBeg E#144 xxx SetConstants " .
-            $ex->getMessage . $errorEnd);
+            $ex->getMessage() . $errorEnd);
     }
     return $msg;
 }

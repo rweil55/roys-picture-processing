@@ -3,9 +3,7 @@
         "../freewheeling-edit/includes",
         "../freewheeling-edit",
         "../freewheeling-map",
-        "c:/inetpub/wwwroot/ww-include/display_tables_class.php",
-        "c:/inetpub/wwwroot/ww-include/*",
-        "c:/inetpub/wwwroot/ww-include/rrw_util_inc.php",
+        "c:/inetpub/wwwroot/ww-include",
         "../jigsaw-puzzle-tool",
         "./ExifWriter.php",
     ],
@@ -84,6 +82,6 @@
         "zip",
         "zlib",
         "wordpress",
-        "imagick"
+        "Imagick"
     ]
 }

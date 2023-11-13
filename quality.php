@@ -2,7 +2,7 @@
 
 class freewheeling_quality { 
     function quality() {
-        $msg .= "
+        $msg = "
         <h1 class-'entry-title'> Quality Standards</h1>
         This site accesses and displays 
 	high quality photographs that can be used for pubication and presentation.  As such only
@@ -45,4 +45,3 @@ following information must be entered on the
         return $msg;
     } // end function
 } // end class
-?>

@@ -298,8 +298,11 @@ function resizeImage(
     $maxWidth,
     $maxHeight,
     $botBorder
-) {
+): array {
     global $eol;
+    $h_new = 0;
+    $w_dst = 0;
+    $img_out = 0;
     $msg = "";
     $ratio = 1;
 

@@ -44,9 +44,9 @@ class rrwPicSubmission {
             if ( !isset( $_FILES[ 'inputfile' ][ 'error' ] ) ||
                 is_array( $_FILES[ 'inputfile' ][ 'error' ] )
             ) {
-                $err .= "Something is wrong with the file paramenters.
+                $errMsg = "Something is wrong with the file paramenters.
                 Did you forget to select one? ";
-                throw new RuntimeException( $err );
+                throw new RuntimeException( $errMsg );
                 return $msg;
             }
             // Check $_FILES['inputfile']['error'] value.
@@ -185,4 +185,3 @@ class rrwPicSubmission {
         return $msg;
     } // end function
 } // end class
-?>
