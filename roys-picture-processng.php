@@ -100,7 +100,7 @@ require_once "$pel/PelWrongComponentCountException.php";
 // commonly used rutines
 require_once "freewheelingeasy-wpdpExtra.php";
 require_once "rrw_util_inc.php";
-require_once "display_stuff_class.php";
+require_once "rrwFormat.php";
 // picture routines
 require_once "rrw_admin.php";
 require_once "displayone.php";
