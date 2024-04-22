@@ -1,17 +1,17 @@
 <?php
 /*
- * Plugin Name: Roys picture processng
- * Description: A Selction box heasing for picture selection
+ * Plugin Name: Roy's picture processing
+ * Description: A Selection box for picture selection
  * Author: Guido, Roy Weil
  * Author URI: https://freewheeling.com
  * Donate URI: https://plugins.royweil.com/donate/
  * License: GNU General Public License v3 or later
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  * Plugin URI: https://pluggins.roywil.com/details/roys-picture-processng/readme.txt
- * Text Domain: Roys-picture-processng
+ * Text Domain: Roy-picture-processing
  * Domain Path: /translation
  
-  * Version: 2.1.82
+  * Version: 2.1.84
  */
 // disable direct access
 ini_set("display_errors", true);
@@ -97,7 +97,7 @@ require_once "$pel/PelJpegMarker.php";
 require_once "$pel/PelTag.php";
 require_once "$pel/PelTiff.php";
 require_once "$pel/PelWrongComponentCountException.php";
-// commonly used rutines
+// commonly used routines
 require_once "freewheelingeasy-wpdpExtra.php";
 require_once "rrw_util_inc.php";
 require_once "rrwFormat.php";
@@ -209,11 +209,11 @@ add_shortcode("fix", array("freewheeling_fixit", "fit_it"));
 add_shortcode("fixtasklist", array("fixTaskList", "showlist"));
 add_shortcode("rrwPicSubmission", array("rrwPicSubmission", "showForm"));
 add_shortcode("upload", array("uploadProcessDire", "upload"));
-add_shortcode("testingexif", array("rrwErrwExif", "test11"));
+add_shortcode("testingexif", array("rrwExif", "test11"));
 require_once 'plugin_update_check.php';
 $MyUpdateChecker  = new PluginUpdateChecker_2_0(
-    'http://pluginserver.royweil.com/roys-picture-processng.php',
+    'http://pluginserver.royweil.com/roys-picture-processing.php',
     __FILE__,
-    'roys-very-picture-processng',
+    'roys-very-picture-processing',
     1
 );
