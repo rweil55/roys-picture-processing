@@ -7,15 +7,15 @@
  * Donate URI: https://plugins.royweil.com/donate/
  * License: GNU General Public License v3 or later
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
- * Plugin URI: https://pluggins.roywil.com/details/roys-picture-processng/readme.txt
+ * Plugin URI: https://pluggins.roywil.com/details/roys-picture-processing/readme.txt
  * Text Domain: Roy-picture-processing
  * Domain Path: /translation
- 
+
   * Version: 2.1.84
  */
 // disable direct access
 ini_set("display_errors", true);
-error_reporting(E_ALL | E_STRICT);
+error_reporting(E_ALL);
 
 use lsolesen\pel\Pel;
 use lsolesen\pel\PelConvert;
@@ -56,8 +56,10 @@ use lsolesen\pel\PelTiff;
 use lsolesen\pel\PelWrongComponentCountException;
 
 $pel = "/home/pillowan/www-shaw-weil-pictures-dev/wp-content/plugins" .
-    "/roys-picture-processng/pel-master/src";
+    "/roys-picture-processing/pel-master/src";
+
 $pel = "pel-master/src";
+
 require_once "$pel/Pel.php";
 require_once "$pel/PelException.php";
 require_once "$pel/PelInvalidArgumentException.php";
@@ -126,7 +128,7 @@ class FreewheelingCommon
         if (!empty($photoname))
             $msg .= " ( $photoname )";
         $msg .= " was not found. Please remember your selection,
-                what you did, copy this message 
+                what you did, copy this message
                 and go to the <a href='webmaster-feedback' >feedback form</a>
                 and tell us what you did to get here ($from) ";
         return $msg;
@@ -186,7 +188,7 @@ function pushToImage($filename, $item, $value)
 
 function println($fmt, $value = "")
 {
-    // a printf() variant that appends a newline to the output. 
+    // a printf() variant that appends a newline to the output.
     global $eol;
     return $fmt;
     if (!empty($value))

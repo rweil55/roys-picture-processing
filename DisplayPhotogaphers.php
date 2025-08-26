@@ -19,8 +19,8 @@ class DisplayPhotographers
         $TABLE->columns("E-Mail", "Address", 69);
         $TABLE->columns("Comment", "Comment", 69);
         $TABLE->columns("copyright Default", "copyrightDefault", 69);
-        $newphotogName = date("H:i:s");
-        $TABLE->columnNewData("photographer", "'$newphotogName'");
+        $newPhotogName = date("H:i:s");
+        $TABLE->columnNewData("photographer", "'$newPhotogName'");
 
         if (empty($action)) {
             $msg .= $TABLE->DoAction("list");

@@ -16,6 +16,9 @@
 /wp-*.php
 /xmlrpc.php
 
+# obsolete code
+search.php
+
 # Configuration
 #wp-config.php
 
