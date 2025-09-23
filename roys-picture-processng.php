@@ -55,6 +55,8 @@ use lsolesen\pel\PelTag;
 use lsolesen\pel\PelTiff;
 use lsolesen\pel\PelWrongComponentCountException;
 
+/*
+
 $pel = "/home/pillowan/www-shaw-weil-pictures-dev/wp-content/plugins" .
     "/roys-picture-processing/pel-master/src";
 
@@ -99,6 +101,8 @@ require_once "$pel/PelJpegMarker.php";
 require_once "$pel/PelTag.php";
 require_once "$pel/PelTiff.php";
 require_once "$pel/PelWrongComponentCountException.php";
+
+*/
 // commonly used routines
 require_once "freewheelingeasy-wpdpExtra.php";
 require_once "rrw_util_inc.php";
@@ -117,8 +121,9 @@ require_once "setConstants.php";
 require_once "submission.php";
 require_once "rrw_update-picture.php";
 require_once "uploadProcessDire.php";
-/*
-*/
+
+
+
 class FreewheelingCommon
 {
     public static function missingImageMessage($from, $photoname = "")

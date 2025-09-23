@@ -115,7 +115,7 @@ class rrwPicSubmission
                     $msg .= "Per your request existing photo will be replaced $eol";
                 } else {
                     $dateMod = $recs[0]["uploaddate"];
-                    $msg .= "$errorBeg $eol E#221 $highresShortname
+                    $msg .= "$errorBeg $eol E#111 $highresShortname
                     was uploaded previously on $dateMod.
                     You must check the box to allow the replacement $errorEnd
                     $sqlexists $eol";

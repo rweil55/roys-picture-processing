@@ -224,7 +224,7 @@ class uploadProcessDire
                 $msg .= self::nameToBottom($fullFilePhoto, $photographer);
             // ----------------- move input image to save location
             if (!rename($sourceFile, $FullfileHighRes)) {
-                throw new Exception(" $errorBeg $msg E#236 while attempting
+                throw new Exception(" $errorBeg $msg E#126 while attempting
                 move ($sourceFile, $FullfileHighRes) $errorEnd");
             }
             if (!file_exists($FullfileHighRes)) {
@@ -254,7 +254,7 @@ class uploadProcessDire
         $fontFile = "$fontDire/mvboli.ttf";
         if (!file_exists($fontFile)) {
             $msg .= "bad font $fontFile ";
-            throw new Exception("$msg $errorBeg E#237 Problems with the font file $fontFile $errorEnd");
+            throw new Exception("$msg $errorBeg E#127 Problems with the font file $fontFile $errorEnd");
         }
         // use Imagick to add the name to the bottom
         $im_src = new Imagick();
