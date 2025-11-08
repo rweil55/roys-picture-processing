@@ -7,8 +7,8 @@ class freeWheeling_DisplayOne
 {
     public static function DisplayOne($attr)
     {
-        // display full size and thumbnail and the meta data infomation
-        ini_set("display_errors", true);
+        // display full size and thumbnail and the meta data information
+        ini_set("display_errors", 1);
         global $photoUrl, $photoPath, $highresPath,
             $thumbPath, $thumbUrl, $site_url;
         global $wpdbExtra, $rrw_photos, $rrw_trails, $rrw_photographers,
@@ -16,14 +16,14 @@ class freeWheeling_DisplayOne
         global $httpSource;
         global $eol, $errorBeg, $errorEnd;
         $msg = "";
-        $debugPath = false;
+        $debugPath = true;
         try {
-            $photoname = rrwUtil::fetchparameterString("photoname", $attr);
-            $photoname = str_replace("_tmb", "", $photoname);
-            $photoname = str_replace(".jpg", "", $photoname);
+            $photoName = rrwUtil::fetchparameterString("photoname", $attr);
+            $photoName = str_replace("_tmb", "", $photoName);
+            $photoName = str_replace(".jpg", "", $photoName);
             if ($debugPath) $msg .= "displayOne:photoPath $photoPath $eol";
             //	if thumbs is true them display thumbnail, else display fill size
-            if ($debugPath) $msg .= " DisplayOne ($photoname )   ... $eol ";
+            if ($debugPath) $msg .= " DisplayOne ($photoName )   ... $eol ";
             $current_user = wp_get_current_user();
             if (!($current_user instanceof WP_User))
                 $ser = "Guest";
@@ -33,10 +33,10 @@ class freeWheeling_DisplayOne
             $ip = $_SERVER['REMOTE_ADDR'];
 
             $sqlAccess = "Insert into $rrw_access (accessphotoname, accessIP,accessuser)
-                values ('$photoname', '$ip', '$user')";
+                values ('$photoName', '$ip', '$user')";
             $answer = $wpdbExtra->query($sqlAccess);
-            if ("nokey" == $photoname) {
-                $sqlNoKey = "select photoname from $rrw_photos  where not photoname in
+            if ("nokey" == $photoName) {
+                $sqlNoKey = "select photoName from $rrw_photos  where not photoname in
                  (select distinct keywordFilename from $rrw_keywords )";
                 $recNokey = $wpdbExtra->get_resultsA($sqlNoKey);
                 if (0 == $wpdbExtra->num_rows)
@@ -44,23 +44,23 @@ class freeWheeling_DisplayOne
                     [ <a href='/fix/?task=add'>find more </a> ]
                     [ <a href='/fix/?task=direonp'>missing source </a> ]
                             ";
-                $photoname = $recNokey[0]["photoname"];
+                $photoName = $recNokey[0]["photoName"];
             }
-            $sql = "Select * from $rrw_photos where photoname = '$photoname'";
+            $sql = "Select * from $rrw_photos where photoName = '$photoName'";
             $msg .= ("\n<!-- sql is $sql -->\n");
             $recset_query = $wpdbExtra->get_resultsA($sql);
             if (1 != $wpdbExtra->num_rows) {
-                $msg .= "E#124 no meta data for image $photoname was found             $errorEnd $sql $eol";
+                $msg .= "E#124 no meta data for image $photoName was found             $errorEnd $sql $eol";
                 $msg .= freewheeling_fixit::filelike(
                     array(
-                        "photname" => $photoname,
-                        "partial" => $photoname
+                        "photname" => $photoName,
+                        "partial" => $photoName
                     )
                 );
                 return $msg;
             }
             $recset = $recset_query[0];
-            $photoname = $recset["photoname"];
+            $photoName = $recset["photoname"];
             $photographer = $recset["photographer"];
             $copyright = $recset["copyright"];
             $PhotoDate = $recset["PhotoDate"];
@@ -73,10 +73,10 @@ class freeWheeling_DisplayOne
             $owner = $recset["owner"];
             $highresShortname = $recset["highresShortname"];
             if ($debugPath) $msg .= "displayOne:photoUrl $photoPath $eol";
-            $htmlfileref1 = "$photoUrl/{$photoname}_cr.jpg";
-            $fullfilename1 = "$photoPath/{$photoname}_cr.jpg";
-            $htmlfileref2 = "$thumbUrl/{$photoname}_tmb.jpg";
-            $fullfilename2 = "$thumbPath/{$photoname}_tmb.jpg";
+            $htmlfileref1 = "$photoUrl/{$photoName}_cr.jpg";
+            $fullfilename1 = "$photoPath/{$photoName}_cr.jpg";
+            $htmlfileref2 = "$thumbUrl/{$photoName}_tmb.jpg";
+            $fullfilename2 = "$thumbPath/{$photoName}_tmb.jpg";
             if (!file_exists($fullfilename1)) {
                 $msg .= "$errorBeg E#210 Not found was the display image $htmlfileref1 $errorEnd";
             }
@@ -116,7 +116,7 @@ class freeWheeling_DisplayOne
                     <td align='left' valign='center' width='200' >
                         <img src='$htmlfileref2' alt='small Trail Photo'
                     $thumbsize id='smallImage' /><br /><br />
-                    <a href = '$htmlfileref1' download=$photoname >
+                    <a href = '$htmlfileref1' download=$photoName >
                     <img src ='/wp-content/download.png' width='200'></a>";
                 $msg .= freeWheeling_DisplayOne::DisplayTableData($recset, "narrow");
                 $msg .= "
@@ -171,18 +171,18 @@ class freeWheeling_DisplayOne
                 <input type='text' name='uploaddate' size='20'
                         value='$uploaddate'>
                 &nbsp; &nbsp; &nbsp; &nbsp; ";
-            if (false === strpos($photoname, "_cr")) {
+            if (false === strpos($photoName, "_cr")) {
                 $msg .= "[ <a href='/fix/?task=reload&" .
                     "fullfilename=$highresPath/$highresShortname' >
                     reload image </a> ] ";
             }
             $msg .= "
-             [ <a href='/fix/?task=filelike&partial=$photoname&photoname=$photoname' >
-                    search $photoname</a> ]
+             [ <a href='/fix/?task=filelike&partial=$photoName&photoname=$photoName' >
+                    search $photoName</a> ]
             &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Delete this photo from the daabase
-            [ <a href='/fix?task=deletephoto&del2=$photoname&del3=$photoname" .
+            [ <a href='/fix?task=deletephoto&del2=$photoName&del3=$photoName" .
                 "&why=duplicate' > Mark as Duplicate </a> ]
-            [ <a href='/fix?task=deletephoto&del2=$photoname&del3=$photoname" .
+            [ <a href='/fix?task=deletephoto&del2=$photoName&del3=$photoName" .
                 "&why=reject' > Mark as Rejected </a> ] $eol
             Location: <input type='text' name='location' size='50'
                         value='$location'>" . "\n" .
@@ -209,11 +209,11 @@ class freeWheeling_DisplayOne
                 target='submit' > 127.0.0.1 picture </a> ] ";
             }
             $msg .= " [ Search:
-                <a href='/fix/?task=filelike&partial=$photoname&photoname=$photoname'
-                            >$photoname</a> ]
+                <a href='/fix/?task=filelike&partial=$photoName&photoname=$photoName'
+                            >$photoName</a> ]
                    [ <a href='/display-one-photo/?photoname=nokey'>
                         Next no keywords</a>]
-        <input type='hidden' name='photoname' id='photoname' value='$photoname' />
+        <input type='hidden' name='photoname' id='photoname' value='$photoName' />
         <br /><input type='submit' value=\"Commit all changes\" id='submit1' name='submit1' > ";
             // --------------------------------------------------  keyword list
 
@@ -223,10 +223,10 @@ class freeWheeling_DisplayOne
 
             $cntChk = 0;
             $cntTot = 0;
-            $msg .= freeWheeling_DisplayOne::keywodCheckboxes($photoname) . "
+            $msg .= freeWheeling_DisplayOne::keywodCheckboxes($photoName) . "
 
 
-                <input type='hidden' name='photoname' value='$photoname' />
+                <input type='hidden' name='photoname' value='$photoName' />
                 <input type='submit' value=\"Commit all changes\"> &nbsp;
                 <input type='reset'>
                 <a href='/display-one-photo/?photoname=nokey'>
@@ -258,7 +258,7 @@ class freeWheeling_DisplayOne
         return $msg;
     } // end function
 
-    private static function keywodCheckboxes($photoname)
+    private static function keywodCheckboxes($photoName)
     {
         // buld the display of keyword checkbox
         global $wpdbExtra, $rrw_keywords;
@@ -277,7 +277,7 @@ class freeWheeling_DisplayOne
             $cntTot++;
         }
         $sql = "select distinct keyword from $rrw_keywords
-                where keywordfilename = '$photoname' "; // get checked keyword
+                where keywordfilename = '$photoName' "; // get checked keyword
         if ($debugKeywords) $msg .= "Keyword search: $sql $eol";
         $cntChk = 0;
         $recset_query = $wpdbExtra->get_resultsA($sql);
@@ -315,7 +315,9 @@ class freeWheeling_DisplayOne
         global $eol, $errorBeg, $errorEnd;
         $msg = "";
 
-        $photoname = $recset["photoname"];
+		$debugJigsaw = false;
+
+        $photoName = $recset["photoname"];
 
         if (is_null($recset["trail_name"])) {
             $trailDisplay = " & lt; & lt; Missing & gt; & gt;
@@ -332,32 +334,32 @@ class freeWheeling_DisplayOne
         $copyRight = $recset["copyright"];
         if (empty($copyRight))
             $copyRight = "Copyright missing from file - Assume all rights reserved
-                <a href='/author2copyright/?filename=$photoname' >.</a>";
+                <a href='/author2copyright/?filename=$photoName' >.</a>";
         else {
             $copyRight = str_replace(",", $eol, $copyRight);
             $copyRight = str_replace(" - ", $eol, $copyRight);
         }
 
-        $nameDisplay = " <a href='$photoUrl/{$photoname}_cr.jpg'>$photoname</a>
+        $nameDisplay = " <a href='$photoUrl/{$photoName}_cr.jpg'>$photoName</a>
                 &nbsp; &nbsp; &nbsp; &nbsp; " . $recset['comment'] . "$eol";
-        $shareDisplay = "<a href='/display-one-photo?photoname=$photoname '> Share </a>";
-        $keywordDisplay = self::GetkkeywordLinkedList($photoname);
+        $shareDisplay = "<a href='/display-one-photo?photoname=$photoName '> Share </a>";
+        $keywordDisplay = self::GetkkeywordLinkedList($photoName);
 
-        $fullname = "$photoPath/$photoname" . "_cr.jpg";
+        $fullname = "$photoPath/$photoName" . "_cr.jpg";
         if (file_exists($fullname)) {
             $photoSize = getimagesize($fullname);
             $sizeDisplay = $photoSize[3];
         } else
             $sizeDisplay = "";
 
-        $fullHighRes = "$highresPath/$photoname.jpg";
+        $fullHighRes = "$highresPath/$photoName.jpg";
         if (file_exists($fullHighRes)) {
             $photoSize = getimagesize($fullHighRes);
             $sizeHighres = $photoSize[3];
         } else
             $sizeHighres = "";
 
-        $fullThumb = "$thumbPath/$photoname" . "_tmb.jpg";
+        $fullThumb = "$thumbPath/$photoName" . "_tmb.jpg";
         if (file_exists($fullThumb)) {
             $photoSize = getimagesize($fullThumb);
             $sizeThumb = $photoSize[3];
@@ -382,7 +384,7 @@ class freeWheeling_DisplayOne
                 );
                 $msg .= rrwFormat::CellRow(
                     "Photo Size ",
-                    "<a href='$photoUrl/{$photoname}_cr.jpg'>this - $sizeDisplay</a>,
+                    "<a href='$photoUrl/" . $photoName . "_cr.jpg'>this - $sizeDisplay</a>,
                ThumbNail - $sizeThumb "
                 );
                 $msg .= "</table>";
@@ -392,7 +394,7 @@ class freeWheeling_DisplayOne
                 $msg .= "<strong>Existing keywords:</strong>\n $keywordDisplay";
 
                 $msg .= "$eol<strong>Identifiable People:</strong>" . $recset["people"] . "
-<div id='missedClassifi' onclick='openMissedClassifi(this,$photoname);'>
+<div id='missedClassifi' onclick='openMissedClassifi(this,$photoName);'>
     if any of this infomation is incorrect or missing. Please
     <a href='/webmaster-feedback'>let us know</a></div>$eol";
                 break;
@@ -412,18 +414,20 @@ class freeWheeling_DisplayOne
                 # -------------------- keywords
 
                 $msg .= "
-<div id='missedClassifi' onclick='openMissedClassifi(this,$photoname);'>
+<div id='missedClassifi' onclick='openMissedClassifi(this,$photoName);'>
     if any of this information is incorrect or missing. Please
     <a href='/webmaster-feedback'>let us know</a></div>$eol";
                 // jigsaw_verify is a class in the the file ../jigsaw=puzzle-tools.php
-                $photoHtmlToJigsaw = "$photoUrl/{$photoname}_cr.jpg";
-                $photoFileToJigsaw = "$photoPath/" . $photoname . "_cr.jpg";
+                $photoHtmlToJigsaw = "$photoUrl/" . $photoName . "_cr.jpg";
+                $photoFileToJigsaw = "$photoPath/" . $photoName . "_cr.jpg";
+                if($debugJigsaw ) print "for jigsaw  $photoHtmlToJigsaw   -----  $photoFileToJigsaw -->$eol";
                 $jigsawPiece = jigsaw_verify::buildpiece(
                     $photoHtmlToJigsaw,
                     $keywordDisplay,
                     $copyRight,
                     ""
                 );
+                if($debugJigsaw ) print  "jigsawPiece= $jigsawPiece $eol";
                 if (file_exists($photoFileToJigsaw)) {
                     $msg .= "$eol $jigsawPiece $eol
                     <!-- $photoFileToJigsaw  --->";
@@ -440,14 +444,14 @@ class freeWheeling_DisplayOne
         return $msg;
     } // end display table
 
-    public static function keywordsDisplay($photoname)
+    public static function keywordsDisplay($photoName)
     {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_keywords;
         $output = "";
 
         $sqlkey = "select keyword from $rrw_keywords
-                        where keywordfilename = '$photoname'";
+                        where keywordfilename = '$photoName'";
         $recKeys = $wpdbExtra->get_resultsA($sqlkey);
         foreach ($recKeys as $reckey) {
             $keyWordItem = $reckey["keyword"];
@@ -462,14 +466,14 @@ class freeWheeling_DisplayOne
         $output = substr($output, 0, -2);
         return $output;
     }
-    public static function GetkkeywordLinkedList($photoname)
+    public static function GetkkeywordLinkedList($photoName)
     {
         global $eol, $errorBeg, $errorEnd;
         global $wpdbExtra, $rrw_keywords;
         $output = "";
 
         $sqlkey = "select keyword from $rrw_keywords
-                        where keywordfilename = '$photoname'";
+                        where keywordfilename = '$photoName'";
         $recKeys = $wpdbExtra->get_resultsA($sqlkey);
         foreach ($recKeys as $reckey) {
             $keyWordItem = $reckey["keyword"];
