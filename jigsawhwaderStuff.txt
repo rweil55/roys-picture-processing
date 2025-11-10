@@ -1,0 +1,22 @@
+/*
+//Plugin Name: JigSaw Puzzle Tools
+Plugin URI:  https://plugins.RoyWeil.com/jigsaw-puzzle-tools
+Description: A collection of tools for creating links to jigsaw puzzles of the jpg
+Author:      Roy Weil
+Author URI:  https://RoyWeil.com
+Donate URI: https://plugins.royweil.com/donate
+Requires at least: 6.0.1
+Tested up to: 6.0.1
+depends: rrw-utilities-common
+License: private
+Version: 1.1.4
+Text Domain: jigsaw-puzzle-tools
+Domain Path: /lang
+*/
+
+
+
+add_shortcode( "jigsaw-verify", array( "jigsaw_verify", "verify" ) );
+add_shortcode( "jigsaw-build-one", array( "jigsaw_verify", "buildOne" ) );
+add_shortcode( "jigsaw-buld-all", array( "jigsaw_verify", "buildAll" ) );
+?>

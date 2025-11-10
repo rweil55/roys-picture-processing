@@ -13,9 +13,10 @@
 
   * Version: 2.1.84
  */
-// disable direct access
-ini_set("display_errors", true);
+ini_set("display_errors", 1);
 error_reporting(E_ALL);
+// disable direct access
+/*
 
 use lsolesen\pel\Pel;
 use lsolesen\pel\PelConvert;
@@ -55,7 +56,7 @@ use lsolesen\pel\PelTag;
 use lsolesen\pel\PelTiff;
 use lsolesen\pel\PelWrongComponentCountException;
 
-/*
+
 
 $pel = "/home/pillowan/www-shaw-weil-pictures-dev/wp-content/plugins" .
     "/roys-picture-processing/pel-master/src";
@@ -107,6 +108,7 @@ require_once "$pel/PelWrongComponentCountException.php";
 require_once "freewheelingeasy-wpdpExtra.php";
 require_once "rrw_util_inc.php";
 require_once "rrwFormat.php";
+
 // picture routines
 require_once "rrw_admin.php";
 require_once "displayone.php";
@@ -115,29 +117,30 @@ require_once "displayphotos.php";
 require_once "DisplayTrails.php";
 require_once "rrw_fix.php";
 require_once "fixTaskList.php";
+require_once "jigsaw-puzzle-tool.php";
 require_once "keywordHandling.php";
 require_once "rrwExif.php";
+require_once "searchBox.php";
 require_once "setConstants.php";
 require_once "submission.php";
 require_once "rrw_update-picture.php";
 require_once "uploadProcessDire.php";
 
 
-
 class FreewheelingCommon
 {
-    public static function missingImageMessage($from, $photoname = "")
+    public static function missingImageMessage($from, $photoName = "")
     {
         $msg = "This is somewhat embarrassing. The image that you
                 requested ";
-        if (!empty($photoname))
-            $msg .= " ( $photoname )";
+        if (!empty($photoName))
+            $msg .= " ( $photoName )";
         $msg .= " was not found. Please remember your selection,
                 what you did, copy this message
                 and go to the <a href='webmaster-feedback' >feedback form</a>
                 and tell us what you did to get here ($from) ";
         return $msg;
-    } // end funvtion missingImageMessage
+    } // end function missingImageMessage
 
 } // end of class
 function rrw_getAccessID()
@@ -153,18 +156,18 @@ function rrw_getAccessID()
     $id .= "-" . rrwUtil::fetchparameterString("USERNAME");
     return $id;
 }
-function updateAccessTable($photoname, $search)
+function updateAccessTable($photoName, $search)
 {
     global $wpdbExtra, $rrw_access;
-    global $picrureCookieName;
+    global $pictureCookieName;
     global $eol;
     $msg = "";
     $userid = rrw_getAccessID();
     $update = array("accessIP" => $userid);
     if (!empty($user))
         $update["accessuser"] = $user;
-    if (!empty($photoname))
-        $update["accessphotoname"] = $photoname;
+    if (!empty($photoName))
+        $update["accessphotoname"] = $photoName;
     if (!empty($search))
         $update["accessSearch"] = $search;
     $answer = $wpdbExtra->insert($rrw_access, $update);

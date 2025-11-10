@@ -16,7 +16,7 @@ class freeWheeling_DisplayOne
         global $httpSource;
         global $eol, $errorBeg, $errorEnd;
         $msg = "";
-        $debugPath = true;
+        $debugPath = false;
         try {
             $photoName = rrwUtil::fetchparameterString("photoname", $attr);
             $photoName = str_replace("_tmb", "", $photoName);

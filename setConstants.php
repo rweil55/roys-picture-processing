@@ -14,7 +14,7 @@ function SetConstants($whocalled)
     global $rejectUrl, $rejectPath;
     global $uploadPath;
     //global $gallery;
-    global $picrureCookieName;
+    global $pictureCookieName;
     global $httpSource;
     global $rrwProcessPhotosConstants;
     global $numberPhotosMax;
@@ -30,7 +30,7 @@ function SetConstants($whocalled)
         $httpSource = "http://128.2.184.148";
         $httpSource = "http://127.0.0.1";
         $numberPhotosMax = 750; // maximun in database used to prevent runaway
-        $picrureCookieName = "picture_visit_ip_time";
+        $pictureCookieName = "picture_visit_ip_time";
         // database names
         if (!is_object($wpdbExtra))
             $wpdbExtra = new wpdbExtra;
