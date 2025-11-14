@@ -70,6 +70,7 @@ class freeWheeling_DisplayOne
             $direonp = $recset["DireOnP"];
             $trail_name = $recset["trail_name"];
             $uploaddate = $recset["uploaddate"];
+            $DireOnP = $recset["DireOnP"];
             $owner = $recset["owner"];
             $highresShortname = $recset["highresShortname"];
             if ($debugPath) $msg .= "displayOne:photoUrl $photoPath $eol";
@@ -77,8 +78,10 @@ class freeWheeling_DisplayOne
             $fullfilename1 = "$photoPath/{$photoName}_cr.jpg";
             $htmlfileref2 = "$thumbUrl/{$photoName}_tmb.jpg";
             $fullfilename2 = "$thumbPath/{$photoName}_tmb.jpg";
+
             if (!file_exists($fullfilename1)) {
-                $msg .= "$errorBeg E#210 Not found was the display image $htmlfileref1 $errorEnd";
+                $msg .= "$errorBeg E#210 Not found was the display image $htmlfileref1 $errorEnd
+                            try looking on $DireOnP $eol";
             }
             /*  displaywidth is based on screen size
             $imageinfo = getimagesize( $fullfilename1 );
@@ -91,7 +94,8 @@ class freeWheeling_DisplayOne
             }
             */
             if (!file_exists($fullfilename2)) {
-                $msg .= "$errorBeg E#209 Not found was the thumbnail image $htmlfileref2 $errorEnd";
+				$msg .= "$errorBeg E#209 Not found was the thumbnail image $htmlfileref2 $errorEnd
+                            try looking on $DireOnP $eol";
                 $thumbsize = 200;
             } else {
                 $thumbInfo = getimagesize($fullfilename2);
