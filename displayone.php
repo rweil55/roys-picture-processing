@@ -421,11 +421,11 @@ class freeWheeling_DisplayOne
 <div id='missedClassifi' onclick='openMissedClassifi(this,$photoName);'>
     if any of this information is incorrect or missing. Please
     <a href='/webmaster-feedback'>let us know</a></div>$eol";
-                // jigsaw_verify is a class in the the file ../jigsaw=puzzle-tools.php
+                // jigsaw_puzzle_tool is a class in the the file ../jigsaw_puzzle_tool.php
                 $photoHtmlToJigsaw = "$photoUrl/" . $photoName . "_cr.jpg";
                 $photoFileToJigsaw = "$photoPath/" . $photoName . "_cr.jpg";
                 if($debugJigsaw ) print "for jigsaw  $photoHtmlToJigsaw   -----  $photoFileToJigsaw -->$eol";
-                $jigsawPiece = jigsaw_verify::buildpiece(
+                $jigsawPiece = jigsaw_puzzle_tool::buildpiece(
                     $photoHtmlToJigsaw,
                     $keywordDisplay,
                     $copyRight,

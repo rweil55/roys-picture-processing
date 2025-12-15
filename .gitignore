@@ -55,3 +55,7 @@ _notes/
 *.bak
 *.lck
 .vscode/sftp.json
+Exif/*
+pel-master/*
+
+hidden files for class definitions/*
