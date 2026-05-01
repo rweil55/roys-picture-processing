@@ -17,9 +17,10 @@ class freewheeling_displayPhotos
         if (empty($sqlFind))
             return "$eol $msg - No Selection made $eol ";
         $recFiles = $wpdbExtra->get_resultsA($sqlFind);
-        $msg .= " -- found " . $wpdbExtra->num_rows . " photos,  $selectDisplay. ";
         if ($wpdbExtra->num_rows > 0)
-            $msg .= " Click photo to enlage. ";
+            $msg .= " <strong>Click photo to enlage.</strong>  -- found $wpdbExtra->num_rows photos,  $selectDisplay. $eol";
+        else
+            $msg .= " <strong>No photos found. </strong> -- $selectDisplay. $eol";
         if ($debugProgress) $msg .= "$eol $sqlFind $eol";
         $msg .= "<ul class='rrwPhotoGrid' role='list'>";
         $trailermsg = "";
@@ -45,7 +46,7 @@ class freewheeling_displayPhotos
         }
         //onmouseover='this.width=800'  onmouseout='this.width=150'
         //           onmouseclick='openOnePhotopage(\"$onePhotoUrl\")'
-        //         <a href = '$onePhotoUrl?nohead=please&photoname=$filename'>
+        //         <a href = '$onePhotoUrl?photoname=$filename'>
         $msg .= "\n</ul>$eol";
         if ($wpdbExtra->num_rows > 8) {
             $msg .= "
@@ -86,28 +87,58 @@ class freewheeling_displayPhotos
                 return $sql;
             case "landscape":
                 $sql = "SELECT photoname, photographer, owner FROM $rrw_landscape";
-                print "case landscape - $sql $eol";
-                $selectDisplay = "Selection: photos in landscape format";
-                return $sql;
-            case "portriat":
+                $selectDisplay = "Selection: photos in landscape format ";
+                if ($trail == "%")
+                    return $sql;
+                else {
+                    $selectDisplay .= " on $trail";
+                    $sql .= " where trail_name = '$trail' ";
+                    if ($debugOutput)
+                        print "case dropdown - $sql $eol";
+                    return $sql;
+                }
+            case "portrait":
                 $sql = "SELECT photoname, photographer, owner FROM $rrw_portrait";
                 $selectDisplay = "Selection: photos in portrait format ";
-                return $sql;
-        }
-        // not a request for random images
+                if ($trail == "%")
+                    return $sql;
+                else {
+                    $selectDisplay .= " on $trail";
+                    $sql .= " where trail_name = '$trail' ";
+                    return $sql;
+                }
+            case "%":
+                // any detail selected
+                if ($trail == "%")
+                    return ""; // no selection made
+                $sql = "select photoname, photographer, owner from $rrw_photos";
+                if ($trail == "%")
+                    return $sql;
+                else {
+                    $selectDisplay .= " on $trail";
+                    $sql .= " where trail_name = '$trail' ";
+                    return $sql;
+                }
+            default:
+                $sql = "select photoname, photographer, owner from $rrw_photos";
+                break;
+        } // end switch
+        // not a request for random, portrait,landscape or all images
         if (!empty($searchdropdown)) {
             // case of dropdown selection
             if ($debug) print "trail= $trail, searchdropdown= $searchdropdown$eol";
-            $sqlSearch = " select photoname, photographer, owner from $rrw_photos
+            $sqlSearch = "$sql
                 where photoname in (
                 select keywordfilename from $rrw_keywords
                 where keyword = '$searchdropdown' )";
             $selectDisplay = " with keyword $searchdropdown ";
-            if (!empty($trail)) {
+            if ($trail == '%') {
+                $selectDisplay .= " and any trail ";
+            } else {
                 $selectDisplay .= " and trail name = $trail";
                 $sqlSearch .= " and trail_name = '$trail' ";
             }
-            if ($debugOutput) print "case dropdown - $sqlSearch $eol";
+            if ($debugOutput)  print "case dropdown - $sqlSearch $eol";
             return $sqlSearch;
         }
         $directory = rrwUtil::fetchparameterString("directory", $attr);

@@ -59,3 +59,5 @@ Exif/*
 pel-master/*
 
 hidden files for class definitions/*
+sftp.json
+localSettings.php

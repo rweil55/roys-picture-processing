@@ -16,45 +16,48 @@ class rrwPictures_searchBox
         //  return "hi there";
         $tablecss = true;
         $msg .= SetConstants("search box");
-        $msg .= "<div class='rrwChangeArea' id='trailddetail' onmouseout=changed(); >";
+        $msg .= "<div class='rrwChangeArea' id='trailddetail' >";
         $msg .= "\n<form action='search.php' method='post' id='form1' name='form1' >";
         if ($tablecss)
-            $msg .= "\n<table><tr><td class='rrwHeaderTDleft' >\n";
+            $msg .= "\n<table><tr><td class='rrwHeaderTDleft rrwChangeArea' >\n";
         if (function_exists("rrw_getAccessID"))
             $ip = rrw_getAccessID();
         else
             $ip = -3;
         $msg .= "<input type='hidden' name='session' id='session' value='$ip'\n />";
         // ------------------------------------------ trail selection
-        $sql = "select ' Any Trail' selection, 'Any Trail' val union
+        $currentTrail = rrwParam::string("trail", []);
+        $sql = "select '%' selection, 'Any Trail' val
+        union
             select distinct trailName selection, trailName val
                 from $rrw_trails order by selection";
-        $msg .= rrwPictures_searchBox::pictureDisplayDropDownOther($wpdbExtra, $rrw_photos, "trailname", $sql, "");
+        $msg .= rrwPictures_searchBox::pictureDisplayDropDownOther($wpdbExtra, $rrw_photos, "trailname", $sql, $currentTrail);
         $msg .= "\n\n<span id='and_not'> and </span>\n\n";
         // ---------------------------------------  detail selection
+        $currentDetail = rrwParam::string("searchdropdown", []);
         $sql = "select count(*) from $rrw_portrait";
         $portraintCount = $wpdbExtra->get_var($sql);
         $sql = "select count(*) from $rrw_landscape";
         $landscapeCount = $wpdbExtra->get_var($sql);
-        $sql = "select ' Any Detail' selection, 'Any Detail' val
+        $sql = "select '%' selection, 'Any Detail' val
                 union  select  'random_21', ' random photos (21)'
                 union  select  'landscape', 'landscape format ($landscapeCount)'
-                union  select  'portriat', 'portrait formet ($portraintCount)'
+                union  select  'portrait', 'portrait format ($portraintCount)'
                 union  select keyword, concat(keyword, ' (', count(*), ')') cnt
                         from $rrw_keywords group by keyword ";
-        $msg .= rrwPictures_searchBox::pictureDisplayDropDownOther($wpdbExtra, $rrw_keywords, "selection", $sql, "");
+        $msg .= rrwPictures_searchBox::pictureDisplayDropDownOther($wpdbExtra, $rrw_keywords, "selection", $sql, $currentDetail);
         if ($tablecss)
-            $msg .= "\n</td>\n<td class='rrwHeaderTDleft' >";
+            $msg .= "\n</td>\n<td class='rrwHeaderTDleft rrwChangeArea' >";
         //  a few mwnu items on the same line as seletions
-        $msg .= "</form> &nbsp; <strong>&lt;- Make a selection</strong>";
+        $msg .= "</form><span style='float:left;display: flex;'>&nbsp; <strong>&lt;- Make a selection</strong></span>";
         if ($tablecss)
-            $msg .= "</td>\n<td> &nbsp; </td>\n<td class='rrwHeaderTDright' >";
+            $msg .= "</td>\n<td class='rrwChangeArea' > &nbsp; </td>\n<td class='rrwHeaderTDright rrwChangeArea' >";
         $msg .= "[ <a href='/'>Home</a> ] [ <a href='/quality/' >Quality</a> ]
                  [ <a href='/privacy/'> Privacy</a>]
                  [ <a href='/webmaster-feedback/'> Feedback</a>]";
         if (rrwUtil::AllowedToEdit("search", "", false)) {
             $hostUrl = $_SERVER['HTTP_HOST'];
-            $msg .= "</td><td>
+            $msg .= "</td><td rrwChangeArea>
     <form action='https://$hostUrl/displayphotos/' method='POST'
     height='13px' >
 <input type='text' name='photoname' id='searchphoto' value='' height='13px' />
@@ -91,7 +94,7 @@ class rrwPictures_searchBox
             $msg = "<!-- user can not edit posts -->\n";
         return $msg;
     }
-    public static function pictureDisplayDropDownOther($wpdbExtra, $table, $toBeUpdated, $sql, $currentvalue)
+    public static function pictureDisplayDropDownOther($wpdbExtra, $table, $toBeUpdated, $sql, $currentValue)
     {
         global $eol;
         if ($toBeUpdated == "starticon ")
@@ -99,14 +102,14 @@ class rrwPictures_searchBox
         else
             $debugDisplayDropDownsql = false;
         if ($debugDisplayDropDownsql) print "picture Display Drop Down Other(db_access,
-                $table, $toBeUpdated, $sql, $currentvalue)$eol";
+                $table, $toBeUpdated, $sql, $currentValue)$eol";
         $site = get_site_url();
         // Thia test enables us to test 'roys header' 'switchname'
         if (false !== strpos(get_site_url(), "demo"))
             $rows = array();
         else
             $rows = $wpdbExtra->get_resultsA($sql);
-        $out = "<select name='$toBeUpdated' id='$toBeUpdated' label='$toBeUpdated'> \n";
+        $out = "<select class='rrwChangeArea'name='$toBeUpdated' id='$toBeUpdated' label='$toBeUpdated'  onchange='changed();'> \n";
         foreach ($rows as $row) {
             $rowValue = $row["selection"];
             $rowDisplay = $row["val"];
@@ -114,7 +117,7 @@ class rrwPictures_searchBox
             if ($debugDisplayDropDownsql) print "DisplayDropDownsql:option:
                             $rowDisplay, $rowValue $eol";
             $out .= "<option ";
-            if (strcmp($rowValue, $currentvalue) == 0)
+            if (strcmp($rowValue, $currentValue) == 0)
                 $out .= " selected='selected' ";
             $out .= " value=\"$rowValue\"> $rowDisplay</option>\n";
         }
