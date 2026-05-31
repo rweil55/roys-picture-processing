@@ -11,7 +11,7 @@
  * Text Domain: Roy-picture-processing
  * Domain Path: /translation
 
-  * Version: 2.1.84
+  * Version: 2.1.88
  */
 ini_set("display_errors", 1);
 error_reporting(E_ALL);
@@ -220,10 +220,15 @@ add_shortcode("fixtasklist", array("fixTaskList", "showlist"));
 add_shortcode("rrwPicSubmission", array("rrwPicSubmission", "showForm"));
 add_shortcode("upload", array("uploadProcessDire", "upload"));
 add_shortcode("testingexif", array("rrwExif", "test11"));
-require_once 'plugin_update_check.php';
-$MyUpdateChecker  = new PluginUpdateChecker_2_0(
+
+
+// 	*******************************  check for updates to the roy-header theme
+require 'plugin-update-checker/plugin-update-checker.php';
+
+use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
+
+$myUpdateChecker = PucFactory::buildUpdateChecker(
     'http://pluginserver.royweil.com/roys-picture-processing.php',
     __FILE__,
-    'roys-very-picture-processing',
-    1
+    'roys-very-picture-processing'
 );

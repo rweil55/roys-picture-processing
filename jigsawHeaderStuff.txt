@@ -18,5 +18,5 @@ Domain Path: /lang
 
 add_shortcode( "jigsaw-verify", array( "jigsaw_verify", "verify" ) );
 add_shortcode( "jigsaw-build-one", array( "jigsaw_verify", "buildOne" ) );
-add_shortcode( "jigsaw-buld-all", array( "jigsaw_verify", "buildAll" ) );
+add_shortcode( "jigsaw-build-all", array( "jigsaw_verify", "buildAll" ) );
 ?>
