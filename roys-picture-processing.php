@@ -223,7 +223,7 @@ add_shortcode("testingexif", array("rrwExif", "test11"));
 
 
 // 	*******************************  check for updates to the roy-header theme
-require 'plugin-update-checker/plugin-update-checker.php';
+require 'plugin-update-checker-5.7/plugin-update-checker.php';
 
 use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 

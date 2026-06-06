@@ -37,12 +37,13 @@ class AppendPhotographer
                 $debugImageWork = $debug | 2;
                 $debug = $debug | 1;
             }
-            if ($debug) $msg = "makeImages( $sourceFile, $photographer ) $eol";
+            if ($debug);
+            $msg = "makeImages( $sourceFile, $photographer ) $eol";
             $h_botWhite = 20; #	height of the white bar at the bottom for copyright notice
             $fontSize = 12; #	height of the copyright text
-            $fontfile = "arial.ttf";
+            $fontFile = "arial.ttf";
             $fontDire = "/home/pillowan/www-shaw-weil-pictures/wp-content/plugins/roys-picture-processing";
-            $fontfile = "$fontDire/mvboli.ttf";
+            $fontFile = "$fontDire/$fontFile";
             $iiSlash = strrpos($sourceFile, "/");
             $direSource = substr($sourceFile, $iiSlash);
             $fullfileThumb = "$direSource" . "_tmb.jpg";
@@ -53,8 +54,8 @@ class AppendPhotographer
                 $msg .= "fullFilePhoto : $fullFilePhoto $eol";
             }
             //  ------------------------------------- got the file now process it
-            if (!file_exists($fontfile)) {
-                $msg .= "bad font $fontfile ";
+            if (!file_exists($fontFile)) {
+                $msg .= "bad font $fontFile ";
                 throw new Exception("$msg $errorBeg E#132 Problems with the font file $errorEnd");
             }
             // create new dimensions, keeping aspect ratio
@@ -136,11 +137,11 @@ class AppendPhotographer
                 $bot = $h_new - 3;
                 $copyrightMsg = "Photo by $photographer"; //pictures.shaw-weil.com";
                 // use true type fonts. First deterine the actual length
-                $bounds = imagettftext($imgFinal, $fontSize, 0, $left, $bot, $black, $fontfile, $copyrightMsg);
+                $bounds = imagettftext($imgFinal, $fontSize, 0, $left, $bot, $black, $fontFile, $copyrightMsg);
                 if ($bounds === false)
                     throw new Exception("E#157 imagettftext ($img_copyright,
                                 $fontSize, 0, $left, $bot,
-                                $black,$fontfile,$copyrightMsg)");
+                                $black,$fontFile,$copyrightMsg)");
                 $w_text = abs($bounds[0] - $bounds[2]);
                 $h_text = abs($bounds[1] - $bounds[5]);
                 $left = ($w_cr - $w_text) / 2; # center the text left to right
@@ -150,9 +151,9 @@ class AppendPhotographer
                 $tmpHeight = $h_cr - $h_botWhite;
                 if (!imagefilledrectangle($imgFinal, 0, $h_cr, $w_src, $h_new, $white))
                     throw new Exception("imagefilledrectangle( imgFinal, 0, $h_cr, $w_src $h_new, $white ) ");
-                $bounds = imagettftext($imgFinal, $fontSize, 0, $left, $bot, $black, $fontfile, $copyrightMsg);
+                $bounds = imagettftext($imgFinal, $fontSize, 0, $left, $bot, $black, $fontFile, $copyrightMsg);
                 if ($bounds === false)
-                    throw new Exception("imagettftext (img_copyright, $fontSize,               0, $left, $bot, $black, $fontfile,
+                    throw new Exception("imagettftext (img_copyright, $fontSize,               0, $left, $bot, $black, $fontFile,
                                     $copyrightMsg)");
                 if (!imagejpeg($imgFinal, $fullFilePhoto))
                     throw new Exception("imagejpeg( imgFinal, fullFilePhoto ");
@@ -187,7 +188,7 @@ class AppendPhotographer
                 $img_src = imagecreatefrompng($sourceFile);
                 break;
             default:
-                throw new Exception(" $errorBeg File '$sourceFile' is
+                throw new Exception(" $errorBeg E$136 File '$sourceFile' is
                     mime_type, only GIF, JPG, jpeg or PNG are allowed
                     $errorEnd");
         }

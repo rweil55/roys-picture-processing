@@ -8,7 +8,7 @@ class uploadProcessDire
 {
     /*
      *   nameToBottom( $sourceFile, $photographer )
-     *   resizeImage( $pathIn, $pathOut, $w_max, $h_max ) {
+     *   resizeImage( $fullFileNameIn, $fullFileNameNameOut, $w_max, $h_max ) {
      */
     public static function upload($attr)
     {
@@ -29,7 +29,7 @@ class uploadProcessDire
             if ($debug) $msg .= "found $uploadShortName in the calling parameters $eol";
             if (!empty($uploadShortName)) {
                 $msg .= self::ProcessOneFile($uploadShortName);
-                $photoname = strToLower($uploadShortName);
+                $photoName = strToLower($uploadShortName);
                 $cntUploaded = 1;
             } else {
                 // not a single file request. walk the directory
@@ -48,15 +48,15 @@ class uploadProcessDire
                         continue; // ignore directories
                     if ($debug) $msg .= "found $uploadShortName in the directory search $eol";
                     $msg .= self::ProcessOneFile($uploadShortName);
-                    $photoname = strToLower($uploadShortName);
+                    $photoName = strToLower($uploadShortName);
                     $cntUploaded++;
                     break;
                 } // end while
             } // end  if (! empty($uploadShortName))
             if (1 == $cntUploaded) {
-                $photoname = substr($photoname, 0, -4);
-                if ($debug) $msg .= "DisplayOne( array( \"photoname\" => $photoname ) ) $eol";
-                $msg .= freeWheeling_DisplayOne::DisplayOne(array("photoname" => $photoname));
+                $photoName = substr($photoName, 0, -4);
+                if ($debug) $msg .= "DisplayOne( array( \"photoName\" => $photoName ) ) $eol";
+                $msg .= freeWheeling_DisplayOne::DisplayOne(array("photoName" => $photoName));
             } else {
                 $msg .= "$eol uploaded $cntUploaded files $eol";
             }
@@ -74,7 +74,7 @@ class uploadProcessDire
         $msg = "";
         $debug = rrwUtil::setDebug("onefile");
         if ($debug) $msg .= "$entry, ";
-        $sourceFile = "$uploadPath/$entry"; // in uplosd dire
+        $sourceFile = "$uploadPath/$entry"; // in upload dire
         // ------new ----------------------------  validate photoname
         if (!file_exists($sourceFile))
             throw new Exception("$msg $errorBeg E#166 processOneFile( $entry )
@@ -91,15 +91,15 @@ class uploadProcessDire
                         it should .jpg, " /*.png or .gif"*/);
         }
         $fileExif = exif_read_data($sourceFile); // used to get time
-        $photoname = substr($entry, 0, strlen($entry) - 4);
-        $photoname = strtolower($photoname);
-        if ($debug) $msg .= "photoname just aftercreate $photoname $eol";
+        $photoName = substr($entry, 0, strlen($entry) - 4);
+        $photoName = strtolower($photoName);
+        if ($debug) $msg .= "photo name just after create $photoName $eol";
         $pregResults = preg_match(
             "/[-a-zA-z0-9 _]*/",
-            $photoname,
-            $matchs
+            $photoName,
+            $matches
         );
-        if (1 != count($matchs))
+        if (1 != count($matches))
             throw new RuntimeException("file name can consist of only
                 letters, numbers, and spaces");
         // only logged n users can get here
@@ -115,7 +115,7 @@ class uploadProcessDire
         if (!empty($remotefile))
             $Data["Direonp"] = $remotefile;
         $sqlRec = "select * from $rrw_photos
-                        where photoname = '$photoname'";
+                        where photoname = '$photoName'";
         $recs = $wpdbExtra->get_resultsA($sqlRec);
         if (1 == $wpdbExtra->num_rows) {
             // have meta data, update it
@@ -130,10 +130,10 @@ class uploadProcessDire
                 if ($debug) $msg .= rrwUtil::print_r(
                     $Data,
                     true,
-                    "updating $photoname $eol"
+                    "updating $photoName $eol"
                 );
             }
-            $key = array("photoname" => $photoname);
+            $key = array("photoname" => $photoName);
             $cnt = $wpdbExtra->update($rrw_photos, $Data, $key);
             if (1 != $cnt) {
                 $err = "$errorBeg E#167 update no change $errorEnd";
@@ -141,10 +141,10 @@ class uploadProcessDire
             }
         } elseif (0 == $wpdbExtra->num_rows) {
             // no meta data
-            $Data["photoname"] = $photoname;
+            $Data["photoname"] = $photoName;
             $Data["photographer"] = "Mary Shaw";
             $Data["owner"] = $userLogin;
-            if ($debug) $msg .= rrwUtil::print_r($Data, true,  "inserting $photoname $eol");
+            if ($debug) $msg .= rrwUtil::print_r($Data, true,  "inserting $photoName $eol");
             $cnt = $wpdbExtra->insert($rrw_photos, $Data);
             if (1 != $cnt) {
                 $err = "$errorBeg E#168 insert fails $errorEnd";
@@ -156,11 +156,11 @@ class uploadProcessDire
             throw new Exception($msg);
         }
         $sqlRec = "select * from $rrw_photos
-                        where photoname = '$photoname'";
+                        where photoname = '$photoName'";
         $recs = $wpdbExtra->get_resultsA($sqlRec);
         $recOld = $recs[0];
         $photographer = $recOld["photographer"];
-        $msg .= freewheeling_fixit::sourceReject($photoname, "use");
+        $msg .= freewheeling_fixit::sourceReject($photoName, "use");
         $msg .= self::makeImages($sourceFile, $photographer);
         // meta date exists make it consistant with the EXIF
         $msg .= freewheeling_fixit::fixAssumeDatabaseCorrect($recOld);
@@ -168,8 +168,8 @@ class uploadProcessDire
         $photoDate = freewheeling_fixit::getPhotoDateTime($fileExif);
         if (!empty($photoDate)) {
             if ($debug) $msg .= "photoDate now $photoDate";
-            $sqlTimeUpdate = "update $rrw_photos set photodate = '$photoDate'
-                                where photoname = '$photoname'";
+            $sqlTimeUpdate = "update $rrw_photos set photoDate = '$photoDate'
+                                where photoName = '$photoName'";
             $wpdbExtra->query($sqlTimeUpdate);
         }
         return $msg;
@@ -181,7 +181,7 @@ class uploadProcessDire
         global $photoUrl, $photoPath, $thumbUrl, $thumbPath, $highresUrl, $highresPath;
         //      creates the _cr version with bottom line credit of photographer
         //      creates the thumbnail version
-        //      moves to the high_resoltion directory
+        //      moves to the high_resolution directory
         $msg = "";
         $debug = rrwParam::Boolean("makeimage");
         $debugImageWork = rrwParam::Boolean("imagework");
@@ -194,46 +194,46 @@ class uploadProcessDire
             if ($debug) $msg .= rrwUtil::print_r($fileSplit, true, "the file split");
             $extension = $fileSplit['extension'];
             $basename = $fileSplit['basename'];
-            $photoname = $fileSplit['filename'];
-            $photoname = strToLower($photoname);
-            $FullfileHighRes = "$highresPath/$basename";
-            $fullfileThumb = "$thumbPath/$photoname" . "_tmb.jpg";
-            $fullFilePhoto = "$photoPath/$photoname" . "_cr.jpg";
+            $photoName = $fileSplit['filename'];
+            $photoName = strToLower($photoName);
+            $fullFileNameHighRes = "$highresPath/$basename";
+            $fullFileNameThumb = "$thumbPath/$photoName" . "_tmb.jpg";
+            $fullFileNamePhoto = "$photoPath/$photoName" . "_cr.jpg";
             if ($debug) {
                 $msg .= "base name : " . $fileSplit['basename'] . $eol;
                 $msg .= "extension : " . $fileSplit['extension'] . $eol;
-                $msg .= "FullfileHighRes : $FullfileHighRes $eol";
-                $msg .= "fullfileThumb : $fullfileThumb $eol";
-                $msg .= "fullFilePhoto : $fullFilePhoto $eol";
+                $msg .= "fullFileNameHighRes : $fullFileNameHighRes $eol";
+                $msg .= "fullFileNameThumb : $fullFileNameThumb $eol";
+                $msg .= "fullFileNamePhoto : $fullFileNamePhoto $eol";
             }
             //  -------------------------- setup done, now process
             $msg .= self::resizeImage( /* do thumbnail */
                 $sourceFile,
-                $fullfileThumb,
+                $fullFileNameThumb,
                 $widthThumb,
                 0
             );
             // source exits or resize would have thrown error
             $msg .= self::resizeImage( /* do dispay image */
                 $sourceFile,
-                $fullFilePhoto,
+                $fullFileNamePhoto,
                 $widthMax,
                 $heightMax
             );
             if (!empty($photographer))
-                $msg .= self::nameToBottom($fullFilePhoto, $photographer);
+                $msg .= self::nameToBottom($fullFileNamePhoto, $photographer);
             // ----------------- move input image to save location
-            if (!rename($sourceFile, $FullfileHighRes)) {
+            if (!rename($sourceFile, $fullFileNameHighRes)) {
                 throw new Exception(" $errorBeg $msg E#126 while attempting
-                move ($sourceFile, $FullfileHighRes) $errorEnd");
+                move ($sourceFile, $fullFileNameHighRes) $errorEnd");
             }
-            if (!file_exists($FullfileHighRes)) {
+            if (!file_exists($fullFileNameHighRes)) {
                 $msg .= "errorBeg Full Resolution did not get moved $errorEnd $eol
-                $FullfileHighRes $eol";
+                $fullFileNameHighRes $eol";
                 return $msg;
             }
             if ($debug) $msg .= "saved the source file
-                                    in $FullfileHighRes $eol";
+                                    in $fullFileNameHighRes $eol";
             return $msg;
         } // end try
         catch (Exception $ex) {
@@ -242,39 +242,65 @@ class uploadProcessDire
         return $msg;
     } // end makeFile
     //
-    public static function nameToBottom($sourceFile, $photographer)
+    public static function nameToBottom(string $sourceFile, string $photographer)
     {
         global $eol, $errorBeg, $errorEnd;
         $msg = "";
         $debug = rrwParam::Boolean("nameToBottom");
-        $h_bottom = 20; #	height of the white bar at the bottom for copyright notice
-        $fontSize = 12; #	height of the copyright text
-        $fontFile = "arial.ttf";
+        if ($debug) $msg .= "nameToBottom( $sourceFile, $photographer ) $eol";
+        // $fontFile = "arial.ttf";
         $fontDire = "/home/pillowan/www-shaw-weil-pictures/wp-content/plugins/roys-picture-processing";
         $fontFile = "$fontDire/mvboli.ttf";
-        if (!file_exists($fontFile)) {
-            $msg .= "bad font $fontFile ";
-            throw new Exception("$msg $errorBeg E#127 Problems with the font file $fontFile $errorEnd");
+        if (!file_exists($fontFile))
+            throw new Exception("$errorBeg E#127 nameToBottom:font file '$fontFile'  Not found $errorEnd");
+        if (!file_exists($sourceFile)) {
+            throw new Exception("$errorBeg E#132 nameToBottom:file: '$sourceFile' Not found $errorEnd");
         }
-        // use Imagick to add the name to the bottom
+
         $im_src = new Imagick();
+        $draw = new ImagickDraw();
+        // set some of the draw parameters for the text to be added
+        $draw->setFillColor("Black");
+        $draw->setStrokeWidth(0);
+        $draw->setTextAntialias(false);
+        $draw->setTextInterlineSpacing(0);
+        $draw->setFont($fontFile);
+        $draw->setGravity(Imagick::GRAVITY_SOUTHWEST);
+
         $im_src->readimage($sourceFile);
+        $imageWidth = $im_src->getImageWidth();
+        $desiredTextWidth = $imageWidth / 3; // want text to be 1/3 of the image width\
+
+        /*
+        $draw->setTextEncoding("UTF-8");
+        $draw->setTextInterlineSpacing(0);
+        */
+        for ($fontSize = 10; $fontSize < 100; $fontSize++) {
+            $draw->setFontSize($fontSize);
+            $metrics = $im_src->queryFontMetrics($draw, "Photo by $photographer");
+            // $msg .= "font size $fontSize text width " . $metrics["textWidth"] . " desired text width $desiredTextWidth $eol";
+            if ($metrics["textWidth"] > $desiredTextWidth) {
+                break;
+            }
+        }
+        $h_bottom = (int)($fontSize * 1.6); #	height of the white bar at the bottom for copyright notice
+
+        // use Imagick to add the name to the bottom
         if ($debug) $msg .= "adding photographer $eol";
         $text = "Photo by $photographer";
         $h_new = $im_src->getImageHeight();
         $w_new = $im_src->getImageWidth();
         $h_new = $h_new + $h_bottom;
-        $im_src->extentImage($w_new, $h_new, 0, 0);
-        $draw = new ImagickDraw();
-        $draw->setStrokeColor(new ImagickPixel("white"));
-        $draw->setFillColor(new ImagickPixel("black"));
-        $draw->setStrokeWidth(0);
-        //   $draw->setFont( $fontFile );
+        $im_src->extentImage($w_new, $h_new, 0, 0);     // add white bar at bottom
+
+
         $draw->setFontSize($fontSize);
-        $metrics = $im_src->queryFontMetrics($draw, $text);
-        $baseline = $h_new - (($h_bottom - $fontSize) / 2);
-        $marginLeft = ($w_new - $metrics["textWidth"]) / 2;
-        if ($debug) $msg .= "calling annotation $eol";
+
+        $baseline = (int)(($h_bottom - $fontSize) / 5);         // h_bottom - fontsize is the extra space, want to split it in half for top and bottom margin
+        $msg .= "font size $fontSize, bottom size = $h_bottom, baseline = $baseline $eol";
+        $marginLeft = (int)(($w_new - $metrics["textWidth"]) / 2);
+        if ($debug);
+        $msg .= "placing annotation '$text' at $marginLeft, $baseline with font size " . $draw->getFontSize() . " $eol";
         $draw->annotation($marginLeft, $baseline, $text);
         $im_src->drawImage($draw);
         $draw->destroy();
@@ -282,70 +308,70 @@ class uploadProcessDire
         $result = unlink($sourceFile);
         if ($debug) $msg .= "writing source $sourceFile $eol";
         $im_src->writeImage($sourceFile);
-        $im_src->destroy();
         return $msg;
     } // end NameToBottom
 
-    public static function resizeImage(
-        $pathin,
-        $pathout,
-        $w_max,
-        $h_max
-    ) {
+    public static function resizeImage(string $fullFileNameIn, string $fullFileNameNameOut, int $w_max, int $h_max)
+    {
         global $eol;
         global $eol, $errorBeg, $errorEnd;
         $msg = "";
         $debug = rrwParam::Boolean("resize");
         $debug = false;
-        if (!file_exists($pathin)) {
-            throw new Exception("$errorBeg E#162 resizeToWidth:file:
-                    ''$pathin' Not found $errorEnd");
+        if (!file_exists($fullFileNameIn)) {
+            throw new Exception("$errorBeg E#162 resizeToWidth:file: '$fullFileNameIn' Not found $errorEnd");
+        } else {
+            $msg .= "resizeImage( $fullFileNameIn, $fullFileNameNameOut, $w_max, $h_max ) $eol";
         }
-        if (file_exists($pathout)) {
-            $resultLink = unlink($pathout); // remove resultant file
+        if (file_exists($fullFileNameNameOut)) {
+            $resultLink = unlink($fullFileNameNameOut); // remove resultant file
             if (false === $resultLink)
                 throw new Exception("$errorBeg E#164 resizeToWidth:file:
-                    '$pathout' did not unlink $errorEnd");
+                    '$fullFileNameNameOut' did not unlink $errorEnd");
         }
-        $imgGDin = self::imageCreateFrom($pathin);
+        $imgGDin = self::imageCreateFrom($fullFileNameIn);
         $w_cur = imagesx($imgGDin);
         $h_cur = imagesy($imgGDin);
         if ($debug) $msg .= "input size =  $w_max, $h_max $eol
-                            curent siz =  $w_cur. $h_cur $eol";
-        $w_scalefactor = $h_scalefactor = $scalefactor = "not set";
+                            current size =  $w_cur. $h_cur $eol";
+        $w_scaleFactor = $h_scaleFactor = $scaleFactor = "not set";
         if (0 >= $w_max && 0 >= $h_max) {
             throw new Exception("$msg $errorBeg E#163 resizeImage:
             Invalid widths specified $w_max, $h_max  $errorEnd");
         } elseif (0 >= $h_max) {; // donothing w,0
         } elseif (0 >= $w_max) {
-            $scalefactor = $h_max / $h_cur;
-            $w_max = round($w_max * $scalefactor);
+            $scaleFactor = $h_max / $h_cur;
+            $w_max = round($w_max * $scaleFactor);
             $h_max = 0;
         } else {
-            $w_scalefactor = $w_max / $w_cur;
-            $h_scalefactor = $h_max / $h_cur;
-            $scalefactor = min($w_scalefactor, $h_scalefactor);
-            $w_max = floor($w_cur * $scalefactor);
+            $w_scaleFactor = $w_max / $w_cur;
+            $h_scaleFactor = $h_max / $h_cur;
+            $scaleFactor = min($w_scaleFactor, $h_scaleFactor);
+            $w_max = floor($w_cur * $scaleFactor);
             $h_max = 0;
         }
         if ($debug)
-            $msg .= "scales $w_scalefactor, $h_scalefactor used $scalefactor $eol resize scaled $w_cur, $h_cur to
+            $msg .= "scales $w_scaleFactor, $h_scaleFactor used $scaleFactor $eol resize scaled $w_cur, $h_cur to
                                 $w_max, $h_max $eol";
         $imgGDout = imagescale($imgGDin, $w_max);
         if (false === $imgGDout)
             throw new Exception("$msg $errorBeg #155 failure in resize
                                     using $w_max, $h_max $errorEnd ");
-        $resultOut = imagejpeg($imgGDout, $pathout, 100);
+        $resultOut = imagejpeg($imgGDout, $fullFileNameNameOut, 100);
         if (false === $resultOut)
             throw new Exception("$msg $errorBeg E#196 failure in resize:write
-                        failed to $pathout $errorEnd");
+                        failed to $fullFileNameNameOut $errorEnd");
         if ($debug) $msg .= ", file succefully created $eol";
         return $msg;
     } // end resize
 
-    private static function imageCreateFrom($sourceFile)
+    private static function imageCreateFrom(string $sourceFile)
     {
         global $eol, $errorBeg, $errorEnd;
+        if (!file_exists($sourceFile)) {
+            throw new Exception("$$errorBeg E#137 imageCreateFrom:file:
+                    '$sourceFile' Not found $errorEnd");
+        }
         $mime_type = mime_content_type($sourceFile);
         switch ($mime_type) {
             case "image/gif": //   gif -> jpg
@@ -359,16 +385,18 @@ class uploadProcessDire
                 $img_src = imagecreatefrompng($sourceFile);
                 break;
             default:
-                throw new Exception(" $errorBeg File '$sourceFile' is
-                    mime_type, only GIF, JPG, jpeg or PNG are allowed
+                throw new Exception(" $errorBeg E#133 File '$sourceFile' is
+                    mime_type, '$mime_type' -  only GIF, JPG, jpeg or PNG are allowed
                     $errorEnd");
         }
         return $img_src;
     } // end imageCreateFrom
+    /*
     //-------------------------------------------------- ENOUGH MEMORY ?
-    private static function enoughmem($x, $y)
+    private static function enoughMemory($x, $y)
     {
-        $MAXMEMy = 32 * 1024 * 1024;
-        return ($x * $y * 3 * 1.7 < $MAXMEMy - memory_get_usage());
-    } // end enoughmem
+        $maxMemory = 32 * 1024 * 1024;
+        return ($x * $y * 3 * 1.7 < $maxMemory - memory_get_usage());
+    } // end enoughMemory
+     */
 } // end class uploadProcessDire

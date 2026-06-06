@@ -18,7 +18,7 @@ class freeWheeling_DisplayOne
         $msg = "";
         $debugPath = false;
         try {
-            $photoName = rrwUtil::fetchparameterString("photoname", $attr);
+            $photoName = rrwUtil::fetchparameterString("photoName", $attr);
             $photoName = str_replace("_tmb", "", $photoName);
             $photoName = str_replace(".jpg", "", $photoName);
             if ($debugPath) $msg .= "displayOne:photoPath $photoPath $eol";
@@ -36,19 +36,19 @@ class freeWheeling_DisplayOne
                 values ('$photoName', '$ip', '$user')";
             $answer = $wpdbExtra->query($sqlAccess);
             if ("nokey" == $photoName) {
-                $sqlNoKey = "select photoName from $rrw_photos  where not photoname in
+                $sqlNoKey = "select photoName from $rrw_photos  where not photoName in
                  (select distinct keywordFilename from $rrw_keywords )";
                 $recNokey = $wpdbExtra->get_resultsA($sqlNoKey);
                 if (0 == $wpdbExtra->num_rows)
                     return "There are no photos with out keywords
                     [ <a href='/fix/?task=add'>find more </a> ]
-                    [ <a href='/fix/?task=direonp'>missing source </a> ]
+                    [ <a href='/fix/?task=DireOnP'>missing source </a> ]
                             ";
                 $photoName = $recNokey[0]["photoName"];
             }
             $sql = "Select * from $rrw_photos where photoName = '$photoName'";
             $msg .= ("\n<!-- sql is $sql -->\n");
-            $recset_query = $wpdbExtra->get_resultsA($sql);
+            $recPhoto_query = $wpdbExtra->get_resultsA($sql);
             if (1 != $wpdbExtra->num_rows) {
                 $msg .= "E#124 no meta data for image $photoName was found             $errorEnd $sql $eol";
                 $msg .= freewheeling_fixit::filelike(
@@ -59,20 +59,19 @@ class freeWheeling_DisplayOne
                 );
                 return $msg;
             }
-            $recset = $recset_query[0];
-            $photoName = $recset["photoname"];
-            $photographer = $recset["photographer"];
-            $copyright = $recset["copyright"];
-            $PhotoDate = $recset["PhotoDate"];
-            $location = $recset["location"];
-            $people = $recset["people"];
-            $comment = $recset["comment"];
-            $direonp = $recset["DireOnP"];
-            $trail_name = $recset["trail_name"];
-            $uploaddate = $recset["uploaddate"];
-            $DireOnP = $recset["DireOnP"];
-            $owner = $recset["owner"];
-            $highresShortname = $recset["highresShortname"];
+            $recPhoto = $recPhoto_query[0];
+            $photoName = $recPhoto["photoname"];
+            $photographer = $recPhoto["photographer"];
+            $copyright = $recPhoto["copyright"];
+            $PhotoDate = $recPhoto["PhotoDate"];
+            $location = $recPhoto["location"];
+            $people = $recPhoto["people"];
+            $comment = $recPhoto["comment"];
+            $DireOnP = $recPhoto["DireOnP"];
+            $trail_name = $recPhoto["trail_name"];
+            $uploaddate = $recPhoto["uploaddate"];
+            $owner = $recPhoto["owner"];
+            $highresShortname = $recPhoto["highresShortname"];
             if ($debugPath) $msg .= "displayOne:photoUrl $photoPath $eol";
             $htmlfileref1 = "$photoUrl/{$photoName}_cr.jpg";
             $fullfilename1 = "$photoPath/{$photoName}_cr.jpg";
@@ -122,13 +121,13 @@ class freeWheeling_DisplayOne
                     $thumbsize id='smallImage' /><br /><br />
                     <a href = '$htmlfileref1' download=$photoName >
                     <img src ='/wp-content/download.png' width='200'></a>";
-                $msg .= freeWheeling_DisplayOne::DisplayTableData($recset, "narrow");
+                $msg .= freeWheeling_DisplayOne::DisplayTableData($recPhoto, "narrow");
                 $msg .= "
                     </td></tr></table> $eol";
                 //print "adjust = $adjust, width=$w_desired $eol";
             }
 
-            //       $msg .= freeWheeling_DisplayOne::DisplayTableData( $recset, "wide" );
+            //       $msg .= freeWheeling_DisplayOne::DisplayTableData( $recPhoto, "wide" );
             $msg .= "
         <script type='javascript' >
         var photo =document.getElementById('bigImage');
@@ -202,13 +201,13 @@ class freeWheeling_DisplayOne
             </table>
             <strong>Source Directory:</strong> &nbsp;
             ";
-            if (empty($direonp)) {
-                $msg .= "<input type='text' name='direonp' id='direonp' size='80px' />";
+            if (empty($DireOnP)) {
+                $msg .= "<input type='text' name='DireOnP' id='DireOnP' size='80px' />";
             } else {
-                $onDriveD = substr($direonp, 2);
-                $msg .= "$direonp
-                    <input type='hidden' name='direonp' id='direonp'
-                        value='$direonp' /> &nbsp;
+                $onDriveD = substr($DireOnP, 2);
+                $msg .= "$DireOnP
+                    <input type='hidden' name='DireOnP' id='DireOnP'
+                        value='$DireOnP' /> &nbsp;
                   [ <a href='$httpSource/$onDriveD'
                 target='submit' > 127.0.0.1 picture </a> ] ";
             }
@@ -273,10 +272,10 @@ class freeWheeling_DisplayOne
 
         $keywordList = array(); // get list all keyword
         $sql = "select distinct keyword from $rrw_keywords order by keyword";
-        $recset_query = $wpdbExtra->get_resultsA($sql);
+        $recPhoto_query = $wpdbExtra->get_resultsA($sql);
         $cntTot = 0;
-        foreach ($recset_query as $recset) {
-            $ctemp = $recset["keyword"];
+        foreach ($recPhoto_query as $recPhoto) {
+            $ctemp = $recPhoto["keyword"];
             $keywordList[$ctemp] = 0; // set not checked
             $cntTot++;
         }
@@ -284,9 +283,9 @@ class freeWheeling_DisplayOne
                 where keywordfilename = '$photoName' "; // get checked keyword
         if ($debugKeywords) $msg .= "Keyword search: $sql $eol";
         $cntChk = 0;
-        $recset_query = $wpdbExtra->get_resultsA($sql);
-        foreach ($recset_query as $recset) {
-            $ctemp = $recset["keyword"];
+        $recPhoto_query = $wpdbExtra->get_resultsA($sql);
+        foreach ($recPhoto_query as $recPhoto) {
+            $ctemp = $recPhoto["keyword"];
             $keywordList[$ctemp] = 1; // set checked
             $cntChk++;
         }
@@ -313,7 +312,7 @@ class freeWheeling_DisplayOne
         return $msg;
     }
 
-    private static function DisplayTableData($recset, $format)
+    private static function DisplayTableData($recPhoto, $format)
     {
         global $photoUrl, $photoPath, $highresPath, $thumbPath;
         global $eol, $errorBeg, $errorEnd;
@@ -321,21 +320,21 @@ class freeWheeling_DisplayOne
 
 		$debugJigsaw = false;
 
-        $photoName = $recset["photoname"];
+        $photoName = $recPhoto["photoname"];
 
-        if (is_null($recset["trail_name"])) {
+        if (is_null($recPhoto["trail_name"])) {
             $trailDisplay = " & lt; & lt; Missing & gt; & gt;
         ";
         } else {
-            $trailDisplay = htmlspecialchars($recset["trail_name"]);
+            $trailDisplay = htmlspecialchars($recPhoto["trail_name"]);
         }
-        if (is_null($recset["photographer"])) {
+        if (is_null($recPhoto["photographer"])) {
             $photographerDisplay = " & lt; & lt; Missing & gt; & gt; ";
         } else {
-            $photographerDisplay = $recset["photographer"] . "</td>\n ";
+            $photographerDisplay = $recPhoto["photographer"] . "</td>\n ";
         }
 
-        $copyRight = $recset["copyright"];
+        $copyRight = $recPhoto["copyright"];
         if (empty($copyRight))
             $copyRight = "Copyright missing from file - Assume all rights reserved
                 <a href='/author2copyright/?filename=$photoName' >.</a>";
@@ -345,7 +344,7 @@ class freeWheeling_DisplayOne
         }
 
         $nameDisplay = " <a href='$photoUrl/{$photoName}_cr.jpg'>$photoName</a>
-                &nbsp; &nbsp; &nbsp; &nbsp; " . $recset['comment'] . "$eol";
+                &nbsp; &nbsp; &nbsp; &nbsp; " . $recPhoto['comment'] . "$eol";
         $shareDisplay = "<a href='/display-one-photo?photoname=$photoName '> Share </a>";
         $keywordDisplay = self::GetkkeywordLinkedList($photoName);
 
@@ -382,9 +381,9 @@ class freeWheeling_DisplayOne
                 );
                 $msg .= rrwFormat::CellRow(
                     "Location: ",
-                    $recset["location"],
+                    $recPhoto["location"],
                     "Photo Date: ",
-                    $recset["PhotoDate"]
+                    $recPhoto["PhotoDate"]
                 );
                 $msg .= rrwFormat::CellRow(
                     "Photo Size ",
@@ -397,7 +396,7 @@ class freeWheeling_DisplayOne
                 # -------------------- keywords
                 $msg .= "<strong>Existing keywords:</strong>\n $keywordDisplay";
 
-                $msg .= "$eol<strong>Identifiable People:</strong>" . $recset["people"] . "
+                $msg .= "$eol<strong>Identifiable People:</strong>" . $recPhoto["people"] . "
 <div id='missedClassifi' onclick='openMissedClassifi(this,$photoName);'>
     if any of this infomation is incorrect or missing. Please
     <a href='/webmaster-feedback'>let us know</a></div>$eol";
@@ -406,10 +405,10 @@ class freeWheeling_DisplayOne
                 $msg .= "\n<div class='rrwOnePhoto'><table> \n " .
                     rrwFormat::CellRow("Photo Name: ", "$nameDisplay &nbsp; &nbsp; $shareDisplay") .
                     rrwFormat::CellRow("Trail: ", $trailDisplay) .
-                    rrwFormat::CellRow("Location: ", $recset["location"]) .
+                    rrwFormat::CellRow("Location: ", $recPhoto["location"]) .
                     rrwFormat::CellRow("Photographer: ", $photographerDisplay) .
-                    rrwFormat::CellRow("Photo Date: ", $recset["PhotoDate"]) .
-                    rrwFormat::CellRow("Identifiable People ", $recset["people"]) .
+                    rrwFormat::CellRow("Photo Date: ", $recPhoto["PhotoDate"]) .
+                    rrwFormat::CellRow("Identifiable People ", $recPhoto["people"]) .
                     rrwFormat::CellRow("Keywords: ", $keywordDisplay) .
                     rrwFormat::CellRow("Copyright: ", $copyRight) .
                     rrwFormat::CellRow("Photo Size ", $sizeDisplay) .
